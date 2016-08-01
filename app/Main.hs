@@ -1,6 +1,8 @@
 module Main where
 
-import Lib
+import Prelude
+
+import Kucipong ( defaultMain )
 
 main :: IO ()
-main = someFunc
+main = defaultMain
