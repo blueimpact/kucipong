@@ -38,11 +38,11 @@ repl: ghci
 
 release:
 	stack exec -- yesod keter
-	scp hobi.keter hobi:
-	ssh -t hobi 'sudo cp hobi.keter /var/www/keter/incoming/'
+	scp kucipong.keter kucipong:
+	ssh -t kucipong 'sudo cp kucipong.keter /var/www/keter/incoming/'
 
 run: build
-	stack exec -- hobi Development
+	stack exec -- kucipong Development
 
 test:
 	stack test
