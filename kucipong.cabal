@@ -16,10 +16,36 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Kucipong
+                     , Kucipong.Config
+                     , Kucipong.Db
+                     , Kucipong.Db.Models
+                     , Kucipong.Db.Models.Base
+                     , Kucipong.Db.Models.EntityDefs
+                     , Kucipong.Db.Pool
+                     , Kucipong.Environment
                      , Kucipong.Handler
+                     , Kucipong.Orphans
                      , Kucipong.Prelude
   build-depends:       base >= 4.7 && < 5
+                     , aeson
                      , classy-prelude
+                     , email-validate
+                     , http-client
+                     , http-conduit
+                     , lens
+                     , monad-control
+                     , monad-logger
+                     , persistent
+                     , persistent-postgresql
+                     , persistent-template
+                     , postgresql-simple
+                     , read-env-var
+                     , resource-pool
+                     , Spock
+                     , time
+                     , wai
+                     , wai-extra
+                     , warp
   default-language:    Haskell2010
   ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
   default-extensions:  ConstraintKinds
@@ -48,7 +74,7 @@ library
   other-extensions:    QuasiQuotes
                      , TemplateHaskell
 
-executable kucipong-exe
+executable kucipong
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction -threaded -rtsopts -with-rtsopts=-N
