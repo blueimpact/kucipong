@@ -23,26 +23,37 @@ library
                      , Kucipong.Db.Models.EntityDefs
                      , Kucipong.Db.Pool
                      , Kucipong.Environment
+                     , Kucipong.Errors
                      , Kucipong.Handler
+                     , Kucipong.Monad
+                     , Kucipong.Monad.Db
+                     , Kucipong.Monad.Db.Class
+                     , Kucipong.Monad.Db.Instance
+                     , Kucipong.Monad.Db.Trans
                      , Kucipong.Orphans
                      , Kucipong.Prelude
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , classy-prelude
                      , email-validate
+                     , envelope
                      , http-client
                      , http-conduit
                      , lens
                      , monad-control
                      , monad-logger
+                     , mtl
                      , persistent
                      , persistent-postgresql
                      , persistent-template
                      , postgresql-simple
+                     , pwstore-fast
                      , read-env-var
                      , resource-pool
                      , Spock
                      , time
+                     , transformers
+                     , transformers-base
                      , wai
                      , wai-extra
                      , warp

@@ -19,7 +19,9 @@ import Database.Persist.TH (
     )
 
 import Kucipong.Db.Models.Base
-    ( CreatedTime, DeletedTime, PasswordHash, UpdatedTime )
+    ( CreatedTime, DeletedTime, Password(..), PasswordHash, UpdatedTime
+    , passwordHash
+    )
 import Kucipong.Db.Models.EntityDefs ( kucipongEntityDefs )
 
 share [ mkPersist sqlSettings { mpsGenerateLenses = True }

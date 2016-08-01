@@ -3,11 +3,7 @@ module Kucipong ( defaultMain ) where
 
 import Kucipong.Prelude
 
-import Network.Wai.Handler.Warp ( Port, run )
-import Database.Persist.Postgresql ( runSqlPool )
-
-import Kucipong.Config ( Config(..), createConfigFromEnv, getPort, setLogger )
-import Kucipong.Environment ( Environment(..) )
+import Kucipong.Config ( createConfigFromEnv, getPort )
 import Kucipong.Db ( {- doMigrations -} )
 import Kucipong.Handler ( app )
 
