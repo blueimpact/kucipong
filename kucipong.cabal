@@ -22,6 +22,7 @@ library
                      , Kucipong.Db.Models.Base
                      , Kucipong.Db.Models.EntityDefs
                      , Kucipong.Db.Pool
+                     , Kucipong.Db.Run
                      , Kucipong.Environment
                      , Kucipong.Errors
                      , Kucipong.Handler
