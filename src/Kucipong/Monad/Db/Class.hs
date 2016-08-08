@@ -7,28 +7,28 @@ import Kucipong.Prelude
 import Control.Monad.Trans ( MonadTrans )
 import Web.Spock ( ActionCtxT )
 
-import Kucipong.Db ( Key, Password, PasswordHash, User )
+import Kucipong.Db ( Admin, Key )
 
 class Monad m => MonadKucipongDb m where
-    dbInsertNewUser :: EmailAddress -> PasswordHash -> m (Key User)
+    dbInsertNewUser :: EmailAddress -> m (Key Admin)
     default dbInsertNewUser
         :: ( Monad (t n)
            , MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
-        => EmailAddress -> PasswordHash ->  t n (Key User)
-    dbInsertNewUser = (lift .) . dbInsertNewUser
+        => EmailAddress -> t n (Key Admin)
+    dbInsertNewUser = lift . dbInsertNewUser
 
-    dbLoginUser :: EmailAddress -> Password -> m (Maybe (Key User))
+    dbLoginUser :: EmailAddress -> m (Maybe (Key Admin))
     default dbLoginUser
         :: ( Monad (t n)
            , MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
-        => EmailAddress -> Password ->  t n (Maybe (Key User))
-    dbLoginUser = (lift .) . dbLoginUser
+        => EmailAddress -> t n (Maybe (Key Admin))
+    dbLoginUser = lift . dbLoginUser
 
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
 instance MonadKucipongDb m => MonadKucipongDb (IdentityT m)

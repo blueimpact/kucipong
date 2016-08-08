@@ -14,11 +14,7 @@ import Crypto.PasswordStore ( verifyPassword )
 import Database.Persist ( getBy, insert, entityKey, entityVal )
 
 import Kucipong.Config ( Config )
-import Kucipong.Db
-    ( Key, CreatedTime(..), HasDbPool, Password(..), PasswordHash(..)
-    , Session(..), Unique(..), UpdatedTime(..), User(..)
-    , passwordHash, {- runDb, runDbSafeCurrTime, -} userPasswordHash
-    )
+import Kucipong.Db ( Admin, Key )
 import Kucipong.Errors ( AppErr )
 import Kucipong.Monad.Db.Class ( MonadKucipongDb(..) )
 import Kucipong.Monad.Db.Trans ( KucipongDbT(..) )
@@ -29,8 +25,8 @@ instance ( MonadBaseControl IO m
          , MonadReader Config m
          ) => MonadKucipongDb (KucipongDbT m) where
 
-    dbInsertNewUser :: EmailAddress -> PasswordHash -> KucipongDbT m (Key User)
-    dbInsertNewUser email hash = KucipongDbT $ undefined
+    dbInsertNewUser :: EmailAddress -> KucipongDbT m (Key Admin)
+    dbInsertNewUser _ = KucipongDbT $ undefined
         -- lift go
       -- where
         -- go :: m (Key User)
@@ -43,8 +39,8 @@ instance ( MonadBaseControl IO m
         --                     hash
         --         insert user
 
-    dbLoginUser :: EmailAddress -> Password -> KucipongDbT m (Maybe (Key User))
-    dbLoginUser email (Password password) = KucipongDbT $ undefined
+    dbLoginUser :: EmailAddress -> KucipongDbT m (Maybe (Key Admin))
+    dbLoginUser _ = KucipongDbT $ undefined
         -- lift go
       -- where
         -- go :: m (Maybe (Key User))

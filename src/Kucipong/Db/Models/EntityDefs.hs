@@ -8,31 +8,68 @@ import Database.Persist ( EntityDef )
 import Database.Persist.TH ( persistLowerCase )
 
 import Kucipong.Db.Models.Base
-    ( CreatedTime, DeletedTime, PasswordHash, UpdatedTime )
+    ( CouponType, CreatedTime, DeletedTime, Image, Percent, Price, UpdatedTime )
 
 kucipongEntityDefs :: [EntityDef]
 kucipongEntityDefs = [persistLowerCase|
-    Session
-        validUntil     UTCTime
-        userId         UserId
+    Admin
+        email                   EmailAddress
+        created                 CreatedTime
+        updated                 UpdatedTime
+        deleted                 DeletedTime Maybe
+        name                    Text
 
-        deriving       Show
-        deriving       Typeable
+        Primary email
 
-    -- Removed json directive from here because we don't want to send the
-    -- password hash when turning a user to JSON.
-    User
-        created        CreatedTime
-        updated        UpdatedTime
-        deleted        DeletedTime Maybe
-        email          EmailAddress
-        passwordHash   PasswordHash
+        deriving Eq
+        deriving Show
+        deriving Typeable
 
-        UniqueUserEmail    email
+    CompanyEmail
+        email                   EmailAddress
+        created                 CreatedTime
+        updated                 UpdatedTime
+        deleted                 DeletedTime Maybe
 
-        deriving       Eq
-        deriving       Show
-        deriving       Typeable
+        Primary email
+
+        deriving Eq
+        deriving Show
+        deriving Typeable
+
+    Company
+        created                 CreatedTime
+        updated                 UpdatedTime
+        deleted                 DeletedTime Maybe
+        emailAddr               CompanyEmailId
+        name                    Text
+        businessCategory        Text
+        businessCategoryDetail  Text
+        image                   Image
+        salesPoint              Text
+        address                 Text
+        phoneNumber             Text
+        businessHours           Text
+        regularHoliday          Text
+        url                     Text
+
+        deriving Eq
+        deriving Show
+        deriving Typeable
+
+    Coupon
+        image                   Image
+        title                   Text
+        validUntil              UTCTime
+        couponType              CouponType
+        discountPercent         Percent Maybe
+        discountMinimumPrice    Price Maybe
+        discountRequirements    Text Maybe
+        presentDescription      Text Maybe
+        presentPrice            Price Maybe
+        presentMinimumPrice     Price Maybe
+        presentRequirements     Text Maybe
+        setDescription          Text Maybe
+        setPrice                Price Maybe
+        setRequirements         Text Maybe
     |]
-
-

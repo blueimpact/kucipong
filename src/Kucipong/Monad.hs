@@ -22,7 +22,7 @@ type MonadKucipong' m =
     ( MonadKucipongDb m
     )
 
--- | This constraint synonym wraps up all of the type classes used by 'StomeTimeM'.
+-- | This constraint synonym wraps up all of the type classes used by 'KucipongM'.
 type MonadKucipong m =
     ( MonadBaseControl IO m
     , MonadError AppErr m
