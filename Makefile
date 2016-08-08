@@ -14,6 +14,10 @@ devel:
 # (you must have a compile error in the code you want to dump)
 dump-th:
 	stack build --ghc-options="-ddump-splices"
+	@echo
+	@echo "Splice files:"
+	@echo
+	@find "$$(stack path --dist-dir)" -name "*.dump-splices"
 
 ghci:
 	stack ghci

@@ -62,23 +62,14 @@ kucipongEntityDefs = [persistLowerCase|
         title                   Text
         validUntil              UTCTime
         couponType              CouponType
-
-    CouponDiscount
-        couponId                CouponId
-        percent                 Percent
-        minimumPrice            Price
-        requirements            Text
-
-    CouponPresent
-        couponId                CouponId
-        description             Text
-        price                   Price Maybe
-        minimumPrice            Price
-        requirements            Text
-
-    CouponSet
-        couponId                CouponId
-        description             Text
-        price                   Price Maybe
-        requirements            Text
+        discountPercent         Percent Maybe
+        discountMinimumPrice    Price Maybe
+        discountRequirements    Text Maybe
+        presentDescription      Text Maybe
+        presentPrice            Price Maybe
+        presentMinimumPrice     Price Maybe
+        presentRequirements     Text Maybe
+        setDescription          Text Maybe
+        setPrice                Price Maybe
+        setRequirements         Text Maybe
     |]
