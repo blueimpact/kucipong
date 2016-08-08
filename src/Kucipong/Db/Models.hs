@@ -7,20 +7,19 @@ module Kucipong.Db.Models
     , module Kucipong.Db.Models.Base
     , EntityField(..)
     , Key(..)
-    , Unique(..)
+    , Unique
     ) where
 
 import Kucipong.Prelude
 
 import Database.Persist
-    ( EntityField(..), Key(..), Unique(..) )
+    ( EntityField(..), Key(..), Unique )
 import Database.Persist.TH (
     share, mkPersist, sqlSettings, mkMigrate, mpsGenerateLenses,
     )
 
 import Kucipong.Db.Models.Base
-    ( CreatedTime, DeletedTime, Password(..), PasswordHash, UpdatedTime
-    , passwordHash
+    ( CouponType, CreatedTime, DeletedTime, Image, Percent, Price, UpdatedTime
     )
 import Kucipong.Db.Models.EntityDefs ( kucipongEntityDefs )
 

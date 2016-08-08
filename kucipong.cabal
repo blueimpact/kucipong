@@ -33,17 +33,20 @@ library
                      , Kucipong.Monad.Db.Trans
                      , Kucipong.Orphans
                      , Kucipong.Prelude
+                     , Kucipong.Util
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , classy-prelude
                      , email-validate
                      , envelope
+                     , http-api-data
                      , http-client
                      , http-conduit
                      , lens
                      , monad-control
                      , monad-logger
                      , mtl
+                     , path-pieces
                      , persistent
                      , persistent-postgresql
                      , persistent-template

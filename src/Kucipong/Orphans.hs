@@ -18,7 +18,13 @@ import Data.Aeson.Types ( Parser )
 import Data.Proxy ( Proxy )
 import Database.Persist.Postgresql
     ( PersistField(..), PersistFieldSql(..), PersistValue(..), SqlType(..))
-import Text.Email.Validate ( EmailAddress, toByteString, validate )
+import Text.Email.Validate ( EmailAddress, emailAddress, toByteString, validate )
+import Web.HttpApiData ( FromHttpApiData(..), ToHttpApiData(..) )
+import Web.PathPieces ( PathPiece(..) )
+
+------------------
+-- EmailAddress --
+------------------
 
 -- | Use 'EmailAddress' as a 'PersistField'.
 instance PersistField EmailAddress where
@@ -50,3 +56,18 @@ instance FromJSON EmailAddress where
 instance ToJSON EmailAddress where
     toJSON :: EmailAddress -> Value
     toJSON = String . decodeUtf8 . toByteString
+
+instance PathPiece EmailAddress where
+    fromPathPiece :: Text -> Maybe EmailAddress
+    fromPathPiece = emailAddress . encodeUtf8
+
+    toPathPiece :: EmailAddress -> Text
+    toPathPiece = decodeUtf8 . toByteString
+
+instance ToHttpApiData EmailAddress where
+    toUrlPiece :: EmailAddress -> Text
+    toUrlPiece = decodeUtf8 . toByteString
+
+instance FromHttpApiData EmailAddress where
+    parseUrlPiece :: Text -> Either Text EmailAddress
+    parseUrlPiece = first pack . validate . encodeUtf8
