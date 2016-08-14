@@ -941,4 +941,151 @@ store :: Store  -- Data representing the store logging in
   </body>
 </html>
 ```
+
+### GET my store edit page
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/store/edit" \
+  -H "AUTH-TOKEN: ${token}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong ストア管理</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeBody card">
+      <form class="storeBody_info_body card_body">
+        <div class="card_row">
+          <label for="storeName" class="card_row_header">
+            店舗名
+          </label>
+          <input id="storeName" type="text" class="card_input"
+            value="七輪焼肉・安安">
+        </div>
+        <div class="card_row">
+          <label for="storeAddress" class="card_row_header">
+            住所
+          </label>
+          <input id="storeAddress" type="text" class="card_input"
+            value="渋谷区桜丘町2-12 渋谷亀八ビル4F">
+        </div>
+        <div class="card_row">
+          <label for="storePhoneNumber" class="card_row_header">
+            電話番号
+          </label>
+          <input id="storePhoneNumber" type="text" class="card_input"
+            value="03-3464-0722">
+        </div>
+        <div class="card_row">
+          <label for="storeHours" class="card_row_header">
+            営業時間
+          </label>
+          <input id="storeHours" type="text" class="card_input"
+            value="月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30">
+        </div>
+        <div class="card_row">
+          <label for="storeCloseOn" class="card_row_header">
+            定休日
+          </label>
+          <input id="storeCloseOn" type="text" class="card_input"
+            value="元旦のみ">
+        </div>
+        <div class="card_row">
+          <label for="storeURL" class="card_row_header">
+            オフィシャルサイト
+          </label>
+          <input id="storeURL" type="text" class="card_input"
+            value="http://www.fuji-tatsu.co.jp/">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+store :: Store  -- Data representing the store logging in
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong ストア管理</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeBody card">
+      <form class="storeBody_info_body card_body">
+        <div class="card_row">
+          <label for="storeName" class="card_row_header">
+            店舗名
+          </label>
+          <input id="storeName" type="text" class="card_input"
+            value="#{storeName store}">
+        </div>
+        <div class="card_row">
+          <label for="storeAddress" class="card_row_header">
+            住所
+          </label>
+          <input id="storeAddress" type="text" class="card_input"
+            value="#{storeAddress store}">
+        </div>
+        <div class="card_row">
+          <label for="storePhoneNumber" class="card_row_header">
+            電話番号
+          </label>
+          <input id="storePhoneNumber" type="text" class="card_input"
+            value="#{storePhoneNumber store}">
+        </div>
+        <div class="card_row">
+          <label for="storeHours" class="card_row_header">
+            営業時間
+          </label>
+          <input id="storeHours" type="text" class="card_input"
+            value="#{storeHours store}">
+        </div>
+        <div class="card_row">
+          <label for="storeCloseOn" class="card_row_header">
+            定休日
+          </label>
+          <input id="storeCloseOn" type="text" class="card_input"
+            value="#{storeCloseOn store}">
+        </div>
+        <div class="card_row">
+          <label for="storeURL" class="card_row_header">
+            オフィシャルサイト
+          </label>
+          <input id="storeURL" type="text" class="card_input"
+            value="#{storeURL store}">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
 ```
