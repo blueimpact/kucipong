@@ -4,6 +4,8 @@
 
 TODO
 
+Only [Japanese version](doc/api.md) now.
+
 ## Steps to install postgres
 
 Use the following steps to install postgres and set it up to be used with kucipong.
