@@ -35,6 +35,7 @@ $ curl -G "http://$domain/api/v1/coupon" \
         "category": 1,
         "tags": [3, 4, 8],
         "image": "http://s3.amasonaws.com/foo/baz",
+        "name": "七輪焼き肉・安安",
         "description": "七輪焼き肉・安安は、美味しい焼肉を...",
         "address": "渋谷区桜丘町2-12 渋谷亀八ビル4F",
         "phoneNumber": "03-3464-0722",
