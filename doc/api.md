@@ -38,6 +38,7 @@ $ curl -G "http://$domain/api/v1/coupon" \
         "name": "七輪焼き肉・安安",
         "description": "七輪焼き肉・安安は、美味しい焼肉を...",
         "address": "渋谷区桜丘町2-12 渋谷亀八ビル4F",
+        "area": {"latitude": 41.40243, "longitude": 2.17551},
         "phoneNumber": "03-3464-0722",
         "hours": "月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30",
         "closeOn": "元旦のみ",
@@ -195,6 +196,8 @@ data Store = Store
   , storeDescription :: Maybe Text
     -- Store address
   , storeAddress :: Maybe Text
+    -- Latitude / Longitude calculated from 'storeAddress'
+  , storeAddress :: Maybe Area
     -- Phone number end-users can contact store staffs
   , storePhoneNumber :: Maybe Text
     -- What time is the store open?
