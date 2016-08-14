@@ -225,3 +225,164 @@ data CouponType =
 newtype Image = Image { unImage :: Text }
 newtype PercentInt = PercentInt { unPercentInt :: Int }
 ```
+
+### GET coupon detail
+
+GET detail information of a coupon in server side rendered HTML format.
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/coupon/${coupon_id}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="coupon">
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">七輪焼肉・安安</h2>
+          <div class="card_header_icon"><span class="icon-like" data-coupon-id="3"></span></div>
+        </div>
+        <div class="card_image">
+          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+          </div>
+          <div class="card_body_summary">
+            <span class="card_body_summary-sub">10% OFF</span>
+            <span class="card_body_summary-main">3600円</span>
+          </div>
+          <div class="card_body_expiration">
+            <span class="card_body_expiration-title">有効期限</span>
+            <span class="card_body_expiration-body">2016年4月15日から 2016年4月30日まで</span>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">※ この画面を店舗でご提示ください</div>
+      <div class="location">
+        <div class="location_map" data-latitude="41.40243" data-longitude="2.17551"></div>
+      </div>
+      <div class="aboutStore">
+        <a class="btn outerBtn" href="/store/52">七輪焼き肉・安安</a>
+      </div>
+      <div class="moreContents">
+        <p>2.5時間飲放題付きの料理4品です。1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム"</p>
+        <p>※ 1グループ1回のご利用時の利用枚数制限はありません。※ 21時以降のご予約のお客様が対象です。</p>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+#### Request Parameter and its type
+
+```haskell
+couponId :: CouponId
+```
+
+#### Response template
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+coupon :: Coupon  -- Data representing the coupon of given ID
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>#{couponTitle coupon}</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="coupon">
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">#{storeName (couponStore coupon)}</h2>
+          <div class="card_header_icon"><span class="icon-like" data-coupon-id="#{couponId coupon}"></span></div>
+        </div>
+        <div class="card_image">
+          <img src="#{couponImage coupon}" alt="#{storeName (couponStore coupon)}">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            #{couponTitle coupon}
+          </div>
+
+          <div class="card_body_summary">
+            #{{ if (couponType == CouponDiscount) then }}
+            <span class="card_body_summary-sub">#{discountMinimumFee coupon}円以上のお買い上げで</span>
+            <span class="card_body_summary-main">#{discountRate coupon}% OFF</span>
+
+            #{{ elseif (couponType == CouponGift) then }}
+            <span class="card_body_summary-sub">#{giftMinimumFee coupon}円以上のお買い上げで</span>
+            <span class="card_body_summary-main">#{maybe "非売品" ((<> "円相当の品") . tshow) (giftReferencePrice coupon)} をプレゼント</span>
+
+            #{{ elseif (couponType == CouponSet) then }}
+            <span class="card_body_summary-sub">#{100 - (setPrice coupon * 100 `div` setReferencePrice coupon)}% OFF</span>
+            <span class="card_body_summary-main">#{setPrice coupon}円</span>
+
+            #{{ elseif (couponType == CouponOther) then }}
+            <span class="card_body_summary-main">#{otherContent coupon}</span>
+
+            #{{ endif }}
+          </div>
+
+
+          <div class="card_body_expiration">
+            <span class="card_body_expiration-title">有効期限</span>
+            <span class="card_body_expiration-body">#{formatDateJa (couponValidFrom coupon)}から #{formatDateJa (couponExpire coupon)}まで</span>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">※ この画面を店舗でご提示ください</div>
+      <div class="location">
+        <div class="location_map" data-latitude="#{(latitude . storeArea . couponStore) coupon}" data-longitude="#{(longitude . storeArea . couponStore) coupon"></div>
+      </div>
+      <div class="aboutStore">
+        <a class="btn outerBtn" href="/store/#{storeId (couponStore coupon)}">#{storeName (couponStore coupon)}</a>
+      </div>
+      <div class="moreContents">
+
+        #{{ if (couponType == CouponDiscount) then }}
+        <p>#{discountMinimumFee coupon}円以上のお買い上げのお客様が対象です。</p>
+        <p>#{discountOtherConditions coupon}</p>
+
+        #{{ elseif (couponType == CouponGift) then }}
+        <p>#{giftMinimumFee coupon}円以上のお買い上げのお客様を対象に #{giftContent coupon} をプレゼントいたします。</p>
+        <p>#{giftOtherConditions coupon}</p>
+
+        #{{ elseif (couponType == CouponSet) then }}
+        <p>クーポン限定セット #{setContent coupon} をお買い上げいただけます。</p>
+        <p>#{setOtherConditions coupon}</p>
+
+        #{{ elseif (couponType == CouponOther) then }}
+        <p>#{otherContent coupon}</p>
+        <p>#{otherConditions coupon}</p>
+        #{{ endif }}
+
+      </div>
+    </div>
+  </body>
+</html>
+```
