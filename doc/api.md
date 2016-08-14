@@ -801,4 +801,144 @@ Return nothing but some side effects are occured, if the verification code is va
     * `/store`
 * Set token for authorization on HTTP header
 
+### GET my store information
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/store" \
+  -H "AUTH-TOKEN: ${token}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong ストア管理</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeMenu">
+      <a class="btn defaultBtn" href="/store/edit">ストア情報編集</a>
+      <a class="btn outerBtn" href="/store/coupon/create">クーポン一覧</a>
+    </div>
+    <div class="storeBody card">
+      <div class="storeBody_info_body card_body">
+        <div class="card_row">
+          <div class="card_row_header">
+            住所
+          </div>
+          <div class="card_row_body">
+            渋谷区桜丘町2-12 渋谷亀八ビル4F
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            電話番号
+          </div>
+          <div class="card_row_body">
+            03-3464-0722
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            営業時間
+          </div>
+          <div class="card_row_body">
+            月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            定休日
+          </div>
+          <div class="card_row_body">
+            元旦のみ
+          </div>
+        </div>
+        <div class="card_row">
+          <a class="btn outerBtn" href="http://www.fuji-tatsu.co.jp/">オフィシャルサイト</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+store :: Store  -- Data representing the store logging in
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong ストア管理</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeMenu">
+      <a class="btn defaultBtn" href="/store/edit">ストア情報編集</a>
+      <a class="btn outerBtn" href="/store/coupon">クーポン一覧</a>
+    </div>
+    <div class="storeBody card">
+      <div class="storeBody_info_body card_body">
+        <div class="card_row">
+          <div class="card_row_header">
+            住所
+          </div>
+          <div class="card_row_body">
+            #{storeAddress store}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            電話番号
+          </div>
+          <div class="card_row_body">
+            #{storePhoneNumber store}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            営業時間
+          </div>
+          <div class="card_row_body">
+            #{storeHours store}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            定休日
+          </div>
+          <div class="card_row_body">
+            #{storeCloseOn store}
+          </div>
+        </div>
+        <div class="card_row">
+          <a class="btn outerBtn" href="#{storeURL store}">オフィシャルサイト</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
 ```
