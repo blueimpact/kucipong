@@ -386,3 +386,348 @@ coupon :: Coupon  -- Data representing the coupon of given ID
   </body>
 </html>
 ```
+
+### GET store detail
+
+GET detail information of a store in server side rendered HTML format.
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/store/${store_id}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>七輪焼肉・安安</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <header class="storeHeader">
+      <div class="storeHeader_image_wrapper">
+        <img src="http://s3.amasonaws.com/foo/baz" alt="七輪焼肉・安安">
+        <span class="storeHeader_annotation">画像は一例です</span>
+      </div>
+      <h2 class="storeHeader_title">七輪焼肉・安安</h2>
+    </header>
+    <div class="storeBody">
+      <div class="storeBody_description">
+        <p>七輪焼き肉・安安は、美味しい焼肉を...</p>
+        <p>...</p>
+      </div>
+      <div class="storeBody_viewCoupon">
+        <a class="btn defaultBtn" href="http://$domain/coupon/3">クーポンを見る</a>
+      </div>
+      <div class="storeBody_info card">
+        <div class="storeBody_info_title">店舗情報</div>
+        <div class="storeBody_info_body card_body">
+          <div class="card_row">
+            <div class="card_row_header">
+              住所
+            </div>
+            <div class="card_row_body">
+              渋谷区桜丘町2-12 渋谷亀八ビル4F
+            </div>
+          </div>
+          <div class="card_row">
+            <div class="card_row_header">
+              電話番号
+            </div>
+            <div class="card_row_body">
+              03-3464-0722
+            </div>
+          </div>
+          <div class="card_row">
+            <div class="card_row_header">
+              営業時間
+            </div>
+            <div class="card_row_body">
+              月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30
+            </div>
+          </div>
+          <div class="card_row">
+            <div class="card_row_header">
+              定休日
+            </div>
+            <div class="card_row_body">
+              元旦のみ
+            </div>
+          </div>
+          <div class="card_row">
+            <a class="btn outerBtn" href="http://www.fuji-tatsu.co.jp/">オフィシャルサイト</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+#### Request Parameter and its type
+
+```haskell
+storeId :: StoreId
+```
+
+#### Response template
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+store :: Store  -- Data representing the store of given ID
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>#{storeName store}</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <header class="storeHeader">
+      <div class="storeHeader_image_wrapper">
+        <img src="#{storeImage store}" alt="#{storeName store}">
+        <span class="storeHeader_annotation">画像は一例です</span>
+      </div>
+      <h2 class="storeHeader_title">#{storeName store}</h2>
+    </header>
+    <div class="storeBody">
+      <div class="storeBody_description">
+        #{{ withParagraphTag (storeDescription store) }}
+      </div>
+      <div class="storeBody_viewCoupon">
+        <a class="btn defaultBtn" href="http://$domain/store/#{storeId store}/coupon">クーポンを見る</a>
+      </div>
+      <div class="storeBody_info card">
+        <div class="storeBody_info_title">店舗情報</div>
+        <div class="storeBody_info_body card_body">
+          <div class="card_row">
+            <div class="card_row_header">
+              住所
+            </div>
+            <div class="card_row_body">
+              #{storeAddress store}
+            </div>
+          </div>
+          <div class="card_row">
+            <div class="card_row_header">
+              電話番号
+            </div>
+            <div class="card_row_body">
+              #{storePhoneNumber store}
+            </div>
+          </div>
+          <div class="card_row">
+            <div class="card_row_header">
+              営業時間
+            </div>
+            <div class="card_row_body">
+              #{storeHours store}
+            </div>
+          </div>
+          <div class="card_row">
+            <div class="card_row_header">
+              定休日
+            </div>
+            <div class="card_row_body">
+              #{storeCloseOn store}
+            </div>
+          </div>
+          <div class="card_row">
+            <a class="btn outerBtn" href="#{storeURL store}">オフィシャルサイト</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+### GET coupons of a store
+
+GET detail information of a store in server side rendered HTML format.
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/store/${store_id}/coupon"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>七輪焼肉・安安</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="coupon">
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">七輪焼肉・安安</h2>
+          <div class="card_header_icon"><span class="icon-like" data-coupon-id="3"></span></div>
+        </div>
+        <div class="card_image">
+          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+          </div>
+          <div class="card_body_summary">
+            <span class="card_body_summary-sub">10% OFF</span>
+            <span class="card_body_summary-main">3600円</span>
+          </div>
+          <div class="card_body_expiration">
+            <span class="card_body_expiration-title">有効期限</span>
+            <span class="card_body_expiration-body">2016年4月15日から 2016年4月30日まで</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="coupon">
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">七輪焼肉・安安</h2>
+          <div class="card_header_icon"><span class="icon-like" data-coupon-id="3"></span></div>
+        </div>
+        <div class="card_image">
+          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+          </div>
+          <div class="card_body_summary">
+            <span class="card_body_summary-sub">10% OFF</span>
+            <span class="card_body_summary-main">3600円</span>
+          </div>
+          <div class="card_body_expiration">
+            <span class="card_body_expiration-title">有効期限</span>
+            <span class="card_body_expiration-body">2016年4月15日から 2016年4月30日まで</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="coupon">
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">七輪焼肉・安安</h2>
+          <div class="card_header_icon"><span class="icon-like" data-coupon-id="3"></span></div>
+        </div>
+        <div class="card_image">
+          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+          </div>
+          <div class="card_body_summary">
+            <span class="card_body_summary-sub">10% OFF</span>
+            <span class="card_body_summary-main">3600円</span>
+          </div>
+          <div class="card_body_expiration">
+            <span class="card_body_expiration-title">有効期限</span>
+            <span class="card_body_expiration-body">2016年4月15日から 2016年4月30日まで</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+#### Request Parameter and its type
+
+```haskell
+storeId :: StoreId
+```
+
+#### Response template
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+store :: Store  -- Data representing the store of given ID
+coupons :: [Coupon] -- Data representing coupons associated to the store of given ID
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>#{storeName store}</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+
+    {{ for coupon in coupons }}
+    <div class="coupon">
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">#{storeName (couponStore coupon)}</h2>
+          <div class="card_header_icon"><span class="icon-like" data-coupon-id="#{couponId coupon}"></span></div>
+        </div>
+        <div class="card_image">
+          <img src="#{couponImage coupon}" alt="#{storeName (couponStore coupon)}">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            #{couponTitle coupon}
+          </div>
+
+          <div class="card_body_summary">
+            #{{ if (couponType == CouponDiscount) then }}
+            <span class="card_body_summary-sub">#{discountMinimumFee coupon}円以上のお買い上げで</span>
+            <span class="card_body_summary-main">#{discountRate coupon}% OFF</span>
+
+            #{{ elseif (couponType == CouponGift) then }}
+            <span class="card_body_summary-sub">#{giftMinimumFee coupon}円以上のお買い上げで</span>
+            <span class="card_body_summary-main">#{maybe "非売品" ((<> "円相当の品") . tshow) (giftReferencePrice coupon)} をプレゼント</span>
+
+            #{{ elseif (couponType == CouponSet) then }}
+            <span class="card_body_summary-sub">#{100 - (setPrice coupon * 100 `div` setReferencePrice coupon)}% OFF</span>
+            <span class="card_body_summary-main">#{setPrice coupon}円</span>
+
+            #{{ elseif (couponType == CouponOther) then }}
+            <span class="card_body_summary-main">#{otherContent coupon}</span>
+
+            #{{ endif }}
+          </div>
+
+
+          <div class="card_body_expiration">
+            <span class="card_body_expiration-title">有効期限</span>
+            <span class="card_body_expiration-body">#{formatDateJa (couponValidFrom coupon)}から #{formatDateJa (couponExpire coupon)}まで</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{ endfor }}
+  </body>
+</html>
+
+```
