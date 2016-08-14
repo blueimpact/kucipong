@@ -729,5 +729,76 @@ coupons :: [Coupon] -- Data representing coupons associated to the store of give
     {{ endfor }}
   </body>
 </html>
+```
+
+## Store user API
+
+For the user who supply the coupon.
+
+* No password is required to log in
+    * Always send special log in page URI to the registered email
+* No way to register store user by themselves
+    * Only way to register is done by admin user
+* Authorization token is needed on any API request
+
+### Request user verification
+
+#### Sample request and response
+
+Note that an email with verification URL will be sent to the email, too.
+
+```bash
+$ curl -X POST "http://$domain/api/store/v1/request-verification" \
+  --data-urlencode 'email=example@example.com' \
+  | jq '.'
+
+{
+  "result": "Email was successfully sent."
+}
+```
+
+#### Request Parameter and its type
+
+```haskell
+email : Email
+newtype Email = Email { unEmail :: Text }
+```
+
+#### Response and its type
+
+```haskell
+-- Dummy data type representing response from back-end
+data Response = Response
+  { result :: Maybe Text
+  }
+```
+
+### User verification
+
+#### Sample request and response
+
+This URI is contained in email sent by the "Request user verification" API.
+
+```bash
+$ curl -G "http://$domain/api/store/v1/verification/${one_time_verification_key}"
+
+(Redirect to the store home page)
+```
+
+#### Request Parameter and its type
+
+```haskell
+oneTimeVerificationKey :: VerKey
+newtype VerKey = VerKey { unVerKey :: Text }
+```
+
+#### Response and its type
+
+Return nothing but some side effects are occured, if the verification code is valid.
+(Note that the verification code should live only one hour)
+
+* Redirect to the store home page
+    * `/store`
+* Set token for authorization on HTTP header
 
 ```
