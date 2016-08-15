@@ -23,6 +23,7 @@ library
                      , Kucipong.Db.Models.EntityDefs
                      , Kucipong.Db.Pool
                      , Kucipong.Db.Run
+                     , Kucipong.Email
                      , Kucipong.Environment
                      , Kucipong.Errors
                      , Kucipong.Handler
@@ -39,6 +40,7 @@ library
                      , classy-prelude
                      , email-validate
                      , envelope
+                     , hailgun
                      , http-api-data
                      , http-client
                      , http-conduit
