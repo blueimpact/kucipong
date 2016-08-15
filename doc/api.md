@@ -1077,7 +1077,7 @@ $ curl -G "http://$domain/store/edit" \
           <input id="storeURL" type="text" class="card_input"
             value="http://www.fuji-tatsu.co.jp/">
         </div>
-      </div>
+      </form>
     </div>
   </body>
 </html>
