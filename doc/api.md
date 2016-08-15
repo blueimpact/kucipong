@@ -1182,9 +1182,8 @@ store :: Store  -- Data representing the store logging in
           <input id="storeURL" name="storeURL" type="text" class="card_input"
             value="#{storeURL store}">
         </div>
-      </div>
+      </form>
     </div>
   </body>
 </html>
-```
 ```
