@@ -7,13 +7,19 @@ resolver: lts-6.10
 # Local packages, usually specified by relative directory name
 packages:
     - '.'
-
-# Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps:
     # TODO: This was added here: https://github.com/fpco/stackage/pull/1782
     # Hopefull we'll be able to use it when lts-6.13 comes out.  It should be
     # out sometime before 2016/09/01.
-    - hailgun-0.4.0.5
+    - location:
+        git: 'https://bitbucket.org/cdepillabout/hailgun'
+        commit: '275a4ebdeab79f7fb048e6174ca2f2bf75aa1f71' # derive-show branch
+    # TODO: This should also be in lts-6.13.
+    - location:
+        git: 'https://github.com/cdepillabout/read-env-var'
+        commit: 'v0.1.0.1'
+
+# Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
+extra-deps: []
 
 # Override default flag values for local packages and extra-deps
 flags: {}
