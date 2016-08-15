@@ -996,14 +996,14 @@ $ curl -G "http://$domain/store/edit" \
           <label for="storeName" class="card_row_header">
             店舗名
           </label>
-          <input id="storeName" type="text" class="card_input"
+          <input id="storeName" name="storeName" type="text" class="card_input"
             value="七輪焼肉・安安">
         </div>
         <div class="card_row">
           <label for="storeCategory" class="card_row_header">
             カテゴリ
           </label>
-          <select id="storeCategory" class="card_input" value="0">
+          <select id="storeCategory" name="storeCategory" class="card_input" value="0">
             <option value="0">グルメ</option>
             <option value="1">ファッション</option>
             <option value="2">ガジェット</option>
@@ -1017,25 +1017,25 @@ $ curl -G "http://$domain/store/edit" \
           </div>
           <div class="card_row_body">
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags0" checked>
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags0" name="storeTags0" checked>
               <label for="storeTags0" class="checkboxLabel">
                 焼き肉
               </label>
             </div>
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags9" checked>
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags9" name="storeTags9" checked>
               <label for="storeTags1" class="checkboxLabel">
                 広々とした店内
               </label>
             </div>
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags1" checked>
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags1" name="storeTags1" checked>
               <label for="storeTags1" class="checkboxLabel">
                 日本食
               </label>
             </div>
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags2" checked>
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags2" name="storeTags2" checked>
               <label for="storeTags1" class="checkboxLabel">
                 寿司
               </label>
@@ -1046,35 +1046,35 @@ $ curl -G "http://$domain/store/edit" \
           <label for="storeAddress" class="card_row_header">
             住所
           </label>
-          <input id="storeAddress" type="text" class="card_input"
+          <input id="storeAddress" name="storeAddress" type="text" class="card_input"
             value="渋谷区桜丘町2-12 渋谷亀八ビル4F">
         </div>
         <div class="card_row">
           <label for="storePhoneNumber" class="card_row_header">
             電話番号
           </label>
-          <input id="storePhoneNumber" type="text" class="card_input"
+          <input id="storePhoneNumber" name="storePhoneNumber" type="text" class="card_input"
             value="03-3464-0722">
         </div>
         <div class="card_row">
           <label for="storeHours" class="card_row_header">
             営業時間
           </label>
-          <input id="storeHours" type="text" class="card_input"
+          <input id="storeHours" name="storeHours" type="text" class="card_input"
             value="月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30">
         </div>
         <div class="card_row">
           <label for="storeCloseOn" class="card_row_header">
             定休日
           </label>
-          <input id="storeCloseOn" type="text" class="card_input"
+          <input id="storeCloseOn" name="storeCloseOn" type="text" class="card_input"
             value="元旦のみ">
         </div>
         <div class="card_row">
           <label for="storeURL" class="card_row_header">
             オフィシャルサイト
           </label>
-          <input id="storeURL" type="text" class="card_input"
+          <input id="storeURL" name="storeURL" type="text" class="card_input"
             value="http://www.fuji-tatsu.co.jp/">
         </div>
       </form>
@@ -1115,14 +1115,14 @@ store :: Store  -- Data representing the store logging in
           <label for="storeName" class="card_row_header">
             店舗名
           </label>
-          <input id="storeName" type="text" class="card_input"
+          <input id="storeName" name="storeName" type="text" class="card_input"
             value="#{storeName store}">
         </div>
         <div class="card_row">
           <label for="storeCategory" class="card_row_header">
             カテゴリ
           </label>
-          <select id="storeCategory" class="card_input" value="#{storeCategory store}">
+          <select id="storeCategory" name="storeCategory" class="card_input" value="#{storeCategory store}">
             #{{ for category in storeCategoryList }}
             <option value="#{category}">#{showStoreCategoryJa category}</option>
             #{{ endfor }}
@@ -1135,7 +1135,7 @@ store :: Store  -- Data representing the store logging in
           <div class="card_row_body">
             #{{ for tag in storeTagList }}
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags#{tag}"
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags#{tag}" name="storeTags#{tag}"
                 #{{ if (tag `elem` storeTags store) }}
                 checked
                 #{{ endif }}
@@ -1151,35 +1151,35 @@ store :: Store  -- Data representing the store logging in
           <label for="storeAddress" class="card_row_header">
             住所
           </label>
-          <input id="storeAddress" type="text" class="card_input"
+          <input id="storeAddress" name="storeAddress" type="text" class="card_input"
             value="#{storeAddress store}">
         </div>
         <div class="card_row">
           <label for="storePhoneNumber" class="card_row_header">
             電話番号
           </label>
-          <input id="storePhoneNumber" type="text" class="card_input"
+          <input id="storePhoneNumber" name="storePhoneNumber" type="text" class="card_input"
             value="#{storePhoneNumber store}">
         </div>
         <div class="card_row">
           <label for="storeHours" class="card_row_header">
             営業時間
           </label>
-          <input id="storeHours" type="text" class="card_input"
+          <input id="storeHours" name="storeHours" type="text" class="card_input"
             value="#{storeHours store}">
         </div>
         <div class="card_row">
           <label for="storeCloseOn" class="card_row_header">
             定休日
           </label>
-          <input id="storeCloseOn" type="text" class="card_input"
+          <input id="storeCloseOn" name="storeCloseOn" type="text" class="card_input"
             value="#{storeCloseOn store}">
         </div>
         <div class="card_row">
           <label for="storeURL" class="card_row_header">
             オフィシャルサイト
           </label>
-          <input id="storeURL" type="text" class="card_input"
+          <input id="storeURL" name="storeURL" type="text" class="card_input"
             value="#{storeURL store}">
         </div>
       </div>
