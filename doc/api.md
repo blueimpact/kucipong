@@ -904,6 +904,32 @@ store :: Store  -- Data representing the store logging in
       <div class="storeBody_info_body card_body">
         <div class="card_row">
           <div class="card_row_header">
+            店舗名
+          </div>
+          <div class="card_row_body">
+            #{storeName store}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            カテゴリ
+          </div>
+          <div class="card_row_body">
+            #{showStoreCategoryJa (storeAddress store)}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            ストアの特徴
+          </div>
+          <div class="card_row_body">
+            #{{ for tag in storeTags store }}
+            <div class="simpleTag">#{showStoreTagJa tag}</div>
+            #{{ endfor }}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
             住所
           </div>
           <div class="card_row_body">
@@ -972,6 +998,49 @@ $ curl -G "http://$domain/store/edit" \
           </label>
           <input id="storeName" type="text" class="card_input"
             value="七輪焼肉・安安">
+        </div>
+        <div class="card_row">
+          <label for="storeCategory" class="card_row_header">
+            カテゴリ
+          </label>
+          <select id="storeCategory" class="card_input" value="0">
+            <option value="0">グルメ</option>
+            <option value="1">ファッション</option>
+            <option value="2">ガジェット</option>
+            <option value="3">旅行</option>
+            <option value="4">美容</option>
+          </select>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            ストアの特徴
+          </div>
+          <div class="card_row_body">
+            <div class="checkboxWrapper">
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags0" checked>
+              <label for="storeTags0" class="checkboxLabel">
+                焼き肉
+              </label>
+            </div>
+            <div class="checkboxWrapper">
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags9" checked>
+              <label for="storeTags1" class="checkboxLabel">
+                広々とした店内
+              </label>
+            </div>
+            <div class="checkboxWrapper">
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags1" checked>
+              <label for="storeTags1" class="checkboxLabel">
+                日本食
+              </label>
+            </div>
+            <div class="checkboxWrapper">
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags2" checked>
+              <label for="storeTags1" class="checkboxLabel">
+                寿司
+              </label>
+            </div>
+          </div>
         </div>
         <div class="card_row">
           <label for="storeAddress" class="card_row_header">
@@ -1048,6 +1117,35 @@ store :: Store  -- Data representing the store logging in
           </label>
           <input id="storeName" type="text" class="card_input"
             value="#{storeName store}">
+        </div>
+        <div class="card_row">
+          <label for="storeCategory" class="card_row_header">
+            カテゴリ
+          </label>
+          <select id="storeCategory" class="card_input" value="#{storeCategory store}">
+            #{{ for category in storeCategoryList }}
+            <option value="#{category}">#{showStoreCategoryJa category}</option>
+            #{{ endfor }}
+          </select>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            ストアの特徴
+          </div>
+          <div class="card_row_body">
+            #{{ for tag in storeTagList }}
+            <div class="checkboxWrapper">
+              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags#{tag}"
+                #{{ if (tag `elem` storeTags store) }}
+                checked
+                #{{ endif }}
+              >
+              <label for="storeTags#{tag}" class="checkboxLabel">
+                #{showStoreTagJa tag}
+              </label>
+            </div>
+            #{{ endfor }}
+          </div>
         </div>
         <div class="card_row">
           <label for="storeAddress" class="card_row_header">
