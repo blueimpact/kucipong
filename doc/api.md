@@ -1329,3 +1329,143 @@ Basically same as the `Store` type except following points.
 
 Same as the response of "GET my shop information" API,
 except that the requested parameters are set as the store data.
+
+### GET my store coupons
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/store/coupon" \
+  -H "AUTH-TOKEN: ${token}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong クーポン管理</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeMenu">
+      <a class="btn outerBtn" href="/store/coupon/create">クーポン追加</a>
+      <a class="btn defaultBtn" href="/store">ストア情報</a>
+    </div>
+    <div class="coupon">
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">七輪焼肉・安安</h2>
+          <div class="card_header_icon"><a class="icon-edit" href="/store/coupon/3/edit"></a></div>
+        </div>
+        <div class="card_image">
+          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+          </div>
+          <div class="card_body_summary">
+            <span class="card_body_summary-sub">10% OFF</span>
+            <span class="card_body_summary-main">3600円</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card_header">
+          <h2 class="card_header_text">七輪焼肉・安安</h2>
+          <div class="card_header_icon"><a class="icon-edit" href="/store/coupon/3/edit"></a></div>
+        </div>
+        <div class="card_image">
+          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+          </div>
+          <div class="card_body_summary">
+            <span class="card_body_summary-sub">10% OFF</span>
+            <span class="card_body_summary-main">3600円</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+store :: Store      -- Data representing the store logging in
+coupons :: [Coupon] -- All coupons that store has
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong クーポン管理</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeMenu">
+      <a class="btn outerBtn" href="/store/coupon/create">クーポン追加</a>
+      <a class="btn defaultBtn" href="/store">ストア情報</a>
+    </div>
+    <div class="coupon">
+      <div class="card">
+        #{{ for coupon in coupons }}
+        <div class="card_header">
+          <h2 class="card_header_text">#{storeName (couponStore coupon)}</h2>
+          <div class="card_header_icon"><a class="icon-edit" href="/store/coupon/#{couponId coupon}/edit"></a></div>
+        </div>
+        <div class="card_image">
+          <img src="#{couponImage coupon}" alt="#{storeName (couponStore coupon)}">
+        </div>
+        <div class="card_body">
+          <div class="card_body_title">
+            #{couponTitle coupon}
+          </div>
+
+          <div class="card_body_summary">
+            #{{ if (couponType == CouponDiscount) then }}
+            <span class="card_body_summary-sub">#{discountMinimumFee coupon}円以上のお買い上げで</span>
+            <span class="card_body_summary-main">#{discountRate coupon}% OFF</span>
+
+            #{{ elseif (couponType == CouponGift) then }}
+            <span class="card_body_summary-sub">#{giftMinimumFee coupon}円以上のお買い上げで</span>
+            <span class="card_body_summary-main">#{maybe "非売品" ((<> "円相当の品") . tshow) (giftReferencePrice coupon)} をプレゼント</span>
+
+            #{{ elseif (couponType == CouponSet) then }}
+            <span class="card_body_summary-sub">#{100 - (setPrice coupon * 100 `div` setReferencePrice coupon)}% OFF</span>
+            <span class="card_body_summary-main">#{setPrice coupon}円</span>
+
+            #{{ elseif (couponType == CouponOther) then }}
+            <span class="card_body_summary-main">#{otherContent coupon}</span>
+
+            #{{ endif }}
+          </div>
+        </div>
+      </div>
+      #{{ endfor }}
+    </div>
+  </body>
+</html>
+```
+
