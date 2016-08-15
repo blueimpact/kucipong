@@ -1672,3 +1672,317 @@ Basically it's same as `Coupon` data type except that it doesn't have `couponSto
 
 Same as the response of "GET my store coupons".
 
+### GET my coupon edit page
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/store/coupon/${coupon_id}/edit" \
+  -H "AUTH-TOKEN: ${token}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong クーポン編集</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeMenu">
+      <a class="btn outerBtn" href="/store/coupon">クーポン一覧</a>
+      <a class="btn defaultBtn" href="/store">ストア情報</a>
+    </div>
+
+    <div class="storeBody card">
+      <form class="storeBody_info_body card_body" enctype="multipart/form-data" method="POST">
+        <div class="card_row">
+          <label for="couponTitle" class="card_row_header">
+            タイトル
+          </label>
+          <input id="couponTitle" name="couponTitle" type="text" class="card_input"
+            value="当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円">
+        </div>
+        <div class="card_row">
+          <label for="couponImage" class="card_row_header">
+            クーポンイメージ画像
+          </label>
+          <input id="couponImage" name="couponImage" type="file" accept="image/*" class="card_input">
+        </div>
+        <div class="card_row">
+          <label for="couponValidFrom" class="card_row_header">
+            クーポン有効期限（利用開始日）
+          </label>
+          <input id="couponValidFrom" name="couponValidFrom" type="date" class="card_input" value="2016-04-15">
+        </div>
+        <div class="card_row">
+          <label for="couponExpire" class="card_row_header">
+            クーポン有効期限（利用期限）
+          </label>
+          <input id="couponExpire" name="couponExpire" type="date" class="card_input" value="2016-04-30">
+        </div>
+        <div class="card_row">
+          <label for="couponType" class="card_row_header">
+            クーポン種別
+          </label>
+          <select id="couponType" name="couponType" class="card_input" value="2">
+            <option value="0">購入額から割引</option>
+            <option value="1">購入者プレゼント</option>
+            <option value="2">特別セット</option>
+            <option value="3">その他クーポン</option>
+          </select>
+        </div>
+        <div class="js-couponDiscount">
+          <div class="card_row">
+            <label for="discountRate" class="card_row_header">
+              割引率 (ご購入総額からxx% OFF)
+            </label>
+            <input id="discountRate" name="discountRate" type="number" class="card_input">
+          </div>
+          <div class="card_row">
+            <label for="discountMinimumFee" class="card_row_header">
+              最低購入額 (xx円以上お買い上げのお客様のみ割引)
+            </label>
+            <input id="discountMinimumFee" name="discountMinimumFee" type="number" class="card_input">
+          </div>
+          <div class="card_row">
+            <label for="discountOtherConditions" class="card_row_header">
+              その他のクーポン適用条件
+            </label>
+            <input id="discountOtherConditions" name="discountOtherConditions" type="text" class="card_input">
+          </div>
+        </div>
+        <div class="js-couponGift">
+          <div class="card_row">
+            <label for="giftContent" class="card_row_header">
+              プレゼント内容
+            </label>
+            <input id="giftContent" name="giftContent" type="text" class="card_input">
+          </div>
+          <div class="card_row">
+            <label for="giftReferencePrice" class="card_row_header">
+              プレゼント参考価格 (非売品の場合は記入しないでください)
+            </label>
+            <input id="giftReferencePrice" name="giftReferencePrice" type="number" class="card_input">
+          </div>
+          <div class="card_row">
+            <label for="giftMinimumFee" class="card_row_header">
+              最低購入額 (xx円以上お買い上げのお客様にプレゼント)
+            </label>
+            <input id="giftMinimumFee" name="giftMinimumFee" type="number" class="card_input">
+          </div>
+          <div class="card_row">
+            <label for="giftOtherConditions" class="card_row_header">
+              その他のクーポン適用条件
+            </label>
+            <input id="giftOtherConditions" name="giftOtherConditions" type="text" class="card_input">
+          </div>
+        </div>
+        <div class="js-couponSet">
+          <div class="card_row">
+            <label for="setContent" class="card_row_header">
+              セット内容
+            </label>
+            <input id="setContent" name="setContent" type="text" class="card_input" value="2.5時間飲放題付きの料理4品です。1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム">
+          </div>
+          <div class="card_row">
+            <label for="setPrice" class="card_row_header">
+              セット価格
+            </label>
+            <input id="setPrice" name="setPrice" type="number" class="card_input" value="3600">
+          </div>
+          <div class="card_row">
+            <label for="setReferencePrice" class="card_row_header">
+              セット参考価格 (非売品の場合は記入しないでください)
+            </label>
+            <input id="setReferencePrice" name="setReferencePrice" type="number" class="card_input" value="4000">
+          </div>
+          <div class="card_row">
+            <label for="setOtherConditions" class="card_row_header">
+              その他のクーポン適用条件
+            </label>
+            <input id="setOtherConditions" name="setOtherConditions" type="text" class="card_input" value="※ 1グループ1回のご利用時の利用枚数制限はありません。\n※ 21時以降のご予約のお客様が対象です。">
+          </div>
+        </div>
+        <div class="js-couponOther">
+          <div class="card_row">
+            <label for="otherContent" class="card_row_header">
+              クーポン内容
+            </label>
+            <input id="otherContent" name="otherContent" type="text" class="card_input">
+          </div>
+          <div class="card_row">
+            <label for="otherConditions" class="card_row_header">
+              クーポン適用条件
+            </label>
+            <input id="otherConditions" name="otherConditions" type="text" class="card_input">
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+coupon :: Coupon -- The coupon to edit
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong クーポン編集</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="storeMenu">
+      <a class="btn outerBtn" href="/store/coupon">クーポン一覧</a>
+      <a class="btn defaultBtn" href="/store">ストア情報</a>
+    </div>
+
+    <div class="storeBody card">
+      <form class="storeBody_info_body card_body" enctype="multipart/form-data" method="POST">
+        <div class="card_row">
+          <label for="couponTitle" class="card_row_header">
+            タイトル
+          </label>
+          <input id="couponTitle" name="couponTitle" type="text" class="card_input"
+            value="#{couponTitle coupon}">
+        </div>
+        <div class="card_row">
+          <label for="couponImage" class="card_row_header">
+            クーポンイメージ画像
+          </label>
+          <input id="couponImage" name="couponImage" type="file" accept="image/*" class="card_input">
+        </div>
+        <div class="card_row">
+          <label for="couponValidFrom" class="card_row_header">
+            クーポン有効期限（利用開始日）
+          </label>
+          <input id="couponValidFrom" name="couponValidFrom" type="date" class="card_input" value="#{couponValidFrom coupon}">
+        </div>
+        <div class="card_row">
+          <label for="couponExpire" class="card_row_header">
+            クーポン有効期限（利用期限）
+          </label>
+          <input id="couponExpire" name="couponExpire" type="date" class="card_input" value="#{couponExpire couponType}">
+        </div>
+        <div class="card_row">
+          <label for="couponType" class="card_row_header">
+            クーポン種別
+          </label>
+          <select id="couponType" name="couponType" class="card_input" value="#{couponType coupon}">
+            {{ for ctype in couponTypeList }}
+            <option value="#{ctype}">#{showCouponTypeJa ctype}</option>
+            {{ endfor }}
+          </select>
+        </div>
+        <div class="js-couponDiscount">
+          <div class="card_row">
+            <label for="discountRate" class="card_row_header">
+              割引率 (ご購入総額からxx% OFF)
+            </label>
+            <input id="discountRate" name="discountRate" type="number" class="card_input" value="{discountRate coupon}">
+          </div>
+          <div class="card_row">
+            <label for="discountMinimumFee" class="card_row_header">
+              最低購入額 (xx円以上お買い上げのお客様のみ割引)
+            </label>
+            <input id="discountMinimumFee" name="discountMinimumFee" type="number" class="card_input" value="#{discountMinimumFee coupon}">
+          </div>
+          <div class="card_row">
+            <label for="discountOtherConditions" class="card_row_header">
+              その他のクーポン適用条件
+            </label>
+            <input id="discountOtherConditions" name="discountOtherConditions" type="text" class="card_input" value="#{discountOtherConditions coupon}">
+          </div>
+        </div>
+        <div class="js-couponGift">
+          <div class="card_row">
+            <label for="giftContent" class="card_row_header">
+              プレゼント内容
+            </label>
+            <input id="giftContent" name="giftContent" type="text" class="card_input" value="#{giftContent coupon}">
+          </div>
+          <div class="card_row">
+            <label for="giftReferencePrice" class="card_row_header">
+              プレゼント参考価格 (非売品の場合は記入しないでください)
+            </label>
+            <input id="giftReferencePrice" name="giftReferencePrice" type="number" class="card_input" value="#{giftReferencePrice coupon}">
+          </div>
+          <div class="card_row">
+            <label for="giftMinimumFee" class="card_row_header">
+              最低購入額 (xx円以上お買い上げのお客様にプレゼント)
+            </label>
+            <input id="giftMinimumFee" name="giftMinimumFee" type="number" class="card_input" value="#{giftMinimumFee coupon}">
+          </div>
+          <div class="card_row">
+            <label for="giftOtherConditions" class="card_row_header">
+              その他のクーポン適用条件
+            </label>
+            <input id="giftOtherConditions" name="giftOtherConditions" type="text" class="card_input" value="#{giftOtherConditions coupon}">
+          </div>
+        </div>
+        <div class="js-couponSet">
+          <div class="card_row">
+            <label for="setContent" class="card_row_header">
+              セット内容
+            </label>
+            <input id="setContent" name="setContent" type="text" class="card_input" value="#{setContent coupon}">
+          </div>
+          <div class="card_row">
+            <label for="setPrice" class="card_row_header">
+              セット価格
+            </label>
+            <input id="setPrice" name="setPrice" type="number" class="card_input" value="#{setPrice coupon}">
+          </div>
+          <div class="card_row">
+            <label for="setReferencePrice" class="card_row_header">
+              セット参考価格 (非売品の場合は記入しないでください)
+            </label>
+            <input id="setReferencePrice" name="setReferencePrice" type="number" class="card_input" value="#{setReferencePrice coupon}">
+          </div>
+          <div class="card_row">
+            <label for="setOtherConditions" class="card_row_header">
+              その他のクーポン適用条件
+            </label>
+            <input id="setOtherConditions" name="setOtherConditions" type="text" class="card_input" value="#{setOtherConditions coupon}">
+          </div>
+        </div>
+        <div class="js-couponOther">
+          <div class="card_row">
+            <label for="otherContent" class="card_row_header">
+              クーポン内容
+            </label>
+            <input id="otherContent" name="otherContent" type="text" class="card_input" value="#{otherContent coupon}">
+          </div>
+          <div class="card_row">
+            <label for="otherConditions" class="card_row_header">
+              クーポン適用条件
+            </label>
+            <input id="otherConditions" name="otherConditions" type="text" class="card_input" value="#{otherConditions coupon}">
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
+```
