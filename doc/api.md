@@ -1986,3 +1986,44 @@ coupon :: Coupon -- The coupon to edit
   </body>
 </html>
 ```
+
+### Edit my coupon
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -X POST "http://$domain/store/coupon/${coupon_id}/edit" \
+  -H "AUTH-TOKEN: ${token}" \
+  -F "couponTitle=当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円" \
+  -F "couponImage=@/path/to/image" \
+  -F "couponValidFrom=2016-04-15" \
+  -F "couponExpire=2016-04-30" \
+  -F "couponType=2" \
+  -F "discountRate=null" \
+  -F "discountMinimumFee=null" \
+  -F "discountOtherConditions=null" \
+  -F "giftContent=null" \
+  -F "giftReferencePrice=null" \
+  -F "giftMinimumFee=null" \
+  -F "giftOtherConditions=null" \
+  -F "setContent=2.5時間飲放題付きの料理4品です。 1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム" \
+  -F "setPrice=3600" \
+  -F "setReferencePrice=4000" \
+  -F "setOtherConditions=※ 1グループ1回のご利用時の利用枚数制限はありません。※ 21時以降のご予約のお客様が対象です。" \
+  -F "otherContent=null" \
+  -F "otherConditions=null"
+
+(Same response as "GET my store coupons")
+```
+
+#### Request Parameter and its type
+
+Basically it's same as `Coupon` data type except that it doesn't have `couponStore` field.
+
+#### Response and its type
+
+Same as the response of "GET my store coupons".
+
