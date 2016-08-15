@@ -1288,3 +1288,44 @@ store :: Store  -- Data representing the store logging in
   </body>
 </html>
 ```
+
+### Edit my store information
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -X POST "http://$domain/store/edit" \
+  -H "AUTH-TOKEN: ${token}" \
+  -F "storeName=七輪焼き肉・安安 \
+  -F "storeCategory=0 \
+  -F "storeLatitude=41.40243 \
+  -F "storeLongitude=2.17551 \
+  -F "storeTags0=on \
+  -F "storeTags1=on \
+  -F "storeTags3=on \
+  -F "storeDescription=七輪焼き肉・安安は、美味しい焼肉を... \
+  -F "storeImage=http://s3.amasonaws.com/foo/baz \
+  -F "storeAddress=渋谷区桜丘町2-12 渋谷亀八ビル4F \
+  -F "storePhoneNumber=03-3464-0722 \
+  -F "storeHours=月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30 \
+  -F "storeCloseOn=元旦のみ \
+  -F "storeURL=url=http://www.fuji-tatsu.co.jp
+
+(Same response as "GET my store information")
+
+```
+
+#### Request Parameter and its type
+
+Basically same as the `Store` type except following points.
+
+* `storeArea` is given by independent properties "storeLatitude" and "storeLongitude"
+* you can check whether a n-th tag is an element of the `storeTags` list by checking the property "storeTags#{n}" is "on" or null
+
+#### Response and its type
+
+Same as the response of "GET my shop information" API,
+except that the requested parameters are set as the store data.
