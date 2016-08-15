@@ -234,6 +234,7 @@ GET detail information of a coupon in server side rendered HTML format.
 
 This response is a sample simple HTML for convenience.
 Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+I suggest the back-end Haskell program should read independent template file (e.g, `/static/coupon.html`) when compilation, which makes more maintainability for us.
 
 ```bash
 $ curl -G "http://$domain/coupon/${coupon_id}"
