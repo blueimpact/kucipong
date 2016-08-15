@@ -32,6 +32,7 @@ type MonadKucipong m =
     , MonadKucipong' m
     )
 
+-- | 'KucipongT' is just a wrapper around all of our Monad transformers.
 newtype KucipongT m a = KucipongT
     { unKucipongT ::
         KucipongDbT m a
@@ -55,11 +56,13 @@ deriving instance
     ) => MonadKucipongDb (KucipongT m)
 
 
+-- | Unwrap the @m@ from 'KucipongT'.
 runKucipongT :: KucipongT m a -> m a
 runKucipongT =
       runKucipongDbT
     . unKucipongT
 
+-- | Lift an action in @m@ to 'KucipongT'.
 liftToKucipongT :: (Monad m) => m a -> KucipongT m a
 liftToKucipongT = KucipongT . lift
 
@@ -80,6 +83,7 @@ instance (MonadBaseControl b m) => MonadBaseControl b (KucipongT m) where
     {-# INLINABLE liftBaseWith #-}
     {-# INLINABLE restoreM #-}
 
+-- | Monad transformer stack for our application.
 newtype KucipongM a = KucipongM
     { unKucipongM ::
         KucipongT (ReaderT Config (ExceptT AppErr (LoggingT IO))) a
@@ -116,6 +120,7 @@ instance MonadBaseControl IO KucipongM where
         readerT :: ReaderT Config (ExceptT AppErr (LoggingT IO)) a
         readerT = ReaderT $ \config -> ExceptT . lift $ f config
 
+-- | Run the 'KucipongM' monad stack.
 runKucipongM :: Config -> KucipongM a -> IO (Either AppErr a)
 runKucipongM config =
       runStdoutLoggingT
