@@ -451,7 +451,6 @@ $ curl -G "http://$domain/store/${store_id}"
             <div class="card_row_body">
               月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30
             </div>
-          </div>
           <div class="card_row">
             <div class="card_row_header">
               定休日
@@ -831,10 +830,53 @@ $ curl -G "http://$domain/store" \
       <div class="storeBody_info_body card_body">
         <div class="card_row">
           <div class="card_row_header">
+            店舗名
+          </div>
+          <div class="card_row_body">
+            七輪焼肉・安安
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            カテゴリ
+          </div>
+          <div class="card_row_body">
+            グルメ
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            店舗の特徴
+          </div>
+          <div class="card_row_body">
+            <div class="simpleTag">焼き肉</div>
+            <div class="simpleTag">広い店内</div>
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            店舗の説明
+          </div>
+          <div class="card_row_body tagsWrapper">
+            七輪焼き肉・安安は、美味しい焼肉を...
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
             住所
           </div>
           <div class="card_row_body">
             渋谷区桜丘町2-12 渋谷亀八ビル4F
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            地図
+          </div>
+          <div class="card_row_body">
+            <div class="location">
+              <div class="location_map" data-latitude="41.40243" data-longitude="2.17551"></div>
+            </div>
           </div>
         </div>
         <div class="card_row">
@@ -920,7 +962,7 @@ store :: Store  -- Data representing the store logging in
         </div>
         <div class="card_row">
           <div class="card_row_header">
-            ストアの特徴
+            店舗の特徴
           </div>
           <div class="card_row_body">
             #{{ for tag in storeTags store }}
@@ -930,10 +972,28 @@ store :: Store  -- Data representing the store logging in
         </div>
         <div class="card_row">
           <div class="card_row_header">
+            店舗の説明
+          </div>
+          <div class="card_row_body tagsWrapper">
+            #{storeDescription store}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
             住所
           </div>
           <div class="card_row_body">
             #{storeAddress store}
+          </div>
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            地図
+          </div>
+          <div class="card_row_body">
+            <div class="location">
+              <div class="location_map" data-latitude="#{latitude (storeArea store)}" data-longitude="#{longitude (storeArea store)}"></div>
+            </div>
           </div>
         </div>
         <div class="card_row">
@@ -1013,34 +1073,42 @@ $ curl -G "http://$domain/store/edit" \
         </div>
         <div class="card_row">
           <div class="card_row_header">
-            ストアの特徴
+            店舗の特徴
           </div>
           <div class="card_row_body">
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags0" name="storeTags0" checked>
+              <input class="checkbox" type="checkbox" name="storeTags0" id="storeTags0" checked>
               <label for="storeTags0" class="checkboxLabel">
                 焼き肉
               </label>
             </div>
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags9" name="storeTags9" checked>
-              <label for="storeTags1" class="checkboxLabel">
-                広々とした店内
-              </label>
-            </div>
-            <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags1" name="storeTags1" checked>
+              <input class="checkbox" type="checkbox" name="storeTags1" id="storeTags1" checked>
               <label for="storeTags1" class="checkboxLabel">
                 日本食
               </label>
             </div>
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags2" name="storeTags2" checked>
-              <label for="storeTags1" class="checkboxLabel">
+              <input class="checkbox" type="checkbox" name="storeTags2" id="storeTags2" checked>
+              <label for="storeTags2" class="checkboxLabel">
                 寿司
               </label>
             </div>
+            <div class="checkboxWrapper">
+              <input class="checkbox" type="checkbox" name="storeTags3" id="storeTags3">
+              <label for="storeTags3" class="checkboxLabel">
+                広々とした店内
+              </label>
+            </div>
           </div>
+        </div>
+        <div class="card_row">
+          <label for="storeDescription" class="card_row_header">
+            店舗の説明
+          </label>
+          <textarea id="storeDescription" name="storeDescription" type="text" class="card_input">
+            七輪焼き肉・安安は、美味しい焼肉を...
+          </textarea>
         </div>
         <div class="card_row">
           <label for="storeAddress" class="card_row_header">
@@ -1048,6 +1116,19 @@ $ curl -G "http://$domain/store/edit" \
           </label>
           <input id="storeAddress" name="storeAddress" type="text" class="card_input"
             value="渋谷区桜丘町2-12 渋谷亀八ビル4F">
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            地図
+          </div>
+          <div class="card_row_body">
+            <div class="location">
+              <div class="location_map" data-latitude="41.40243" data-longitude="2.17551">
+                <input type="hidden" name="latitude" value="41.40243">
+                <input type="hidden" name="latitude" value="2.17551">
+              </div>
+            </div>
+          </div>
         </div>
         <div class="card_row">
           <label for="storePhoneNumber" class="card_row_header">
@@ -1130,12 +1211,12 @@ store :: Store  -- Data representing the store logging in
         </div>
         <div class="card_row">
           <div class="card_row_header">
-            ストアの特徴
+            店舗の特徴
           </div>
           <div class="card_row_body">
             #{{ for tag in storeTagList }}
             <div class="checkboxWrapper">
-              <input class="checkbox" type="checkbox" name="storeTags" id="storeTags#{tag}" name="storeTags#{tag}"
+              <input class="checkbox" type="checkbox" name="storeTags#{tag}" id="storeTags#{tag}"
                 #{{ if (tag `elem` storeTags store) }}
                 checked
                 #{{ endif }}
@@ -1148,11 +1229,31 @@ store :: Store  -- Data representing the store logging in
           </div>
         </div>
         <div class="card_row">
+          <label for="storeDescription" class="card_row_header">
+            店舗の説明
+          </label>
+          <textarea id="storeDescription" name="storeDescription" type="text" class="card_input">
+            #{storeDescription store}
+          </textarea>
+        </div>
+        <div class="card_row">
           <label for="storeAddress" class="card_row_header">
             住所
           </label>
           <input id="storeAddress" name="storeAddress" type="text" class="card_input"
             value="#{storeAddress store}">
+        </div>
+        <div class="card_row">
+          <div class="card_row_header">
+            地図
+          </div>
+          <div class="card_row_body">
+            <div class="location">
+              <div class="location_map" data-latitude="#{latitude (storeArea store)}" data-longitude="#{longitude (storeArea store)}"></div>
+                <input type="hidden" name="latitude" value="#{latitude (storeArea store)}">
+                <input type="hidden" name="latitude" value="#{longitude (storeArea store)}">
+            </div>
+          </div>
         </div>
         <div class="card_row">
           <label for="storePhoneNumber" class="card_row_header">
