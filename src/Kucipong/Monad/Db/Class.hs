@@ -9,6 +9,11 @@ import Web.Spock ( ActionCtxT )
 
 import Kucipong.Db ( Admin, Key )
 
+-- | Type-class for monads that can perform Db actions.  For instance, querying
+-- the database for information or writing new information to the database.
+--
+-- Default implementations are used to easily derive instances for monads
+-- transformers that implement 'MonadTrans'.
 class Monad m => MonadKucipongDb m where
     dbInsertNewUser :: EmailAddress -> m (Key Admin)
     default dbInsertNewUser
