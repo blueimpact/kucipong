@@ -906,6 +906,9 @@ $ curl -G "http://$domain/store" \
         <div class="card_row">
           <a class="btn outerBtn" href="http://www.fuji-tatsu.co.jp/">オフィシャルサイト</a>
         </div>
+        <div class="card_row">
+          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
+        </div>
       </div>
     </div>
   </body>
@@ -1023,6 +1026,9 @@ store :: Store  -- Data representing the store logging in
         <div class="card_row">
           <a class="btn outerBtn" href="#{storeURL store}">オフィシャルサイト</a>
         </div>
+        <div class="card_row">
+          <img src="#{storeImage store}" alt="七輪焼き肉・安安">
+        </div>
       </div>
     </div>
   </body>
@@ -1051,7 +1057,7 @@ $ curl -G "http://$domain/store/edit" \
   </head>
   <body>
     <div class="storeBody card">
-      <form class="storeBody_info_body card_body">
+      <form class="storeBody_info_body card_body" enctype="multipart/form-data" method="POST">
         <div class="card_row">
           <label for="storeName" class="card_row_header">
             店舗名
@@ -1158,6 +1164,12 @@ $ curl -G "http://$domain/store/edit" \
           <input id="storeURL" name="storeURL" type="text" class="card_input"
             value="http://www.fuji-tatsu.co.jp/">
         </div>
+        <div class="card_row">
+          <label for="storeImage" class="card_row_header">
+            店舗イメージ画像
+          </label>
+          <input id="storeImage" name="storeImage" type="file" class="card_input">
+        </div>
       </form>
     </div>
   </body>
@@ -1191,7 +1203,7 @@ store :: Store  -- Data representing the store logging in
   </head>
   <body>
     <div class="storeBody card">
-      <form class="storeBody_info_body card_body">
+      <form class="storeBody_info_body card_body" enctype="multipart/form-data" method="POST">
         <div class="card_row">
           <label for="storeName" class="card_row_header">
             店舗名
@@ -1282,6 +1294,12 @@ store :: Store  -- Data representing the store logging in
           </label>
           <input id="storeURL" name="storeURL" type="text" class="card_input"
             value="#{storeURL store}">
+        </div>
+        <div class="card_row">
+          <label for="storeImage" class="card_row_header">
+            店舗イメージ画像
+          </label>
+          <input id="storeImage" name="storeImage" type="file" class="card_input">
         </div>
       </form>
     </div>
@@ -2026,4 +2044,3 @@ Basically it's same as `Coupon` data type except that it doesn't have `couponSto
 #### Response and its type
 
 Same as the response of "GET my store coupons".
-
