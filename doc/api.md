@@ -2059,3 +2059,274 @@ Basically it's same as `Coupon` data type except that it doesn't have `couponSto
 #### Response and its type
 
 Same as the response of "GET my store coupons".
+
+## Admin user API
+
+For kucipong staffs.
+
+* No password is required to log in
+    * Always send special log in page URI to the registered email
+* Authorization token is needed on any API request
+
+### Request user verification / user verification
+
+Same as store user.
+
+### GET store user create page
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/admin/store/create" \
+  -H "AUTH-TOKEN: ${token}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong 店舗ユーザ追加</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="adminMenu">
+      <a class="btn outerBtn" href="/admin/store/delete">ストアユーザ削除</a>
+      <a class="btn defaultBtn" href="/ddmin/store/login">ストアユーザとしてログインする</a>
+    </div>
+
+    <div class="adminBody card">
+      <form class="adminBody_info_body card_body" method="POST">
+        <div class="card_row">
+          <label for="couponTitle" class="card_row_header">
+            追加する店舗ユーザのメールアドレス
+          </label>
+          <input id="storeEmail" name="storeEmail" type="text" class="card_input"
+            value="">
+        </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">この内容で店舗ユーザを作成</button>
+        </div>
+      </form>
+    </div>
+  </body>
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+See the sample response.
+
+### Create store user
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI, so do not include version number in the URI.
+
+```bash
+$ curl -X POST "http://$domain/store/coupon/create" \
+  -H "AUTH-TOKEN: ${token}" \
+  -d "storeEmail=sample@example.com"
+
+(Same response as "GET store user create page")
+```
+
+#### Request Parameter and its type
+
+```haskell
+storeEmail :: Email
+```
+
+#### Response and its type
+
+Same as the response of "GET store user create page"
+
+### GET store user delete page
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/admin/store/delete" \
+  -H "AUTH-TOKEN: ${token}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong 店舗ユーザ削除</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="adminMenu">
+      <a class="btn outerBtn" href="/admin/store/create">ストアユーザ作成</a>
+      <a class="btn defaultBtn" href="/ddmin/store/login">ストアユーザとしてログインする</a>
+    </div>
+
+    <div class="adminBody card">
+      <form class="adminBody_info_body card_body" method="POST" action="/admin/store/delete/confirm">
+        <div class="card_row">
+          <label for="couponTitle" class="card_row_header">
+            削除する店舗ユーザのメールアドレス
+          </label>
+          <input id="storeEmail" name="storeEmail" type="text" class="card_input"
+            value="">
+        </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">削除する店舗ユーザの確認</button>
+        </div>
+      </form>
+    </div>
+  </body>
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+See the sample response.
+
+### GET store user delete confirm page
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/admin/store/delete/confirm" \
+  -H "AUTH-TOKEN: ${token}" \
+  -data-urlencode "storeEmail=sample@example.com"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong 店舗ユーザ削除</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="adminMenu">
+      <a class="btn outerBtn" href="/admin/store/create">ストアユーザ作成</a>
+      <a class="btn defaultBtn" href="/ddmin/store/login">ストアユーザとしてログインする</a>
+    </div>
+
+    <div class="adminBody card">
+      <form class="adminBody_info_body card_body" method="POST" action="/admin/store/delete">
+        <div class="card_row">
+          「焼き肉・安安」を削除しますか？
+        </div>
+        <div class="card_row">
+          <label for="couponTitle" class="card_row_header">
+            確認のため「焼き肉・安安」と入力してください
+          </label>
+          <input id="storeName" name="storeName" type="text" class="card_input"
+            value="">
+        </div>
+        <div class="card_row submit_row">
+          <input type="hidden" name="storeId" value="3">
+          <button type="submit" class="btn outerBtn">この店舗ユーザを削除</button>
+        </div>
+      </form>
+    </div>
+  </body>
+```
+
+#### Request Parameter and its type
+
+```haskell
+storeEmail :: Email
+```
+
+#### Response and its type
+
+This code is for explanation of the API response, so this is NOT the same HTML as production code.
+
+* Model
+
+    ```haskell
+store :: Coupon -- The coupon to edit
+    ```
+* Pseudo template file
+
+    ```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong 店舗ユーザ削除</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="adminMenu">
+      <a class="btn outerBtn" href="/admin/store/create">ストアユーザ作成</a>
+      <a class="btn defaultBtn" href="/ddmin/store/login">ストアユーザとしてログインする</a>
+    </div>
+
+    <div class="adminBody card">
+      <form class="adminBody_info_body card_body" method="POST" action="/admin/store/delete/confirm">
+        <div class="card_row">
+          「#{storeName store}」を削除しますか？
+        </div>
+        <div class="card_row">
+          <label for="couponTitle" class="card_row_header">
+            確認のため「#{storeName store}」と入力してください
+          </label>
+          <input id="storeName" name="storeName" type="text" class="card_input"
+            value="">
+        </div>
+        <div class="card_row submit_row">
+          <input type="hidden" name="storeId" value="#{storeId store}">
+          <button type="submit" class="btn outerBtn">この店舗ユーザを削除</button>
+        </div>
+      </form>
+    </div>
+  </body>
+```
+
+### Delete store user
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI, so do not include version number in the URI.
+
+```bash
+$ curl -X POST "http://$domain/store/coupon/create" \
+  -H "AUTH-TOKEN: ${token}" \
+  -d "storeName=七輪焼き肉・安安" \
+  -d "storeId=3"
+
+(Same response as "GET store user create page")
+```
+
+#### Request Parameter and its type
+
+```haskell
+storeName :: Text
+storeId :: StoreId
+```
+
+Delete user only if the store name of the store id equals `storeName`.
+
+#### Response and its type
+
+
+Same as the response of "GET store user create page"
