@@ -19,7 +19,7 @@ const commonConfig = {
   // Directory to output compiled files
   output: {
     path: path.resolve(__dirname, 'dist/'),
-    filename: '[hash].js',
+    filename: '[name]-[hash].js',
   },
 
   resolve: {
@@ -34,15 +34,28 @@ const commonConfig = {
         test: /\.(eot|ttf|woff|woff2|svg)$/,
         loader: 'file-loader',
       },
+      {
+        test: /\.pug$/,
+        loader: 'pug',
+      },
     ]
   },
 
   plugins: [
+    // Compile chat page
     new HtmlWebpackPlugin({
-      template: 'src/index.html',
+      chunks: ['chat'],
+      template: 'src/pug/chat.pug',
       inject:   'body',
-      filename: 'index.html',
-    })
+      filename: 'chat.html',
+    }),
+    // Compile end-user related page
+    new HtmlWebpackPlugin({
+      chunks: ['enduser'],
+      template: 'src/pug/enduser_coupon_id.pug',
+      inject:   'body',
+      filename: 'enduser_coupon_id.html',
+    }),
   ],
 
   postcss: () => [
@@ -60,10 +73,16 @@ if (TARGET_ENV === 'development') {
 
   module.exports = merge(commonConfig, {
 
-    entry: [
-      'webpack-dev-server/client?http://localhost:8080',
-      path.join( __dirname, 'src/index.js' )
-    ],
+    entry: {
+      chat: [
+        'webpack-dev-server/client?http://localhost:8080',
+        path.join( __dirname, 'src/chat.js' )
+      ],
+      enduser: [
+        'webpack-dev-server/client?http://localhost:8080',
+        path.join( __dirname, 'src/enduser.js' )
+      ],
+    },
 
     devServer: {
       contentBase: 'src',
@@ -98,7 +117,14 @@ if (TARGET_ENV === 'production') {
 
   module.exports = merge(commonConfig, {
 
-    entry: path.join(__dirname, 'src/index.js'),
+    entry: {
+      chat: [
+        path.join( __dirname, 'src/chat.js' )
+      ],
+      enduser: [
+        path.join( __dirname, 'src/enduser.js' )
+      ],
+    },
 
     module: {
       loaders: [
