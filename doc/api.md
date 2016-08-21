@@ -1170,6 +1170,9 @@ $ curl -G "http://$domain/store/edit" \
           </label>
           <input id="storeImage" name="storeImage" type="file" class="card_input">
         </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">この内容で店舗情報を更新する</button>
+        </div>
       </form>
     </div>
   </body>
@@ -1300,6 +1303,9 @@ store :: Store  -- Data representing the store logging in
             店舗イメージ画像
           </label>
           <input id="storeImage" name="storeImage" type="file" class="card_input">
+        </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">この内容で店舗情報を更新する</button>
         </div>
       </form>
     </div>
@@ -1637,6 +1643,9 @@ $ curl -G "http://$domain/store/coupon/create" \
             <input id="otherConditions" name="otherConditions" type="text" class="card_input">
           </div>
         </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">この内容でクーポンを作成</button>
+        </div>
       </form>
     </div>
   </body>
@@ -1840,6 +1849,9 @@ $ curl -G "http://$domain/store/coupon/${coupon_id}/edit" \
             <input id="otherConditions" name="otherConditions" type="text" class="card_input">
           </div>
         </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">この内容でクーポンを更新</button>
+        </div>
       </form>
     </div>
   </body>
@@ -1998,6 +2010,9 @@ coupon :: Coupon -- The coupon to edit
             </label>
             <input id="otherConditions" name="otherConditions" type="text" class="card_input" value="#{otherConditions coupon}">
           </div>
+        </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">この内容でクーポンを更新</button>
         </div>
       </form>
     </div>
