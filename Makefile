@@ -2,7 +2,7 @@
 all: build
 
 build:
-	stack build
+	stack build kucipong
 
 clean:
 	stack clean

@@ -2,21 +2,17 @@
 # For more information, see: http://docs.haskellstack.org/en/stable/yaml_configuration/
 
 # Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
-resolver: lts-6.10
+resolver: lts-6.13
 
 # Local packages, usually specified by relative directory name
 packages:
     - '.'
     # TODO: This was added here: https://github.com/fpco/stackage/pull/1782
-    # Hopefull we'll be able to use it when lts-6.13 comes out.  It should be
-    # out sometime before 2016/09/01.
+    # Hopefull we'll be able to use it when lts-6.14 comes out.  It should be
+    # out sometime around 2016/09/01.
     - location:
         git: 'https://bitbucket.org/cdepillabout/hailgun'
         commit: '275a4ebdeab79f7fb048e6174ca2f2bf75aa1f71' # derive-show branch
-    # TODO: This should also be in lts-6.13.
-    - location:
-        git: 'https://github.com/cdepillabout/read-env-var'
-        commit: 'v0.1.0.1'
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []
