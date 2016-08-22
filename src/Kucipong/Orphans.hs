@@ -10,5 +10,3 @@ other libraries but that we use here.
 -}
 
 module Kucipong.Orphans where
-
-import ClassyPrelude

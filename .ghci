@@ -1,0 +1,10 @@
+-- The following hack is needed when using two packages, where one is
+-- ImplicitPrelude and one is NoImplicitPrelude.
+
+:set -XImplicitPrelude
+:add .stack-work/downloaded/7c431ba03e837f904d10866cd436267f4ab12d74e76fbf464e3599cab5e61d06/src/Text/Email/Validate.hs
+:add .stack-work/downloaded/2e6a2889ab218635d549c10132bf8206e87b52831bb0b0d63119ff59a8407377/Mail/Hailgun.hs
+:set -XNoImplicitPrelude
+-- :add src/Kucipong/Dev.hs
+:add src/Kucipong.hs
+-- import Kucipong.Dev

@@ -5,52 +5,51 @@ module Kucipong.Monad.Db.Instance where
 
 import Kucipong.Prelude
 
-import Control.Lens ( to, view )
-import Control.Monad.Trans.Class ( MonadTrans )
-import Control.Monad.Trans.Control
-    ( ComposeSt, MonadBaseControl(..), MonadTransControl(..)
-    , defaultLiftBaseWith, defaultRestoreM )
-import Crypto.PasswordStore ( verifyPassword )
-import Database.Persist ( getBy, insert, entityKey, entityVal )
+import Control.Monad.Random ( MonadRandom(..) )
+import Control.Monad.Time ( MonadTime(..) )
+import Database.Persist ( Entity(..), insert, )
 
 import Kucipong.Config ( Config )
-import Kucipong.Db ( Admin, Key )
+import Kucipong.Db
+    ( Admin(..), AdminLoginToken(..), CreatedTime(..), Key
+    , LoginTokenExpirationTime(..), UpdatedTime(..), runDb )
 import Kucipong.Errors ( AppErr )
+import Kucipong.LoginToken ( createRandomLoginToken )
 import Kucipong.Monad.Db.Class ( MonadKucipongDb(..) )
 import Kucipong.Monad.Db.Trans ( KucipongDbT(..) )
+import Kucipong.Util ( addOneDay )
 
 instance ( MonadBaseControl IO m
          , MonadIO m
          , MonadError AppErr m
+         , MonadRandom m
          , MonadReader Config m
+         , MonadTime m
          ) => MonadKucipongDb (KucipongDbT m) where
 
-    dbInsertNewUser :: EmailAddress -> KucipongDbT m (Key Admin)
-    dbInsertNewUser _ = KucipongDbT $ undefined
-        -- lift go
-      -- where
-        -- go :: m (Key User)
-        -- go = runDbSafeCurrTime $ \currentTime -> do
-        --         let user = User
-        --                     (CreatedTime currentTime)
-        --                     (UpdatedTime currentTime)
-        --                     Nothing
-        --                     email
-        --                     hash
-        --         insert user
+    dbCreateAdmin :: EmailAddress -> Text -> KucipongDbT m (Entity Admin)
+    dbCreateAdmin email name = lift go
+      where
+        go :: m (Entity Admin)
+        go = do
+            currTime <- currentTime
+            let admin =
+                    Admin email (CreatedTime currTime) (UpdatedTime currTime)
+                        Nothing name
+            adminKey <- runDb $ insert admin
+            pure $ Entity adminKey admin
 
-    dbLoginUser :: EmailAddress -> KucipongDbT m (Maybe (Key Admin))
-    dbLoginUser _ = KucipongDbT $ undefined
-        -- lift go
-      -- where
-        -- go :: m (Maybe (Key User))
-        -- go = do
-        --     maybeUserEntity <- runDb . getBy $ UniqueUserEmail email
-        --     pure $ do
-        --         userEntity <- maybeUserEntity
-        --         let userKey = entityKey userEntity
-        --             user = entityVal userEntity
-        --             hash = view (userPasswordHash . passwordHash) user
-        --         if verifyPassword (encodeUtf8 password) hash
-        --             then Just userKey
-        --             else Nothing
+    dbCreateAdminMagicLoginToken :: Key Admin -> KucipongDbT m (Entity AdminLoginToken)
+    dbCreateAdminMagicLoginToken adminKey = lift go
+      where
+        go :: m (Entity AdminLoginToken)
+        go = do
+            currTime <- currentTime
+            randomLoginToken <- createRandomLoginToken
+            let plusOneDay = addOneDay currTime
+            let adminLoginToken =
+                    AdminLoginToken adminKey (CreatedTime currTime)
+                        (UpdatedTime currTime) Nothing randomLoginToken
+                        (LoginTokenExpirationTime plusOneDay)
+            adminLoginTokenKey <- runDb $ insert adminLoginToken
+            pure $ Entity adminLoginTokenKey adminLoginToken
