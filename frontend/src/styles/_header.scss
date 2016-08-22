@@ -1,0 +1,28 @@
+/* Helper module for button component */
+
+@mixin header($main-color: #07b8eb, $font-color: #fff) {
+  background-color: $main-color;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  .home {
+    padding: 0 1em;
+    display: flex;
+    align-items: center;
+  }
+
+  .title {
+    font-size: 1em;
+    font-weight: normal;
+    color: $invert-font-color;
+  }
+
+  .icons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding-right: 0.6em;
+  }
+}

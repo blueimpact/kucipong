@@ -2,6 +2,10 @@
 @import "~modularscale-sass/stylesheets/modular-scale";
 @import "mixin";
 
+@import "button";
+@import "card";
+@import "header";
+
 /* Color settings */
 $main-color: #07b8eb;
 $second-color: #484848;
@@ -40,30 +44,7 @@ body {
 }
 
 .header {
-  background-color: $main-color;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-
-  .home {
-    padding: 0 1em;
-    display: flex;
-    align-items: center;
-  }
-
-  .title {
-    font-size: 1em;
-    font-weight: normal;
-    color: $invert-font-color;
-  }
-
-  .icons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    padding-right: 0.6em;
-  }
+  @include header($main-color, $invert-font-color);
 }
 
 .coupon {
@@ -72,6 +53,72 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+
+  .card {
+    @include card(
+      $second-color,
+      $invert-font-color,
+      $shadow-color
+    ) {
+      .card_image {
+        position: relative;
+
+        .card_image-image {
+          width: 100%;
+        }
+
+        .card_image-annotation {
+          position: absolute;
+          bottom: 0.4em;
+          right: 0.4em;
+          font-size: 0.6em;
+          color: $invert-font-color;
+          text-shadow:
+            -1px -1px $font-color,
+            1px -1px $font-color,
+            -1px 1px $font-color,
+            1px 1px $font-color;
+        }
+      }
+
+      .card_body_summary {
+        padding: 0.5em 1.2em;
+        background-color: $second-color-light;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .card_body_summary-sub {
+          padding: 0 1em;
+          color: $font-color-light;
+          font-size: 0.9em;
+        }
+
+        .card_body_summary-main {
+          color: $font-color-strong;
+          font-size: 1.3em;
+        }
+      }
+
+      .card_body_expiration {
+        padding: 0.5em 1.2em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .card_body_expiration-title {
+          padding: 0 1em;
+          color: $font-color-light;
+          font-size: 0.9em;
+        }
+
+        .card_body_expiration-body {
+          color: $font-color-strong;
+          font-size: 0.9em;
+        }
+      }
+    }
+  }
 
   .annotation {
     margin: 0 auto;
@@ -105,115 +152,14 @@ body {
   }
 }
 
-.card {
-  box-shadow: 2px 2px 10px -2px $shadow-color;
-
-  .card_header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: $second-color;
-
-    .card_header_text {
-      flex: 1;
-      display: flex;
-      font-weight: normal;
-      justify-content: center;
-      color: $invert-font-color;
-      font-size: 1em;
-    }
-
-    .card_header_icon {
-      .icon {
-        cursor: pointer;
-      }
-    }
-  }
-
-  .card_image {
-    position: relative;
-
-    .card_image-image {
-      width: 100%;
-    }
-
-    .card_image-annotation {
-      position: absolute;
-      bottom: 0.4em;
-      right: 0.4em;
-      font-size: 0.6em;
-      color: $invert-font-color;
-      text-shadow:
-        -1px -1px $font-color,
-        1px -1px $font-color,
-        -1px 1px $font-color,
-        1px 1px $font-color;
-    }
-  }
-
-  .card_body {
-    .card_body_title {
-      font-size: 1.2em;
-      padding: 0.5em 1.2em;
-    }
-
-    .card_body_summary {
-      padding: 0.5em 1.2em;
-      background-color: $second-color-light;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      .card_body_summary-sub {
-        padding: 0 1em;
-        color: $font-color-light;
-        font-size: 0.9em;
-      }
-
-      .card_body_summary-main {
-        color: $font-color-strong;
-        font-size: 1.3em;
-      }
-    }
-
-    .card_body_expiration {
-      padding: 0.5em 1.2em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      .card_body_expiration-title {
-        padding: 0 1em;
-        color: $font-color-light;
-        font-size: 0.9em;
-      }
-
-      .card_body_expiration-body {
-        color: $font-color-strong;
-        font-size: 0.9em;
-      }
-    }
-  }
-}
-
 .icon {
   padding: 0 0.8em;
 }
 
 .btn {
-  height: 3.4em;
-  width: calc(100% / #{$golden});
-  border-radius: 8px;
-  border-style: solid;
-  border-width: 2px;
-  text-decoration: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-
-  &.outerBtn {
-    border-color: $button-color;
-    color: $button-color;
+  @include button($golden) {
+    &.outerBtn {
+      @include outerButton($button-color);
+    }
   }
 }

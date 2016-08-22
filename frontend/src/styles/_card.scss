@@ -1,0 +1,35 @@
+/* Helper module for card component */
+
+@mixin card($header-color, $font-color, $shadow-color) {
+  box-shadow: 2px 2px 10px -2px $shadow-color;
+
+  .card_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: $header-color;
+
+    .card_header_text {
+      flex: 1;
+      display: flex;
+      font-weight: normal;
+      justify-content: center;
+      color: $font-color;
+      font-size: 1em;
+    }
+
+    .card_header_icon {
+      .icon {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .card_body {
+    .card_body_title {
+      font-size: 1.2em;
+      padding: 0.5em 1.2em;
+    }
+  }
+  @content;
+}
