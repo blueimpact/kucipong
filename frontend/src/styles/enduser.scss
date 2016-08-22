@@ -1,5 +1,6 @@
 @import '~sanitize.css/sanitize.css';
 @import "~modularscale-sass/stylesheets/modular-scale";
+@import "mixin";
 
 /* Color settings */
 $main-color: #07b8eb;
@@ -32,6 +33,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
+  @include min-screen($break-point-tablet) {
+    width: $break-point-tablet;
+  }
 }
 
 .header {
@@ -77,7 +82,7 @@ body {
 
   .location .location_map {
     margin: 0 auto;
-    width: 90%;
+    padding: 0 2em;
 
     .location_map-frame {
       width: 100%;
