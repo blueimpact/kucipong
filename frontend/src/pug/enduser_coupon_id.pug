@@ -6,8 +6,17 @@ html(lang="ja")
     meta(content="width=device-width,initial-scale=1" name="viewport")
     title
       | Kucipong #{htmlWebpackPlugin.options.title}
-  body#main.
-    <div class="coupon">
+  body#main.wrapper
+    header.header
+      .home
+        img(src=require("../img/hamburger.svg"))
+      h1.title クーポン
+      .icons
+        .icon.icon-like
+          img(src=require("../img/heart.svg"))
+        .icon.icon-me
+          img(src=require("../img/me.svg"))
+    .coupon.
       <div class="card">
         <div class="card_header">
           <h2 class="card_header_text">七輪焼肉・安安</h2>
@@ -41,4 +50,3 @@ html(lang="ja")
         <p>2.5時間飲放題付きの料理4品です。1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム"</p>
         <p>※ 1グループ1回のご利用時の利用枚数制限はありません。※ 21時以降のご予約のお客様が対象です。</p>
       </div>
-    </div>

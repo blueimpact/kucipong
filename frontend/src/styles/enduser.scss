@@ -1,5 +1,60 @@
-html {
+@import '~sanitize.css/sanitize.css';
+@import "~modularscale-sass/stylesheets/modular-scale";
+
+/* Color settings */
+$main-color: #07b8eb;
+$invert-font-color: white;
+
+/* Size settings */
+$break-point-mobile: 640px;
+$break-point-tablet: 960px;
+$ms-range:
+  1.1 20em,
+  1.33 60em;
+
+/* Main */
+body {
+  @include ms-respond(font-size, 1);
+}
+
+.wrapper {
+  height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.header {
+  background-color: $main-color;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  .home {
+    padding: 0 1em;
+    display: flex;
+    align-items: center;
+  }
+
+  .title {
+    font-size: 1em;
+    font-weight: normal;
+    color: $invert-font-color;
+  }
+
+  .icons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding-right: 0.6em;
+
+    .icon {
+      padding: 0 0.8em;
+    }
+  }
+}
+
+.coupon {
   flex: 1;
 }
