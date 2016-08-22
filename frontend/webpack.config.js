@@ -38,6 +38,10 @@ const commonConfig = {
         test: /\.pug$/,
         loader: 'pug',
       },
+      {
+        test: /\.(jpg|jpeg|png)$/,
+        loader: 'url'
+      },
     ]
   },
 
