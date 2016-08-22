@@ -16,37 +16,32 @@ html(lang="ja")
           img(src=require("../img/heart.svg"))
         .icon.icon-me
           img(src=require("../img/me.svg"))
-    .coupon.
-      <div class="card">
-        <div class="card_header">
-          <h2 class="card_header_text">七輪焼肉・安安</h2>
-          <div class="card_header_icon"><span class="icon-like" data-coupon-id="3"></span></div>
-        </div>
-        <div class="card_image">
-          <img src="http://s3.amasonaws.com/foo/bar" alt="七輪焼き肉・安安">
-        </div>
-        <div class="card_body">
-          <div class="card_body_title">
-            当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
-          </div>
-          <div class="card_body_summary">
-            <span class="card_body_summary-sub">10% OFF</span>
-            <span class="card_body_summary-main">3600円</span>
-          </div>
-          <div class="card_body_expiration">
-            <span class="card_body_expiration-title">有効期限</span>
-            <span class="card_body_expiration-body">2016年4月15日から 2016年4月30日まで</span>
-          </div>
-        </div>
-      </div>
-      <div class="annotation">※ この画面を店舗でご提示ください</div>
-      <div class="location">
-        <div class="location_map" data-latitude="41.40243" data-longitude="2.17551"></div>
-      </div>
-      <div class="aboutStore">
-        <a class="btn outerBtn" href="/store/52">七輪焼き肉・安安</a>
-      </div>
-      <div class="moreContents">
-        <p>2.5時間飲放題付きの料理4品です。1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム"</p>
-        <p>※ 1グループ1回のご利用時の利用枚数制限はありません。※ 21時以降のご予約のお客様が対象です。</p>
-      </div>
+    .coupon
+      .card
+        .card_header
+          h2.card_header_text 七輪焼肉・安安
+          .card_header_icon
+            .icon.icon-like(data-coupon-id="3")
+              img(src=require("../img/heart.svg"))
+        .card_image
+          img.card_image-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
+          span.card_image-annotation 画像は一例です
+        .card_body
+          .card_body_title
+            | 当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+          .card_body_summary
+            span.card_body_summary-sub 10% OFF
+            span.card_body_summary-main 3600円
+          .card_body_expiration
+            span.card_body_expiration-title
+              | 有効期限
+            span.card_body_expiration-body
+              | 2016年4月15日から 2016年4月30日まで
+      .annotation ※ この画面を店舗でご提示ください
+      .location
+        .location_map(data-latitude="41.40243" data-longitude="2.17551")
+      .aboutStore
+        a.btn.outerBtn(href="/store/52") 七輪焼き肉・安安
+      .moreContents
+        p 2.5時間飲放題付きの料理4品です。 1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム
+        p ※ 1グループ1回のご利用時の利用枚数制限はありません。※ 21時以降のご予約のお客様が対象です。
