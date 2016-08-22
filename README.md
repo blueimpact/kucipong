@@ -67,3 +67,15 @@ $ make run
 ### Other make target
 
 Look in the `Makefile` for other targets to run.
+
+## Add Admin User
+
+A new admin user can be added from the command line like the following.  The
+`KUCIPONG_MAILGUN_APIKEY` can be found by logging on to the mailgun website.
+This sends an email to the user so they can login as an admin.
+
+```bash
+$ make build
+$ export KUCIPONG_MAILGUN_APIKEY="key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+$ stack exec -- kucipong-add-admin kucipong.dev@gmail.com "Some User Name"
+```
