@@ -6,6 +6,8 @@ $main-color: #07b8eb;
 $second-color: #484848;
 $second-color-light: #eee;
 
+$button-color: #00a7f4;
+
 $font-color: #000;
 $invert-font-color: #fff;
 $font-color-light: #858585;
@@ -64,7 +66,38 @@ body {
   padding: 0.8em;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+
+  .annotation {
+    margin: 0 auto;
+    padding: 2em;
+    font-size: 0.8em;
+    color: $font-color-strong;
+  }
+
+  .location .location_map {
+    margin: 0 auto;
+    width: 90%;
+
+    .location_map-frame {
+      width: 100%;
+      height: calc(100vw / #{$golden});
+    }
+  }
+
+  .aboutStore {
+    padding: 1em;
+    font-size: 0.8em;
+  }
+
+  .moreContents {
+    font-size: 0.8em;
+    padding: 0 1em;
+
+    .moreContents_txt {
+      margin: 0;
+    }
+  }
 }
 
 .card {
@@ -160,4 +193,22 @@ body {
 
 .icon {
   padding: 0 0.8em;
+}
+
+.btn {
+  height: 3.4em;
+  width: calc(100% / #{$golden});
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 2px;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+
+  &.outerBtn {
+    border-color: $button-color;
+    color: $button-color;
+  }
 }
