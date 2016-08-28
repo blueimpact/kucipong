@@ -66,6 +66,12 @@ const commonConfig = {
       inject:   'body',
       filename: 'enduser_store_id.html',
     }),
+    new HtmlWebpackPlugin({
+      chunks: ['enduser'],
+      template: 'src/pug/enduser_store_id_coupon.pug',
+      inject:   'body',
+      filename: 'enduser_store_id_coupon.html',
+    }),
   ],
 
   postcss: () => [
