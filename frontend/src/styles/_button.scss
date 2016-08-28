@@ -20,6 +20,7 @@
 }
 
 @mixin defaultButton($color, $font-color) {
+  border-color: $color;
   background-color: $color;
   color: $font-color;
 }

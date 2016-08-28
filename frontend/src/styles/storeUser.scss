@@ -115,6 +115,10 @@ body {
 }
 
 .store {
+  .storeSubmit {
+    padding: 1em;
+  }
+
   .store_editBtn {
     padding: 1em;
   }
@@ -189,6 +193,34 @@ body {
                 width: 100%;
                 height: calc(100vw / #{$golden});
               }
+            }
+
+            .storeBody_info_body_row-body-image {
+              width: 100%;
+            }
+
+            select,
+            input[type="text"],
+            input[type="tel"],
+            input[type="url"],
+            input[type="email"] {
+              border: 1px solid $border-color-light;
+              border-radius: 4px;
+              min-height: 2em;
+              width: 100%;
+              padding: 0.5em;
+              font-size: 1em;
+              box-shadow: inset 4px 4px 10px -10px $shadow-color;
+            }
+
+            textarea {
+              border: 1px solid $border-color-light;
+              border-radius: 4px;
+              min-height: 6em;
+              width: 100%;
+              padding: 0.5em;
+              font-size: 1em;
+              box-shadow: inset 4px 4px 10px -10px $shadow-color;
             }
           }
         }
@@ -309,5 +341,40 @@ body {
 
   .simpleTag {
     padding-right: 2em;
+  }
+}
+
+.checkboxGroup {
+  display: flex;
+
+  .checkboxWrapper {
+    .checkbox {
+      display: none;
+    }
+
+    .checkboxLabel {
+      flex: 1;
+      padding: 0.2em 0.5em;
+      border-radius: 8px;
+      border-style: solid;
+      border-width: 2px;
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 0.1em;
+    }
+
+    .checkbox:checked ~ .checkboxLabel {
+      @include defaultButton($main-color, $invert-font-color);
+
+      transition: all 1s ease;
+    }
+
+    .checkbox:not(:checked) ~ .checkboxLabel {
+      @include outerButton($border-color-light);
+
+      transition: all 1s ease;
+    }
   }
 }

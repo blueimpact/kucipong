@@ -80,6 +80,12 @@ const commonConfig = {
       inject:   'body',
       filename: 'storeUser_store.html',
     }),
+    new HtmlWebpackPlugin({
+      chunks: ['storeUser'],
+      template: 'src/pug/storeUser_store_edit.pug',
+      inject:   'body',
+      filename: 'storeUser_store_edit.html',
+    }),
   ],
 
   postcss: () => [
