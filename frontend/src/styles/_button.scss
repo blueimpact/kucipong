@@ -1,7 +1,7 @@
 /* Helper module for button component */
 
 @mixin button($rate) {
-  height: 3.4em;
+  height: 3em;
   width: calc(100% / #{$rate});
   border-radius: 8px;
   border-style: solid;

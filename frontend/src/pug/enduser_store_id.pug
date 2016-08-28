@@ -1,0 +1,52 @@
+doctype html
+html(lang="ja")
+  head
+    meta(content="IE=edge" http-equiv="X-UA-Compatible")
+    meta(content="text/html; charset=UTF-8" http-equiv="Content-Type")
+    meta(content="width=device-width,initial-scale=1" name="viewport")
+    title
+      | Kucipong #{htmlWebpackPlugin.options.title}
+  body#main.wrapper
+    include _header
+      | 店舗情報
+    .store
+      header.storeHeader
+        .annotatedImageGroup
+          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
+          span.annotatedImageGroup-annotation 画像は一例です
+        .highlightedBlock
+          h2.highlightedBlock.storeHeader-title
+            | 七輪焼肉・安安
+      .storeBody
+        .storeBody_description
+          p 七輪焼き肉・安安は、美味しい焼肉を...
+          p ...
+        .storeBody_viewCoupon
+          a.btn.defaultBtn(href="/store/52/coupon") クーポンを見る
+        .storeBody_info
+          .storeBody_info_titleArea
+            .storeBody_info_titleArea-text
+              | 店舗情報
+          .storeBody_info_body
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 住所
+              .storeBody_info_body_row-body
+                | 渋谷区桜丘町2-12 渋谷亀八ビル4F
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 電話番号
+              .storeBody_info_body_row-body
+                | 03-3464-0722
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 営業時間
+              .storeBody_info_body_row-body
+                | 月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 定休日
+              .storeBody_info_body_row-body
+                | 元旦のみ
+            .storeBody_info_body_btnRow
+              a.btn.outerBtn(href="http://www.fuji-tatsu.co.jp/") オフィシャルサイト

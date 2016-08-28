@@ -53,12 +53,18 @@ const commonConfig = {
       inject:   'body',
       filename: 'chat.html',
     }),
-    // Compile end-user related page
+    // Compile end-user related pages
     new HtmlWebpackPlugin({
       chunks: ['enduser'],
       template: 'src/pug/enduser_coupon_id.pug',
       inject:   'body',
       filename: 'enduser_coupon_id.html',
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['enduser'],
+      template: 'src/pug/enduser_store_id.pug',
+      inject:   'body',
+      filename: 'enduser_store_id.html',
     }),
   ],
 

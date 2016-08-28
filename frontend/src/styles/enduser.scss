@@ -11,12 +11,14 @@ $main-color: #07b8eb;
 $second-color: #484848;
 $second-color-light: #eee;
 
-$button-color: #00a7f4;
-
 $font-color: #000;
 $invert-font-color: #fff;
 $font-color-light: #858585;
+$font-color-lightest: #c1c1c1;
 $font-color-strong: #d70909;
+
+$border-color: $font-color;
+$border-color-light: #c4c4c4;
 
 $shadow-color: rgba(0, 0, 0, 0.5);
 
@@ -112,14 +114,88 @@ body {
   }
 }
 
+.store {
+  .storeHeader-title {
+    font-size: 1em;
+    font-weight: normal;
+  }
+
+  .storeBody {
+    .storeBody_description {
+      font-size: 0.8em;
+      color: $font-color-light;
+      padding: 1em 2em;
+    }
+
+    .storeBody_info {
+      margin: 3em 1em 1em;
+      position: relative;
+      border: solid 2px $border-color-light;
+      border-radius: 8px;
+
+      .storeBody_info_titleArea {
+        position: absolute;
+        top: -2em;
+        height: 4em;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.9em;
+
+        .storeBody_info_titleArea-text {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border: solid 2px $border-color-light;
+          border-radius: 8px;
+          min-width: 12em;
+          padding: 0.3em;
+          background-color: $invert-font-color;
+        }
+      }
+
+      .storeBody_info_body {
+        padding: 3em 2em 1em;
+
+        .storeBody_info_body_btnRow {
+          padding: 1em 0;
+        }
+
+        .storeBody_info_body_row {
+          padding: 1em 0;
+          display: flex;
+          flex-wrap: wrap;
+          font-size: 0.8em;
+
+          .storeBody_info_body_row-header {
+            width: 8em;
+            color: $font-color-lightest;
+          }
+
+          .storeBody_info_body_row-body {
+            color: $font-color-light;
+            flex: 1;
+            min-width: 12em;
+          }
+        }
+      }
+    }
+  }
+}
+
 .icon {
   padding: 0 0.8em;
 }
 
 .btn {
-  @include button($golden) {
+  @include button($major-third) {
     &.outerBtn {
-      @include outerButton($button-color);
+      @include outerButton($main-color);
+    }
+
+    &.defaultBtn {
+      @include defaultButton($main-color, $invert-font-color);
     }
   }
 }
