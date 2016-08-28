@@ -7,15 +7,8 @@ html(lang="ja")
     title
       | Kucipong #{htmlWebpackPlugin.options.title}
   body#main.wrapper
-    header.header
-      .home
-        img(src=require("../img/hamburger.svg"))
-      h1.title クーポン
-      .icons
-        .icon.icon-like
-          img(src=require("../img/heart.svg"))
-        .icon.icon-me
-          img(src=require("../img/me.svg"))
+    include _header
+      | クーポン
     .coupon
       .card
         .card_header
