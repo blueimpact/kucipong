@@ -23,15 +23,15 @@ html(lang="ja")
           .card_header_icon
             .icon.icon-like(data-coupon-id="3")
               img(src=require("../img/heart.svg"))
-        .card_image
-          img.card_image-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
-          span.card_image-annotation 画像は一例です
+        .annotatedImageGroup
+          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
+          span.annotatedImageGroup-annotation 画像は一例です
         .card_body
           .card_body_title
             | 当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
-          .card_body_summary
-            span.card_body_summary-sub 10% OFF
-            span.card_body_summary-main 3600円
+          .card_body_summary.highlightedBlock
+            span.highlightedBlock-sub 10% OFF
+            span.highlightedBlock-main 3600円
           .card_body_expiration
             span.card_body_expiration-title
               | 有効期限

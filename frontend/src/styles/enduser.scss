@@ -60,46 +60,6 @@ body {
       $invert-font-color,
       $shadow-color
     ) {
-      .card_image {
-        position: relative;
-
-        .card_image-image {
-          width: 100%;
-        }
-
-        .card_image-annotation {
-          position: absolute;
-          bottom: 0.4em;
-          right: 0.4em;
-          font-size: 0.6em;
-          color: $invert-font-color;
-          text-shadow:
-            -1px -1px $font-color,
-            1px -1px $font-color,
-            -1px 1px $font-color,
-            1px 1px $font-color;
-        }
-      }
-
-      .card_body_summary {
-        padding: 0.5em 1.2em;
-        background-color: $second-color-light;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .card_body_summary-sub {
-          padding: 0 1em;
-          color: $font-color-light;
-          font-size: 0.9em;
-        }
-
-        .card_body_summary-main {
-          color: $font-color-strong;
-          font-size: 1.3em;
-        }
-      }
-
       .card_body_expiration {
         padding: 0.5em 1.2em;
         display: flex;
@@ -161,5 +121,45 @@ body {
     &.outerBtn {
       @include outerButton($button-color);
     }
+  }
+}
+
+.annotatedImageGroup {
+  position: relative;
+
+  .annotatedImageGroup-image {
+    width: 100%;
+  }
+
+  .annotatedImageGroup-annotation {
+    position: absolute;
+    bottom: 0.4em;
+    right: 0.4em;
+    font-size: 0.6em;
+    color: $invert-font-color;
+    text-shadow:
+      -1px -1px $font-color,
+      1px -1px $font-color,
+      -1px 1px $font-color,
+      1px 1px $font-color;
+  }
+}
+
+.highlightedBlock {
+  background-color: $second-color-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .highlightedBlock-sub {
+    padding: 0 1em;
+    color: $font-color-light;
+    font-size: 0.9em;
+  }
+
+  .highlightedBlock-main {
+    color: $font-color-strong;
+    font-size: 1.2em;
+    padding: 0.2em 0;
   }
 }
