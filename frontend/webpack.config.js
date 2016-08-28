@@ -72,6 +72,14 @@ const commonConfig = {
       inject:   'body',
       filename: 'enduser_store_id_coupon.html',
     }),
+
+    // Compile store-user related pages
+    new HtmlWebpackPlugin({
+      chunks: ['storeUser'],
+      template: 'src/pug/storeUser_store.pug',
+      inject:   'body',
+      filename: 'storeUser_store.html',
+    }),
   ],
 
   postcss: () => [
@@ -97,6 +105,10 @@ if (TARGET_ENV === 'development') {
       enduser: [
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/enduser.js' )
+      ],
+      storeUser: [
+        'webpack-dev-server/client?http://localhost:8080',
+        path.join( __dirname, 'src/storeUser.js' )
       ],
     },
 
@@ -139,6 +151,9 @@ if (TARGET_ENV === 'production') {
       ],
       enduser: [
         path.join( __dirname, 'src/enduser.js' )
+      ],
+      storeUser: [
+        path.join( __dirname, 'src/storeUser.js' )
       ],
     },
 

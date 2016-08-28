@@ -1,0 +1,313 @@
+@import '~sanitize.css/sanitize.css';
+@import "~modularscale-sass/stylesheets/modular-scale";
+@import "mixin";
+
+@import "button";
+@import "card";
+@import "header";
+
+/* Color settings */
+$main-color: #07b8eb;
+$second-color: #484848;
+$second-color-light: #eee;
+
+$font-color: #000;
+$invert-font-color: #fff;
+$font-color-light: #858585;
+$font-color-lightest: #c1c1c1;
+$font-color-strong: #d70909;
+
+$border-color: $font-color;
+$border-color-light: #c4c4c4;
+
+$shadow-color: rgba(0, 0, 0, 0.5);
+
+/* Size settings */
+$break-point-mobile: 640px;
+$break-point-tablet: 960px;
+$ms-range:
+  1.1 20em,
+  1.33 60em;
+
+/* Main */
+body {
+  @include ms-respond(font-size, 1);
+}
+
+.wrapper {
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  @include min-screen($break-point-tablet) {
+    width: $break-point-tablet;
+  }
+}
+
+.header {
+  @include header($main-color, $invert-font-color);
+}
+
+.coupon {
+  flex: 1;
+  padding: 0.8em;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  .card {
+    @include card(
+      $second-color,
+      $invert-font-color,
+      $shadow-color
+    ) {
+      .card_body_expiration {
+        padding: 0.5em 1.2em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .card_body_expiration-title {
+          padding: 0 1em;
+          color: $font-color-light;
+          font-size: 0.9em;
+        }
+
+        .card_body_expiration-body {
+          color: $font-color-strong;
+          font-size: 0.9em;
+        }
+      }
+    }
+  }
+
+  .annotation {
+    margin: 0 auto;
+    padding: 2em;
+    font-size: 0.8em;
+    color: $font-color-strong;
+  }
+
+  .location .location_map {
+    margin: 0 auto;
+    padding: 0 2em;
+
+    .location_map-frame {
+      width: 100%;
+      height: calc(100vw / #{$golden});
+    }
+  }
+
+  .aboutStore {
+    padding: 1em;
+    font-size: 0.8em;
+  }
+
+  .moreContents {
+    font-size: 0.8em;
+    padding: 0 1em;
+
+    .moreContents_txt {
+      margin: 0;
+    }
+  }
+}
+
+.store {
+  .store_editBtn {
+    padding: 1em;
+  }
+
+  .storeHeader-title {
+    font-size: 1em;
+    font-weight: normal;
+  }
+
+  .storeBody {
+    .storeBody_description {
+      font-size: 0.8em;
+      color: $font-color-light;
+      padding: 1em 2em;
+    }
+
+    .storeBody_info {
+      margin: 3em 1em 1em;
+      position: relative;
+      border: solid 2px $border-color-light;
+      border-radius: 8px;
+
+      .storeBody_info_titleArea {
+        position: absolute;
+        top: -2em;
+        height: 4em;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.9em;
+
+        .storeBody_info_titleArea-text {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border: solid 2px $border-color-light;
+          border-radius: 8px;
+          min-width: 12em;
+          padding: 0.3em;
+          background-color: $invert-font-color;
+        }
+      }
+
+      .storeBody_info_body {
+        padding: 3em 2em 1em;
+
+        .storeBody_info_body_btnRow {
+          padding: 1em 0;
+        }
+
+        .storeBody_info_body_row {
+          padding: 1em 0;
+          display: flex;
+          flex-wrap: wrap;
+          font-size: 0.8em;
+
+          .storeBody_info_body_row-header {
+            width: 8em;
+            color: $font-color-lightest;
+          }
+
+          .storeBody_info_body_row-body {
+            color: $font-color-light;
+            flex: 1;
+            min-width: 12em;
+
+            .storeBody_info_body_row-body-map {
+              margin: 0 auto;
+
+              .location_map-frame {
+                width: 100%;
+                height: calc(100vw / #{$golden});
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.couponSimple {
+  flex: 1;
+  padding: 0.8em;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  .card {
+    @include card(
+      $second-color,
+      $invert-font-color,
+      $shadow-color
+    ) {
+      .couponSimple_abstraction {
+        display: flex;
+        justify-content: flex-between;
+        align-items: center;
+
+        .couponSimple_abstraction-store {
+          padding: 1em;
+          font-size: 0.8em;
+          font-weight: normal;
+          flex: 1;
+          min-width: 12em;
+          margin: 0;
+        }
+
+        .couponSimple_abstraction-summary {
+          display: flex;
+          justify-content: right;
+          align-items: center;
+
+          .couponSimple_abstraction-summary-sub {
+            padding: 1em;
+            color: $font-color-light;
+            font-size: 0.8em;
+            min-size: 12em;
+          }
+
+          .couponSimple_abstraction-summary-main {
+            padding-right: 1em;
+            color: $font-color-strong;
+            min-size: 12em;
+          }
+        }
+      }
+    }
+  }
+}
+
+.icon {
+  padding: 0 0.8em;
+}
+
+.btn {
+  @include button($major-third) {
+    &.outerBtn {
+      @include outerButton($main-color);
+    }
+
+    &.defaultBtn {
+      @include defaultButton($main-color, $invert-font-color);
+    }
+  }
+}
+
+.annotatedImageGroup {
+  position: relative;
+
+  .annotatedImageGroup-image {
+    width: 100%;
+  }
+
+  .annotatedImageGroup-annotation {
+    position: absolute;
+    bottom: 0.4em;
+    right: 0.4em;
+    font-size: 0.6em;
+    color: $invert-font-color;
+    text-shadow:
+      -1px -1px $font-color,
+      1px -1px $font-color,
+      -1px 1px $font-color,
+      1px 1px $font-color;
+  }
+}
+
+.highlightedBlock {
+  background-color: $second-color-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .highlightedBlock-sub {
+    padding: 0 1em;
+    color: $font-color-light;
+    font-size: 0.9em;
+  }
+
+  .highlightedBlock-main {
+    color: $font-color-strong;
+    font-size: 1.2em;
+    padding: 0.2em 0;
+  }
+}
+
+.simpleTagWrapper {
+  display: flex;
+  flex-wrap: wrap;
+
+  .simpleTag {
+    padding-right: 2em;
+  }
+}
