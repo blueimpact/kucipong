@@ -16,11 +16,13 @@ import Network.Wai.Handler.Warp ( Port )
 import Network.Wai.Middleware.RequestLogger ( logStdoutDev, logStdout )
 import Network.Wai ( Middleware )
 import System.ReadEnvVar ( lookupEnvDef, readEnvVarDef )
+import Web.ClientSession ( Key )
 
-import Kucipong.Environment ( Environment(..), HasEnv(..) )
-import Kucipong.Email ( HasHailgunContext(..) )
 import Kucipong.Db
     ( DbPoolConnNum, DbPoolConnTimeout, HasDbPool(..), makePool )
+import Kucipong.Environment ( Environment(..), HasEnv(..) )
+import Kucipong.Email ( HasHailgunContext(..) )
+import Kucipong.Session ( HasSessionKey(..) )
 
 -- | A 'Config' used by our application.  It contains things used
 -- throughout a request.
@@ -30,6 +32,7 @@ data Config = Config
     , configHttpManager :: Manager
     , configPool :: ConnectionPool
     , configPort :: Port
+    , configSessionKey :: Key
     }
 
 class HasPort a where
@@ -54,6 +57,10 @@ instance HasHttpManager Config where
 instance HasPort Config where
     getPort :: Config -> Port
     getPort = configPort
+
+instance HasSessionKey Config where
+    getSessionKey :: Config -> Key
+    getSessionKey = configSessionKey
 
 -- | Returns a 'Middleware' with our logger.
 setLogger :: Environment -> Middleware
@@ -90,8 +97,10 @@ createConfigFromEnv = do
     dbUser <- lookupEnvDef "KUCIPONG_DB_USER" "kucipong"
     dbPass <- lookupEnvDef "KUCIPONG_DB_PASSWORD" "nuy07078akyy1y7anvya7072"
     dbDatabase <- lookupEnvDef "KUCIPONG_DB_DATABASE" "kucipong"
+    sessionKey <- undefined "KUCIPONG_SESSION_KEY" undefined
     createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
         dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbDatabase
+        sessionKey
 
 type DbHost = String
 type DbPort = Word16
@@ -114,9 +123,11 @@ createConfigFromValues
     -> DbUser
     -> DbPassword
     -> DbName
+    -> Key
     -> IO Config
 createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
-        dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName = do
+        dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName
+        sessionKey = do
     httpManager <- newManager tlsManagerSettings
     let hailgunContext = HailgunContext
             { hailgunDomain = hailgunContextDomain
@@ -137,4 +148,5 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
         , configHailgunContext = hailgunContext
         , configHttpManager = httpManager
         , configPort = port
+        , configSessionKey = sessionKey
         }

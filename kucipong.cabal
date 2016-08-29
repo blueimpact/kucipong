@@ -41,11 +41,13 @@ library
                      , Kucipong.Monad.SendEmail.Trans
                      , Kucipong.Orphans
                      , Kucipong.Prelude
+                     , Kucipong.Session
                      , Kucipong.Util
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , base64-bytestring
                      , classy-prelude
+                     , clientsession
                      , emailaddress
                      , envelope
                      , hailgun
