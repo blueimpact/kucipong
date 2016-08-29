@@ -34,6 +34,20 @@ body {
   @include ms-respond(font-size, 1);
 }
 
+a {
+  text-decoration: none;
+  color: black;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 1em;
+}
+
 .wrapper {
   height: 100%;
   min-height: 100vh;
