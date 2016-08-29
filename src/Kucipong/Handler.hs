@@ -11,7 +11,7 @@ import Kucipong.Monad ( KucipongM, runKucipongM )
 -- TODO: Remove this:
 import Kucipong.Email
 import Mail.Hailgun
-import Text.Email.Validate (emailAddress)
+import "emailaddress" Text.Email.Validate (emailAddress)
 
 import Kucipong.Handler.Admin ( adminComponent )
 

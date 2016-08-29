@@ -16,6 +16,8 @@ import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad ( MonadKucipongDb(..), MonadKucipongSendEmail )
 import Kucipong.Util ( fromMaybeM )
 
+-- | Login an admin.  Take the admin's 'LoginToken', and send them a session
+-- cookie.
 login
     :: forall ctx m
      . ( MonadIO m

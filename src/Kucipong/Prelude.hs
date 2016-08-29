@@ -12,6 +12,6 @@ import Control.Monad.Trans.Identity as X ( IdentityT(..), runIdentityT )
 import Data.Data as X ( Data )
 import Data.Proxy as X ( Proxy(Proxy) )
 import Data.Word as X ( Word16 )
-import Text.Email.Validate as X ( EmailAddress )
+import "emailaddress" Text.Email.Validate as X ( EmailAddress )
 
 import Kucipong.Orphans as X ()

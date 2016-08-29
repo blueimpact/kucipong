@@ -8,7 +8,7 @@ import Mail.Hailgun
     ( HailgunContext, HailgunErrorMessage, HailgunErrorResponse(..)
     , HailgunMessage, HailgunSendResponse, MessageContent(..)
     , MessageRecipients(..), emptyMessageRecipients, hailgunMessage, sendEmail )
-import Text.Email.Validate ( toByteString )
+import "emailaddress" Text.Email.Validate ( toByteString )
 import Text.Shakespeare.Text ( st )
 
 import Kucipong.Errors ( AppErr, AppErrEnum(..), throwAppErr )
