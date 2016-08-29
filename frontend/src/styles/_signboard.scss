@@ -1,0 +1,30 @@
+/* Helper module for signboard component */
+
+@mixin signboard($border-color) {
+  margin: 3em 1em 1em;
+  position: relative;
+  border: solid 2px $border-color;
+  border-radius: 8px;
+}
+
+@mixin signboard_titleArea() {
+  position: absolute;
+  top: -2em;
+  height: 4em;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+@mixin signboard_roundedTitle($border-color, $background-color) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: solid 2px $border-color;
+  border-radius: 8px;
+  min-width: 12em;
+  padding: 0.3em;
+  background-color: $background-color;
+}

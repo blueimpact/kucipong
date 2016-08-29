@@ -5,6 +5,7 @@
 @import "button";
 @import "card";
 @import "header";
+@import "signboard";
 
 /* Color settings */
 $main-color: #07b8eb;
@@ -142,30 +143,14 @@ h6 {
     }
 
     .storeBody_info {
-      margin: 3em 1em 1em;
-      position: relative;
-      border: solid 2px $border-color-light;
-      border-radius: 8px;
+      @include signboard($border-color-light);
 
       .storeBody_info_titleArea {
-        position: absolute;
-        top: -2em;
-        height: 4em;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 0.9em;
+        @include signboard_titleArea;
 
         .storeBody_info_titleArea-text {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          border: solid 2px $border-color-light;
-          border-radius: 8px;
-          min-width: 12em;
-          padding: 0.3em;
-          background-color: $invert-font-color;
+
+          @include signboard_roundedTitle($border-color-light, $invert-font-color);
         }
       }
 
