@@ -16,6 +16,8 @@ instance Exception AppErr
 data AppErrEnum
     = AuthErr
     -- ^ An error with auth.
+    | HailgunError
+    -- ^ An error with sending an email to hailgun.
     | OtherException
     -- ^ A wrapper for any other type of exception
     | SessionExpired

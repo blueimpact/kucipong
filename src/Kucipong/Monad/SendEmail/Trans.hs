@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Kucipong.Monad.Db.Trans where
+module Kucipong.Monad.SendEmail.Trans where
 
 import Kucipong.Prelude
 
@@ -11,7 +11,8 @@ import Control.Monad.Trans.Control
     ( ComposeSt, MonadBaseControl(..), MonadTransControl(..)
     , defaultLiftBaseWith, defaultRestoreM )
 
-newtype KucipongDbT m a = KucipongDbT { unKucipongDbT :: IdentityT m a }
+
+newtype KucipongSendEmailT m a = KucipongSendEmailT { unKucipongSendEmailT :: IdentityT m a }
     deriving
         ( Applicative
         , Functor
@@ -26,18 +27,18 @@ newtype KucipongDbT m a = KucipongDbT { unKucipongDbT :: IdentityT m a }
         , MonadTrans
         )
 
-runKucipongDbT :: KucipongDbT m a -> m a
-runKucipongDbT = runIdentityT . unKucipongDbT
+runKucipongSendEmailT :: KucipongSendEmailT m a -> m a
+runKucipongSendEmailT = runIdentityT . unKucipongSendEmailT
 
-instance MonadTransControl KucipongDbT where
-    type StT KucipongDbT a = a
-    liftWith f = lift (f runKucipongDbT)
-    restoreT = KucipongDbT . IdentityT
+instance MonadTransControl KucipongSendEmailT where
+    type StT KucipongSendEmailT a = a
+    liftWith f = lift (f runKucipongSendEmailT)
+    restoreT = KucipongSendEmailT . IdentityT
     {-# INLINABLE liftWith #-}
     {-# INLINABLE restoreT #-}
 
-instance (MonadBaseControl b m) => MonadBaseControl b (KucipongDbT m) where
-    type StM (KucipongDbT m) a = ComposeSt KucipongDbT m a
+instance (MonadBaseControl b m) => MonadBaseControl b (KucipongSendEmailT m) where
+    type StM (KucipongSendEmailT m) a = ComposeSt KucipongSendEmailT m a
     liftBaseWith = defaultLiftBaseWith
     restoreM     = defaultRestoreM
     {-# INLINABLE liftBaseWith #-}

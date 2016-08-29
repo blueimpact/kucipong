@@ -8,7 +8,9 @@ import Database.Persist ( EntityDef )
 import Database.Persist.TH ( persistLowerCase )
 
 import Kucipong.Db.Models.Base
-    ( CouponType, CreatedTime, DeletedTime, Image, Percent, Price, UpdatedTime )
+    ( CouponType, CreatedTime, DeletedTime, Image, LoginTokenExpirationTime
+    , Percent, Price, UpdatedTime )
+import Kucipong.LoginToken ( LoginToken )
 
 kucipongEntityDefs :: [EntityDef]
 kucipongEntityDefs = [persistLowerCase|
@@ -18,6 +20,20 @@ kucipongEntityDefs = [persistLowerCase|
         updated                 UpdatedTime
         deleted                 DeletedTime Maybe
         name                    Text
+
+        Primary email
+
+        deriving Eq
+        deriving Show
+        deriving Typeable
+
+    AdminLoginToken
+        email                   AdminId
+        created                 CreatedTime
+        updated                 UpdatedTime
+        deleted                 DeletedTime Maybe
+        loginToken              LoginToken
+        expirationTime          LoginTokenExpirationTime
 
         Primary email
 

@@ -23,28 +23,38 @@ library
                      , Kucipong.Db.Models.EntityDefs
                      , Kucipong.Db.Pool
                      , Kucipong.Db.Run
+                     , Kucipong.Email
                      , Kucipong.Environment
                      , Kucipong.Errors
                      , Kucipong.Handler
+                     , Kucipong.LoginToken
                      , Kucipong.Monad
                      , Kucipong.Monad.Db
                      , Kucipong.Monad.Db.Class
                      , Kucipong.Monad.Db.Instance
                      , Kucipong.Monad.Db.Trans
+                     , Kucipong.Monad.OtherInstances
+                     , Kucipong.Monad.SendEmail
+                     , Kucipong.Monad.SendEmail.Class
+                     , Kucipong.Monad.SendEmail.Instance
+                     , Kucipong.Monad.SendEmail.Trans
                      , Kucipong.Orphans
                      , Kucipong.Prelude
                      , Kucipong.Util
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , classy-prelude
-                     , email-validate
+                     , emailaddress
                      , envelope
+                     , hailgun
                      , http-api-data
                      , http-client
                      , http-conduit
                      , lens
                      , monad-control
                      , monad-logger
+                     , MonadRandom
+                     , monad-time
                      , mtl
                      , path-pieces
                      , persistent
@@ -54,6 +64,7 @@ library
                      , pwstore-fast
                      , read-env-var
                      , resource-pool
+                     , shakespeare
                      , Spock
                      , time
                      , transformers
@@ -109,6 +120,45 @@ executable kucipong
                      , GeneralizedNewtypeDeriving
                      , InstanceSigs
                      , MultiParamTypeClasses
+                     , NoImplicitPrelude
+                     , OverloadedStrings
+                     , PolyKinds
+                     , RankNTypes
+                     , RecordWildCards
+                     , ScopedTypeVariables
+                     , StandaloneDeriving
+                     , TupleSections
+                     , TypeFamilies
+                     , TypeOperators
+  other-extensions:    QuasiQuotes
+                     , TemplateHaskell
+
+executable kucipong-add-admin
+  hs-source-dirs:      app
+  main-is:             AddAdmin.hs
+  ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , kucipong
+                     , emailaddress
+                     , lens
+                     , monad-time
+                     , optparse-applicative
+                     , persistent
+  default-language:    Haskell2010
+  default-extensions:  ConstraintKinds
+                     , DataKinds
+                     , DefaultSignatures
+                     , DeriveDataTypeable
+                     , DeriveFunctor
+                     , DeriveGeneric
+                     , EmptyDataDecls
+                     , FlexibleContexts
+                     , FlexibleInstances
+                     , GADTs
+                     , GeneralizedNewtypeDeriving
+                     , InstanceSigs
+                     , MultiParamTypeClasses
+                     , NamedFieldPuns
                      , NoImplicitPrelude
                      , OverloadedStrings
                      , PolyKinds

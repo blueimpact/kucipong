@@ -2,7 +2,7 @@
 all: build
 
 build:
-	stack build
+	stack build kucipong
 
 clean:
 	stack clean
@@ -20,7 +20,7 @@ dump-th:
 	@find "$$(stack path --dist-dir)" -name "*.dump-splices"
 
 ghci:
-	stack ghci
+	stack ghci --no-load
 
 haddock:
 	stack build --haddock
@@ -53,7 +53,7 @@ test:
 
 # Watch for changes.
 watch:
-	stack build --file-watch --fast .
+	stack build --file-watch --fast kucipong
 
 # Watch for changes.
 watch-test: watch-tests

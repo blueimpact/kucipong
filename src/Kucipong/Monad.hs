@@ -8,18 +8,23 @@ module Kucipong.Monad
 import Kucipong.Prelude
 
 import Control.Monad.Logger ( runStdoutLoggingT )
+import Control.Monad.Random ( MonadRandom )
+import Control.Monad.Time ( MonadTime )
 import Control.Monad.Trans.Class ( MonadTrans )
 import Control.Monad.Trans.Control
     ( ComposeSt, MonadBaseControl(..), MonadTransControl(..)
     , defaultLiftBaseWith, defaultRestoreM )
 
 import Kucipong.Config ( Config )
-import Kucipong.Errors (AppErr)
+import Kucipong.Errors ( AppErr )
 import Kucipong.Monad.Db as X
+import Kucipong.Monad.OtherInstances ()
+import Kucipong.Monad.SendEmail as X
 
 -- | This constraint synonym wraps up all of our Kucipong type classes.
 type MonadKucipong' m =
     ( MonadKucipongDb m
+    , MonadKucipongSendEmail m
     )
 
 -- | This constraint synonym wraps up all of the type classes used by 'KucipongM'.
@@ -28,13 +33,16 @@ type MonadKucipong m =
     , MonadError AppErr m
     , MonadIO m
     , MonadLogger m
+    , MonadRandom m
     , MonadReader Config m
+    , MonadTime m
     , MonadKucipong' m
     )
 
+-- | 'KucipongT' is just a wrapper around all of our Monad transformers.
 newtype KucipongT m a = KucipongT
     { unKucipongT ::
-        KucipongDbT m a
+        KucipongDbT (KucipongSendEmailT m) a
     }
     deriving
         ( Applicative
@@ -44,24 +52,37 @@ newtype KucipongT m a = KucipongT
         , MonadError e
         , MonadIO
         , MonadLogger
+        , MonadRandom
         , MonadReader r
+        , MonadTime
         )
 
 deriving instance
     ( MonadBaseControl IO m
     , MonadError AppErr m
     , MonadIO m
+    , MonadRandom m
     , MonadReader Config m
+    , MonadTime m
     ) => MonadKucipongDb (KucipongT m)
 
+deriving instance
+    ( MonadError AppErr m
+    , MonadIO m
+    , MonadReader Config m
+    ) => MonadKucipongSendEmail (KucipongT m)
 
+
+-- | Unwrap the @m@ from 'KucipongT'.
 runKucipongT :: KucipongT m a -> m a
 runKucipongT =
-      runKucipongDbT
+      runKucipongSendEmailT
+    . runKucipongDbT
     . unKucipongT
 
+-- | Lift an action in @m@ to 'KucipongT'.
 liftToKucipongT :: (Monad m) => m a -> KucipongT m a
-liftToKucipongT = KucipongT . lift
+liftToKucipongT = KucipongT . lift . lift
 
 instance MonadTrans KucipongT where
     lift = liftToKucipongT
@@ -80,6 +101,7 @@ instance (MonadBaseControl b m) => MonadBaseControl b (KucipongT m) where
     {-# INLINABLE liftBaseWith #-}
     {-# INLINABLE restoreM #-}
 
+-- | Monad transformer stack for our application.
 newtype KucipongM a = KucipongM
     { unKucipongM ::
         KucipongT (ReaderT Config (ExceptT AppErr (LoggingT IO))) a
@@ -91,9 +113,12 @@ newtype KucipongM a = KucipongM
         , MonadBase IO
         , MonadError AppErr
         , MonadIO
-        , MonadReader Config
         , MonadLogger
+        , MonadRandom
+        , MonadReader Config
+        , MonadTime
         , MonadKucipongDb
+        , MonadKucipongSendEmail
         )
 
 instance MonadBaseControl IO KucipongM where
@@ -116,6 +141,7 @@ instance MonadBaseControl IO KucipongM where
         readerT :: ReaderT Config (ExceptT AppErr (LoggingT IO)) a
         readerT = ReaderT $ \config -> ExceptT . lift $ f config
 
+-- | Run the 'KucipongM' monad stack.
 runKucipongM :: Config -> KucipongM a -> IO (Either AppErr a)
 runKucipongM config =
       runStdoutLoggingT

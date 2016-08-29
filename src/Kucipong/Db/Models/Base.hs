@@ -69,6 +69,16 @@ newtype Image = Image { unImage :: Text }
         ( Data, Eq, FromJSON, Generic, Ord, PersistField, PersistFieldSql, Show
         , ToJSON, Typeable )
 
+---------------------------------
+-- Login Token Expiration Time --
+---------------------------------
+
+newtype LoginTokenExpirationTime = LoginTokenExpirationTime
+    { unLoginTokenExpirationTime :: UTCTime }
+    deriving
+        ( Data, Eq, FromJSON, Generic, Ord, PersistField, PersistFieldSql, Show
+        , ToJSON, Typeable )
+
 -------------
 -- Percent --
 -------------

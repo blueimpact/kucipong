@@ -19,9 +19,10 @@ import Database.Persist.TH (
     )
 
 import Kucipong.Db.Models.Base
-    ( CouponType, CreatedTime, DeletedTime, Image, Percent, Price, UpdatedTime
-    )
+    ( CouponType, CreatedTime(..), DeletedTime(..), Image
+    , LoginTokenExpirationTime(..), Percent, Price, UpdatedTime(..) )
 import Kucipong.Db.Models.EntityDefs ( kucipongEntityDefs )
+import Kucipong.LoginToken ( LoginToken )
 
 share [ mkPersist sqlSettings { mpsGenerateLenses = True }
       , mkMigrate "migrateAll"
