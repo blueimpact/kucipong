@@ -20,7 +20,7 @@ dump-th:
 	@find "$$(stack path --dist-dir)" -name "*.dump-splices"
 
 ghci:
-	stack ghci --no-load
+	stack ghci
 
 haddock:
 	stack build --haddock
