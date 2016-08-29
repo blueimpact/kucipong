@@ -14,6 +14,16 @@ import Data.Time.Clock ( NominalDiffTime, addUTCTime )
 
 infixr 8 <$$>
 
+-- | Similar to 'fromMaybe'.  @'fromMaybeM' action@ is the same as @'maybe'
+-- action 'pure'@.
+--
+-- >>> fromMaybeM (putStrLn "hello") Nothing
+-- hello
+-- >>> fromMaybeM (Left "there was an error") (Just 3)
+-- Right 3
+fromMaybeM :: Applicative m => m a -> Maybe a -> m a
+fromMaybeM action = maybe action pure
+
 oneDay :: NominalDiffTime
 oneDay = 60 * 60 * 24
 
