@@ -7,14 +7,14 @@ import Kucipong.Prelude
 
 import Control.Monad.Random ( MonadRandom(..) )
 import Control.Monad.Time ( MonadTime(..) )
-import Database.Persist ( Entity(..), insert, )
+import Database.Persist ( Entity(..), (==.), insert, selectFirst )
 
 import Kucipong.Config ( Config )
 import Kucipong.Db
-    ( Admin(..), AdminLoginToken(..), CreatedTime(..), Key
+    ( Admin(..), AdminLoginToken(..), CreatedTime(..), EntityField(..), Key
     , LoginTokenExpirationTime(..), UpdatedTime(..), runDb )
 import Kucipong.Errors ( AppErr )
-import Kucipong.LoginToken ( createRandomLoginToken )
+import Kucipong.LoginToken ( LoginToken, createRandomLoginToken )
 import Kucipong.Monad.Db.Class ( MonadKucipongDb(..) )
 import Kucipong.Monad.Db.Trans ( KucipongDbT(..) )
 import Kucipong.Util ( addOneDay )
@@ -53,3 +53,9 @@ instance ( MonadBaseControl IO m
                         (LoginTokenExpirationTime plusOneDay)
             adminLoginTokenKey <- runDb $ insert adminLoginToken
             pure $ Entity adminLoginTokenKey adminLoginToken
+
+    dbFindAdminLoginToken :: LoginToken -> KucipongDbT m (Maybe (Entity AdminLoginToken))
+    dbFindAdminLoginToken loginToken = lift go
+      where
+        go :: m (Maybe (Entity AdminLoginToken))
+        go = runDb $ selectFirst [AdminLoginTokenLoginToken ==. loginToken] []
