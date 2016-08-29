@@ -27,6 +27,7 @@ library
                      , Kucipong.Environment
                      , Kucipong.Errors
                      , Kucipong.Handler
+                     , Kucipong.Handler.Admin
                      , Kucipong.LoginToken
                      , Kucipong.Monad
                      , Kucipong.Monad.Db
@@ -51,6 +52,7 @@ library
                      , http-api-data
                      , http-client
                      , http-conduit
+                     , http-types
                      , lens
                      , monad-control
                      , monad-logger

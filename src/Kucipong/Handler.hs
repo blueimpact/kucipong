@@ -3,7 +3,7 @@ module Kucipong.Handler where
 
 import Kucipong.Prelude
 
-import Web.Spock ( Path, (<//>), get, html, root, runSpock, spockT, text, var )
+import Web.Spock ( Path, (<//>), get, html, root, runSpock, spockT, subcomponent, text, var )
 
 import Kucipong.Config ( Config, HasPort(..) )
 import Kucipong.Monad ( KucipongM, runKucipongM )
@@ -12,6 +12,8 @@ import Kucipong.Monad ( KucipongM, runKucipongM )
 import Kucipong.Email
 import Mail.Hailgun
 import Text.Email.Validate (emailAddress)
+
+import Kucipong.Handler.Admin ( adminComponent )
 
 helloR :: Path '[Text]
 helloR = "hello" <//> var
@@ -25,6 +27,7 @@ runKucipongMHandleErrors config = either throwIO pure <=< runKucipongM config
 app :: Config -> IO ()
 app config = runSpock (getPort config) $
     spockT (runKucipongMHandleErrors config) $ do
+        subcomponent "admin" adminComponent
         get root $ do
             -- dbLoginUser undefined undefined
             html "<p>hello world</p>"
