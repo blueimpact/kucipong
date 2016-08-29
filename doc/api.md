@@ -1493,6 +1493,28 @@ coupons :: [Coupon] -- All coupons that store has
 </html>
 ```
 
+### GET my store coupon detail
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
+
+```bash
+$ curl -G "http://$domain/store/coupon/${coupon_id}" \
+  -H "AUTH-TOKEN: ${token}"
+
+# Same as coupon detail page for end-user except that this page has some links for store user.
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+Same as one for end-user.
+
 ### GET my coupon create page
 
 #### Sample request and response
