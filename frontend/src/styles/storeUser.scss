@@ -5,6 +5,8 @@
 @import "button";
 @import "card";
 @import "header";
+@import "inputs";
+@import "labeledRow";
 @import "signboard";
 
 /* Color settings */
@@ -12,7 +14,7 @@ $main-color: #07b8eb;
 $second-color: #484848;
 $second-color-light: #eee;
 
-$font-color: #000;
+$font-color: #2c2c2c;
 $invert-font-color: #fff;
 $font-color-light: #858585;
 $font-color-lightest: #c1c1c1;
@@ -170,20 +172,19 @@ h6 {
         }
 
         .storeBody_info_body_row {
-          padding: 1em 0;
-          display: flex;
-          flex-wrap: wrap;
-          font-size: 0.8em;
+          @include labeledRow($break-point-mobile);
 
           .storeBody_info_body_row-header {
-            width: 8em;
-            color: $font-color-lightest;
+            @include labeledRow_header($break-point-mobile) {
+              color: $font-color-lightest;
+            }
           }
 
           .storeBody_info_body_row-body {
-            color: $font-color-light;
-            flex: 1;
-            min-width: 12em;
+            @include labeledRow_body {
+              color: $font-color-light;
+            }
+            @include defaultInput($border-color-light, $shadow-color);
 
             .storeBody_info_body_row-body-map {
               margin: 0 auto;
@@ -196,30 +197,6 @@ h6 {
 
             .storeBody_info_body_row-body-image {
               width: 100%;
-            }
-
-            select,
-            input[type="text"],
-            input[type="tel"],
-            input[type="url"],
-            input[type="email"] {
-              border: 1px solid $border-color-light;
-              border-radius: 4px;
-              min-height: 2em;
-              width: 100%;
-              padding: 0.5em;
-              font-size: 1em;
-              box-shadow: inset 4px 4px 10px -10px $shadow-color;
-            }
-
-            textarea {
-              border: 1px solid $border-color-light;
-              border-radius: 4px;
-              min-height: 6em;
-              width: 100%;
-              padding: 0.5em;
-              font-size: 1em;
-              box-shadow: inset 4px 4px 10px -10px $shadow-color;
             }
           }
         }
@@ -275,6 +252,32 @@ h6 {
         }
       }
     }
+  }
+}
+
+.couponEditor {
+  .couponEditor_signbord {
+    @include signboard($border-color-light);
+
+    .couponEditor_titleArea {
+      @include signboard_titleArea;
+
+      .couponEditor_titleArea-title {
+        @include signboard_roundedTitle($border-color-light, $invert-font-color);
+      }
+    }
+
+    .couponEditor_body {
+      padding: 3em 2em 1em;
+
+      .labeledRow-body-image {
+        width: 100%;
+      }
+    }
+  }
+
+  .couponSubmit {
+    padding: 1em;
   }
 }
 
@@ -376,4 +379,29 @@ h6 {
       transition: all 1s ease;
     }
   }
+}
+
+.labeledRow {
+  @include labeledRow($break-point-mobile);
+
+  .labeledRow-header {
+    @include labeledRow_header($break-point-mobile) {
+      color: $font-color-lightest;
+    }
+  }
+
+  .labeledRow-body {
+    @include labeledRow_body {
+      color: $font-color-light;
+    }
+    @include defaultInput($border-color-light, $shadow-color);
+  }
+}
+
+.js-invisible {
+  display: none;
+}
+
+.js-visible {
+  display: block;
 }

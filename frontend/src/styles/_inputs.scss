@@ -1,0 +1,28 @@
+/* Helper module for input component */
+
+@mixin defaultInput($border-color, $shadow-color) {
+  select,
+  input[type="text"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="email"] {
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    min-height: 2em;
+    width: 100%;
+    padding: 0.5em;
+    font-size: 1em;
+    box-shadow: inset 4px 4px 10px -10px $shadow-color;
+  }
+
+  textarea {
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    min-height: 6em;
+    width: 100%;
+    padding: 0.5em;
+    font-size: 1em;
+    box-shadow: inset 4px 4px 10px -10px $shadow-color;
+  }
+}
