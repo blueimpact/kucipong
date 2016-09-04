@@ -115,6 +115,15 @@ const commonConfig = {
       inject:   'body',
       filename: 'storeUser_store_coupon_id_edit.html',
     }),
+
+    // Compile admin-user related pages
+    new HtmlWebpackPlugin({
+      chunks: ['adminUser'],
+      template: 'src/pug/adminUser_admin_store_create.pug',
+      inject:   'body',
+      filename: 'adminUser_admin_store_create.html',
+    }),
+
     // Inject variables to JS file.
     new webpack.DefinePlugin({
       'process.env': ENV,
@@ -148,6 +157,10 @@ if (TARGET_ENV === 'development') {
       storeUser: [
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/storeUser.js' )
+      ],
+      adminUser: [
+        'webpack-dev-server/client?http://localhost:8080',
+        path.join( __dirname, 'src/adminUser.js' )
       ],
     },
 
@@ -193,6 +206,9 @@ if (TARGET_ENV === 'production') {
       ],
       storeUser: [
         path.join( __dirname, 'src/storeUser.js' )
+      ],
+      adminUser: [
+        path.join( __dirname, 'src/adminUser.js' )
       ],
     },
 

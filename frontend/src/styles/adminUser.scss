@@ -1,0 +1,30 @@
+@import "common";
+
+.admin {
+  padding: 1em;
+
+  .adminMenu {
+    margin-bottom: 1em;
+  }
+
+  .adminBody {
+    margin-bottom: 1em;
+    @include signboard($border-color-light);
+
+    .signboard_titleArea {
+      @include signboard_titleArea;
+
+      .signboard_titleArea-title {
+        @include signboard_roundedTitle($border-color-light, $invert-font-color);
+      }
+    }
+
+    .signboard_body {
+      padding: 1em;
+
+      .labeledRow-body {
+        margin-bottom: 1em;
+      }
+    }
+  }
+}

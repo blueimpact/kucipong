@@ -13,8 +13,7 @@
 }
 
 @mixin labeledRow_header($breakpoint: 640px) {
-  min-width: 12em;
-  width: 12em;
+  flex: 1 1 12em;
   padding-right: 2em;
   @content;
 
@@ -24,7 +23,6 @@
 }
 
 @mixin labeledRow_body {
-  flex: 1;
-  min-width: 22em;
+  flex: 1 1 22em;
   @content;
 }

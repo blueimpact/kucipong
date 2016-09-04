@@ -1,7 +1,5 @@
 @import "common";
 
-@import "inputs";
-
 .store {
   .storeSubmit {
     padding: 1em;
@@ -106,23 +104,6 @@
 
       transition: all 1s ease;
     }
-  }
-}
-
-.labeledRow {
-  @include labeledRow($break-point-mobile);
-
-  .labeledRow-header {
-    @include labeledRow_header($break-point-mobile) {
-      color: $font-color-lightest;
-    }
-  }
-
-  .labeledRow-body {
-    @include labeledRow_body {
-      color: $font-color-light;
-    }
-    @include defaultInput($border-color-light, $shadow-color);
   }
 }
 

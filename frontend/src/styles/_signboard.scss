@@ -24,7 +24,7 @@
   align-items: center;
   border: solid 2px $border-color;
   border-radius: 8px;
-  min-width: 12em;
+  flex: 0 1 12em;
   padding: 0.3em;
   background-color: $background-color;
 }
