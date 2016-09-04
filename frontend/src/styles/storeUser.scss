@@ -1,54 +1,6 @@
-@import '~sanitize.css/sanitize.css';
-@import "~modularscale-sass/stylesheets/modular-scale";
+@import "common";
 
-/* import mixins */
-@import "mixin";
-@import "button";
-@import "card";
-@import "header";
 @import "inputs";
-@import "labeledRow";
-@import "signboard";
-
-/* import settings */
-@import "variables";
-
-@import "coupon";
-@import "couponSimple";
-
-/* Main */
-body {
-  @include ms-respond(font-size, 1);
-}
-
-a {
-  text-decoration: none;
-  color: black;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-size: 1em;
-}
-
-.wrapper {
-  height: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  margin: 0 auto;
-  @include min-screen($break-point-tablet) {
-    width: $break-point-tablet;
-  }
-}
-
-.header {
-  @include header($main-color, $invert-font-color);
-}
 
 .store {
   .storeSubmit {
@@ -59,66 +11,29 @@ h6 {
     padding: 1em;
   }
 
-  .storeHeader-title {
-    font-size: 1em;
-    font-weight: normal;
-  }
+  .storeBody_info_body_row {
+    @include labeledRow($break-point-mobile);
 
-  .storeBody {
-    .storeBody_description {
-      font-size: 0.8em;
-      color: $font-color-light;
-      padding: 1em 2em;
+    .storeBody_info_body_row-header {
+      @include labeledRow_header($break-point-mobile) {
+        color: $font-color-lightest;
+      }
     }
 
-    .storeBody_info {
-      @include signboard($border-color-light);
+    .storeBody_info_body_row-body {
+      @include defaultInput($border-color-light, $shadow-color);
 
-      .storeBody_info_titleArea {
-        @include signboard_titleArea;
+      .storeBody_info_body_row-body-map {
+        margin: 0 auto;
 
-        .storeBody_info_titleArea-text {
-
-          @include signboard_roundedTitle($border-color-light, $invert-font-color);
+        .location_map-frame {
+          width: 100%;
+          height: calc(100vw / #{$golden});
         }
       }
 
-      .storeBody_info_body {
-        padding: 3em 2em 1em;
-
-        .storeBody_info_body_btnRow {
-          padding: 1em 0;
-        }
-
-        .storeBody_info_body_row {
-          @include labeledRow($break-point-mobile);
-
-          .storeBody_info_body_row-header {
-            @include labeledRow_header($break-point-mobile) {
-              color: $font-color-lightest;
-            }
-          }
-
-          .storeBody_info_body_row-body {
-            @include labeledRow_body {
-              color: $font-color-light;
-            }
-            @include defaultInput($border-color-light, $shadow-color);
-
-            .storeBody_info_body_row-body-map {
-              margin: 0 auto;
-
-              .location_map-frame {
-                width: 100%;
-                height: calc(100vw / #{$golden});
-              }
-            }
-
-            .storeBody_info_body_row-body-image {
-              width: 100%;
-            }
-          }
-        }
+      .storeBody_info_body_row-body-image {
+        width: 100%;
       }
     }
   }
@@ -147,62 +62,6 @@ h6 {
 
   .couponSubmit {
     padding: 1em;
-  }
-}
-
-.icon {
-  padding: 0 0.8em;
-}
-
-.btn {
-  @include button($major-third) {
-    &.outerBtn {
-      @include outerButton($main-color);
-    }
-
-    &.defaultBtn {
-      @include defaultButton($main-color, $invert-font-color);
-    }
-  }
-}
-
-.annotatedImageGroup {
-  position: relative;
-
-  .annotatedImageGroup-image {
-    width: 100%;
-  }
-
-  .annotatedImageGroup-annotation {
-    position: absolute;
-    bottom: 0.4em;
-    right: 0.4em;
-    font-size: 0.6em;
-    color: $invert-font-color;
-    text-shadow:
-      -1px -1px $font-color,
-      1px -1px $font-color,
-      -1px 1px $font-color,
-      1px 1px $font-color;
-  }
-}
-
-.highlightedBlock {
-  background-color: $second-color-light;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .highlightedBlock-sub {
-    padding: 0 1em;
-    color: $font-color-light;
-    font-size: 0.9em;
-  }
-
-  .highlightedBlock-main {
-    color: $font-color-strong;
-    font-size: 1.2em;
-    padding: 0.2em 0;
   }
 }
 

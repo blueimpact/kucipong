@@ -122,9 +122,9 @@ const commonConfig = {
   ],
 
   postcss: () => [
+    require('stylelint'),
     autoprefixer({ browsers: ['last 2 versions'] }),
     require('postcss-flexbugs-fixes'),
-    require('stylelint'),
     require('postcss-reporter')({ clearMessages: true }),
   ],
 
@@ -169,8 +169,8 @@ if (TARGET_ENV === 'development') {
           loaders: [
             'style-loader',
             'css-loader',
-            'postcss-loader',
             'sass-loader',
+            'postcss-loader',
           ]
         }
       ]
@@ -207,8 +207,8 @@ if (TARGET_ENV === 'production') {
           test: /\.(css|scss)$/,
           loader: ExtractTextPlugin.extract('style-loader', [
             'css-loader',
-            'postcss-loader',
             'sass-loader',
+            'postcss-loader',
           ])
         }
       ]
