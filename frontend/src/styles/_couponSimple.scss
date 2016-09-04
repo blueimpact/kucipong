@@ -1,0 +1,52 @@
+/* import settings */
+@import "variables";
+
+.couponSimple {
+  flex: 1;
+  padding: 0.8em;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  .card {
+    @include card(
+      $second-color,
+      $invert-font-color,
+      $shadow-color
+    ) {
+      .couponSimple_abstraction {
+        display: flex;
+        justify-content: flex-between;
+        align-items: center;
+
+        .couponSimple_abstraction-store {
+          padding: 1em;
+          font-size: 0.8em;
+          font-weight: normal;
+          flex: 1;
+          min-width: 12em;
+          margin: 0;
+        }
+
+        .couponSimple_abstraction-summary {
+          display: flex;
+          justify-content: right;
+          align-items: center;
+
+          .couponSimple_abstraction-summary-sub {
+            padding: 1em;
+            color: $font-color-light;
+            font-size: 0.8em;
+            min-size: 12em;
+          }
+
+          .couponSimple_abstraction-summary-main {
+            padding-right: 1em;
+            color: $font-color-strong;
+            min-size: 12em;
+          }
+        }
+      }
+    }
+  }
+}

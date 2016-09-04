@@ -2,14 +2,6 @@ include _layout
   body#main.wrapper
     include _header
       | 七輪焼肉・安安
-    .couponSimple
-      a.card(href="/coupon/3")
-        .annotatedImageGroup
-          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
-          span.annotatedImageGroup-annotation 画像は一例です
-        .card_body
-          .couponSimple_abstraction
-            h2.couponSimple_abstraction-store 七輪焼肉・安安
-            .couponSimple_abstraction-summary
-              span.couponSimple_abstraction-summary-sub 10% OFF
-              span.couponSimple_abstraction-summary-main 3600円
+    include _couponSimple
+    include _couponSimple
+    include _couponSimple
