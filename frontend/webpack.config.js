@@ -66,22 +66,22 @@ const commonConfig = {
     }),
     // Compile end-user related pages
     new HtmlWebpackPlugin({
-      chunks: ['enduser'],
-      template: 'src/pug/enduser_coupon_id.pug',
+      chunks: ['endUser'],
+      template: 'src/pug/endUser_coupon_id.pug',
       inject:   'body',
-      filename: 'enduser_coupon_id.html',
+      filename: 'endUser_coupon_id.html',
     }),
     new HtmlWebpackPlugin({
-      chunks: ['enduser'],
-      template: 'src/pug/enduser_store_id.pug',
+      chunks: ['endUser'],
+      template: 'src/pug/endUser_store_id.pug',
       inject:   'body',
-      filename: 'enduser_store_id.html',
+      filename: 'endUser_store_id.html',
     }),
     new HtmlWebpackPlugin({
-      chunks: ['enduser'],
-      template: 'src/pug/enduser_store_id_coupon.pug',
+      chunks: ['endUser'],
+      template: 'src/pug/endUser_store_id_coupon.pug',
       inject:   'body',
-      filename: 'enduser_store_id_coupon.html',
+      filename: 'endUser_store_id_coupon.html',
     }),
 
     // Compile store-user related pages
@@ -115,7 +115,7 @@ const commonConfig = {
       inject:   'body',
       filename: 'storeUser_store_coupon_id_edit.html',
     }),
-    // Inject to JS file.
+    // Inject variables to JS file.
     new webpack.DefinePlugin({
       'process.env': ENV,
     }),
@@ -141,9 +141,9 @@ if (TARGET_ENV === 'development') {
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/chat.js' )
       ],
-      enduser: [
+      endUser: [
         'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/enduser.js' )
+        path.join( __dirname, 'src/endUser.js' )
       ],
       storeUser: [
         'webpack-dev-server/client?http://localhost:8080',
@@ -188,8 +188,8 @@ if (TARGET_ENV === 'production') {
       chat: [
         path.join( __dirname, 'src/chat.js' )
       ],
-      enduser: [
-        path.join( __dirname, 'src/enduser.js' )
+      endUser: [
+        path.join( __dirname, 'src/endUser.js' )
       ],
       storeUser: [
         path.join( __dirname, 'src/storeUser.js' )

@@ -1,2 +1,2 @@
 // Pull in desired CSS/SASS files
-require('./styles/enduser.scss');
+require('./styles/endUser.scss');
