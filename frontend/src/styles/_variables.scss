@@ -1,0 +1,22 @@
+/* Color settings */
+$main-color: #07b8eb;
+$second-color: #484848;
+$second-color-light: #eee;
+
+$font-color: #000;
+$invert-font-color: #fff;
+$font-color-light: #858585;
+$font-color-lightest: #c1c1c1;
+$font-color-strong: #d70909;
+
+$border-color: $font-color;
+$border-color-light: #c4c4c4;
+
+$shadow-color: rgba(0, 0, 0, 0.5);
+
+/* Size settings */
+$break-point-mobile: 640px;
+$break-point-tablet: 960px;
+$ms-range:
+  1.1 20em,
+  1.33 60em;

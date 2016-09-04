@@ -1,34 +1,17 @@
 @import '~sanitize.css/sanitize.css';
 @import "~modularscale-sass/stylesheets/modular-scale";
-@import "mixin";
 
+/* import mixins */
+@import "mixin";
 @import "button";
 @import "card";
 @import "header";
 @import "signboard";
 
-/* Color settings */
-$main-color: #07b8eb;
-$second-color: #484848;
-$second-color-light: #eee;
+/* import settings */
+@import "variables";
 
-$font-color: #000;
-$invert-font-color: #fff;
-$font-color-light: #858585;
-$font-color-lightest: #c1c1c1;
-$font-color-strong: #d70909;
-
-$border-color: $font-color;
-$border-color-light: #c4c4c4;
-
-$shadow-color: rgba(0, 0, 0, 0.5);
-
-/* Size settings */
-$break-point-mobile: 640px;
-$break-point-tablet: 960px;
-$ms-range:
-  1.1 20em,
-  1.33 60em;
+@import "coupon";
 
 /* Main */
 body {
@@ -62,71 +45,6 @@ h6 {
 
 .header {
   @include header($main-color, $invert-font-color);
-}
-
-.coupon {
-  flex: 1;
-  padding: 0.8em;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-
-  .card {
-    @include card(
-      $second-color,
-      $invert-font-color,
-      $shadow-color
-    ) {
-      .card_body_expiration {
-        padding: 0.5em 1.2em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .card_body_expiration-title {
-          padding: 0 1em;
-          color: $font-color-light;
-          font-size: 0.9em;
-        }
-
-        .card_body_expiration-body {
-          color: $font-color-strong;
-          font-size: 0.9em;
-        }
-      }
-    }
-  }
-
-  .annotation {
-    margin: 0 auto;
-    padding: 2em;
-    font-size: 0.8em;
-    color: $font-color-strong;
-  }
-
-  .location .location_map {
-    margin: 0 auto;
-    padding: 0 2em;
-
-    .location_map-frame {
-      width: 100%;
-      height: calc(100vw / #{$golden});
-    }
-  }
-
-  .aboutStore {
-    padding: 1em;
-    font-size: 0.8em;
-  }
-
-  .moreContents {
-    font-size: 0.8em;
-    padding: 0 1em;
-
-    .moreContents_txt {
-      margin: 0;
-    }
-  }
 }
 
 .store {
