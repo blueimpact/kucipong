@@ -2331,7 +2331,7 @@ This response is a sample simple HTML for convenience.
 Some user may bookmark or share this URI, so do not include version number in the URI.
 
 ```bash
-$ curl -X POST "http://$domain/store/coupon/create" \
+$ curl -X POST "http://$domain/admin/store/delete" \
   -H "AUTH-TOKEN: ${token}" \
   -d "storeName=七輪焼き肉・安安" \
   -d "storeId=3"
@@ -2352,3 +2352,81 @@ Delete user only if the store name of the store id equals `storeName`.
 
 
 Same as the response of "GET store user create page"
+
+### Get page to log in as a store user
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI, so do not include version number in the URI.
+
+```bash
+$ curl -X GET "http://$domain/admin/store/login" \
+  -H "AUTH-TOKEN: ${token}"
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <title>kucipong 店舗ユーザとしてログイン</title>
+    <link rel="stylesheet" href="/static/main.css">
+  </head>
+  <body>
+    <div class="adminMenu">
+      <a class="btn outerBtn" href="/admin/store/create">店舗ユーザ作成</a>
+      <a class="btn defaultBtn" href="/admin/store/delete">店舗ユーザ削除</a>
+    </div>
+
+    <div class="adminBody card">
+      <form class="adminBody_info_body card_body" method="POST">
+        <div class="card_row">
+          <label for="couponTitle" class="card_row_header">
+            店舗ユーザのメールアドレス
+          </label>
+          <input id="storeEmail" name="storeEmail" type="text" class="card_input"
+            value="">
+        </div>
+        <div class="card_row submit_row">
+          <button type="submit" class="btn outerBtn">この店舗ユーザとしてログイン</button>
+        </div>
+      </form>
+    </div>
+  </body>
+```
+
+#### Request Parameter and its type
+
+#### Response and its type
+
+Same as the sample response.
+
+
+### Log in as a store user
+
+#### Sample request and response
+
+This response is a sample simple HTML for convenience.
+Some user may bookmark or share this URI, so do not include version number in the URI.
+
+```bash
+$ curl -X POST "http://$domain/admin/store/login" \
+  -H "AUTH-TOKEN: ${token}" \
+  -d "storeEmail=sample@example.com"
+
+(Same response as "GET store user create page")
+(It's better to show any message to tell the user was sent email to log in on the response html.)
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Side effects
+
+Send an email to log in as the store user specified with `storeEmail` parameter.
+
+#### Response and its type
+
+Same as the sample response.
