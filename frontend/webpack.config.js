@@ -12,6 +12,17 @@ console.log('Start Webpack process...');
 
 // Determine build env by npm command options
 const TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
+const ENV = TARGET_ENV === 'production' ?
+  {
+    'apiRoot': JSON.stringify(
+      process.env.API_ROOT || 'http://kucipong.com/api/v0/'
+    ),
+  } :
+  {
+    'apiRoot': JSON.stringify(
+      process.env.API_ROOT || 'http://localhost:8081/v0/'
+    ),
+  };
 
 // Common webpack config
 const commonConfig = {
@@ -103,6 +114,10 @@ const commonConfig = {
       template: 'src/pug/storeUser_store_coupon_id_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon_id_edit.html',
+    }),
+    // Inject to JS file.
+    new webpack.DefinePlugin({
+      'process.env': ENV,
     }),
   ],
 
