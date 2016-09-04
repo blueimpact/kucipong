@@ -129,6 +129,12 @@ const commonConfig = {
       inject:   'body',
       filename: 'adminUser_admin_store_delete.html',
     }),
+    new HtmlWebpackPlugin({
+      chunks: ['adminUser'],
+      template: 'src/pug/adminUser_admin_store_delete_confirm.pug',
+      inject:   'body',
+      filename: 'adminUser_admin_store_delete_confirm.html',
+    }),
 
     // Inject variables to JS file.
     new webpack.DefinePlugin({

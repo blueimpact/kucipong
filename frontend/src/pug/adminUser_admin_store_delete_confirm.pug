@@ -1,0 +1,30 @@
+include _layout
+  body#main.wrapper
+    include _adminHeader
+      | 店舗ユーザ削除
+    .admin
+      .adminBody
+        .signboard_titleArea
+          .signboard_titleArea-title
+            | 店舗ユーザの削除
+        form.signboard_body(
+          method="POST"
+          action="/admin/store/delete"
+        )
+          .row
+            | 「焼き肉・安安」を削除しますか？
+          .labeledRow
+            label.labeledRow-header(for="storeEmail")
+
+              | 確認のため
+              span.strong 焼き肉・安安
+              | と入力してください
+            .labeledRow-body
+              input#storeName(
+                name="storeName" type="text"
+                required
+              )
+          .submitRow
+            button.btn.outerBtn(type="submit")
+              | この店舗ユーザを削除
+

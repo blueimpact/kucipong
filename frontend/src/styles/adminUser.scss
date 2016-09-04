@@ -26,5 +26,16 @@
         margin-bottom: 1em;
       }
     }
+
+    .row {
+      padding: 1em;
+      text-align: center;
+      color: $font-color-light;
+    }
+
+    .strong {
+      font-weight: bold;
+      color: $font-color-strong;
+    }
   }
 }
