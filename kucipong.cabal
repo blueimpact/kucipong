@@ -46,6 +46,7 @@ library
                      , Kucipong.Orphans
                      , Kucipong.Prelude
                      , Kucipong.Session
+                     , Kucipong.Spock
                      , Kucipong.Util
   build-depends:       base >= 4.7 && < 5
                      , aeson
