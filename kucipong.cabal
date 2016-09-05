@@ -30,6 +30,10 @@ library
                      , Kucipong.Handler.Admin
                      , Kucipong.LoginToken
                      , Kucipong.Monad
+                     , Kucipong.Monad.Cookie
+                     , Kucipong.Monad.Cookie.Class
+                     , Kucipong.Monad.Cookie.Instance
+                     , Kucipong.Monad.Cookie.Trans
                      , Kucipong.Monad.Db
                      , Kucipong.Monad.Db.Class
                      , Kucipong.Monad.Db.Instance

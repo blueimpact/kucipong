@@ -17,13 +17,15 @@ import Control.Monad.Trans.Control
 
 import Kucipong.Config ( Config )
 import Kucipong.Errors ( AppErr )
+import Kucipong.Monad.Cookie as X
 import Kucipong.Monad.Db as X
 import Kucipong.Monad.OtherInstances ()
 import Kucipong.Monad.SendEmail as X
 
 -- | This constraint synonym wraps up all of our Kucipong type classes.
 type MonadKucipong' m =
-    ( MonadKucipongDb m
+    ( MonadKucipongCookie m
+    , MonadKucipongDb m
     , MonadKucipongSendEmail m
     )
 
@@ -42,7 +44,7 @@ type MonadKucipong m =
 -- | 'KucipongT' is just a wrapper around all of our Monad transformers.
 newtype KucipongT m a = KucipongT
     { unKucipongT ::
-        KucipongDbT (KucipongSendEmailT m) a
+        KucipongCookieT (KucipongDbT (KucipongSendEmailT m)) a
     }
     deriving
         ( Applicative
@@ -56,6 +58,11 @@ newtype KucipongT m a = KucipongT
         , MonadReader r
         , MonadTime
         )
+
+deriving instance
+    ( MonadIO m
+    , MonadReader Config m
+    ) => MonadKucipongCookie (KucipongT m)
 
 deriving instance
     ( MonadBaseControl IO m
@@ -72,17 +79,17 @@ deriving instance
     , MonadReader Config m
     ) => MonadKucipongSendEmail (KucipongT m)
 
-
 -- | Unwrap the @m@ from 'KucipongT'.
 runKucipongT :: KucipongT m a -> m a
 runKucipongT =
       runKucipongSendEmailT
     . runKucipongDbT
+    . runKucipongCookieT
     . unKucipongT
 
 -- | Lift an action in @m@ to 'KucipongT'.
 liftToKucipongT :: (Monad m) => m a -> KucipongT m a
-liftToKucipongT = KucipongT . lift . lift
+liftToKucipongT = KucipongT . lift . lift . lift
 
 instance MonadTrans KucipongT where
     lift = liftToKucipongT
@@ -117,6 +124,7 @@ newtype KucipongM a = KucipongM
         , MonadRandom
         , MonadReader Config
         , MonadTime
+        , MonadKucipongCookie
         , MonadKucipongDb
         , MonadKucipongSendEmail
         )
