@@ -294,3 +294,18 @@ h6 {
   }
 }
 
+.messageArea {
+  .messageGroup {
+    padding: 1em;
+
+    .messageBody {
+      border-radius: 4px;
+      border: solid 2px $main-color;
+      box-shadow: 0 18px 15px -22px $shadow-color;
+      display: flex;
+      justify-content: space-between;
+      color: $font-color;
+      padding: 0.4em;
+    }
+  }
+}
