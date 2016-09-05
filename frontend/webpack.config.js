@@ -268,7 +268,7 @@ if (TARGET_ENV === 'production') {
       new webpack.optimize.OccurenceOrderPlugin(),
 
       // Extract CSS into a separate file
-      new ExtractTextPlugin( './[hash].css', { allChunks: true } ),
+      new ExtractTextPlugin( './[name]-[hash].css', { allChunks: true } ),
 
       // Minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({
