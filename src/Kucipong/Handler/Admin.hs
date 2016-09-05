@@ -11,9 +11,10 @@ import Web.Spock
     ( ActionCtxT, Path, SpockCtxT, (<//>), get, html, root, runSpock
     , setStatus, spockT, text, var )
 
-import Kucipong.Db ( LoginTokenExpirationTime(..), adminLoginTokenExpirationTime )
+import Kucipong.Db ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..), adminLoginTokenExpirationTime )
 import Kucipong.LoginToken ( LoginToken )
-import Kucipong.Monad ( MonadKucipongDb(..), MonadKucipongSendEmail )
+import Kucipong.Monad ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
+import Kucipong.Spock ( setAdminCookie )
 import Kucipong.Util ( fromMaybeM )
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
@@ -21,20 +22,21 @@ import Kucipong.Util ( fromMaybeM )
 login
     :: forall ctx m
      . ( MonadIO m
+       , MonadKucipongCookie m
        , MonadKucipongDb m
        , MonadTime m
        )
     => LoginToken -> ActionCtxT ctx m ()
 login loginToken = do
     maybeAdminLoginTokenEntity <- dbFindAdminLoginToken loginToken
-    (Entity _ adminLoginToken) <-
+    (Entity (AdminLoginTokenKey (AdminKey adminEmail)) adminLoginToken) <-
         fromMaybeM noAdminLoginTokenError maybeAdminLoginTokenEntity
     -- check date on admin login token
     now <- currentTime
     let (LoginTokenExpirationTime expirationTime) =
             adminLoginToken ^. adminLoginTokenExpirationTime
     when (now > expirationTime) tokenExpiredError
-    -- TODO: Set the cookie.
+    setAdminCookie adminEmail
     html "<p>okay</p>"
     -- TODO: Figure out what to actually return.  Also relevant below in the
     -- error cases.
@@ -52,6 +54,7 @@ login loginToken = do
 adminComponent
     :: forall m ctx
      . ( MonadIO m
+       , MonadKucipongCookie m
        , MonadKucipongDb m
        , MonadKucipongSendEmail m
        , MonadTime m
