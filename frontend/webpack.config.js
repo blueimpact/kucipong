@@ -67,6 +67,12 @@ const commonConfig = {
     // Compile end-user related pages
     new HtmlWebpackPlugin({
       chunks: ['endUser'],
+      template: 'src/pug/endUser_category.pug',
+      inject:   'body',
+      filename: 'endUser_category.html',
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['endUser'],
       template: 'src/pug/endUser_coupon_id.pug',
       inject:   'body',
       filename: 'endUser_coupon_id.html',

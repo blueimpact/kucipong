@@ -1,1 +1,27 @@
 @import "common";
+
+.category {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+
+  .taggedImage {
+    flex: 0 1 13em;
+    padding: 1.4em 2.4em;
+
+    .taggedImage-image {
+      padding: 1em;
+    }
+
+    .roundedImage {
+      border-radius: 100%;
+      width: 100%;
+    }
+
+    .taggedImage-tag {
+      font-size: 1em;
+      font-color: $font-color;
+      text-align: center;
+    }
+  }
+}
