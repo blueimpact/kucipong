@@ -27,6 +27,9 @@ fromMaybeM action = maybe action pure
 oneDay :: NominalDiffTime
 oneDay = 60 * 60 * 24
 
+oneYear :: NominalDiffTime
+oneYear = oneDay * 365
+
 -- | Add one day to a 'UTCTime'.
 addOneDay :: UTCTime -> UTCTime
 addOneDay = addUTCTime oneDay
