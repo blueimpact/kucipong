@@ -5,6 +5,8 @@ module Kucipong.Session
       -- * Markers for either AdminSession or StoreSession
     , Admin
     , Store
+      -- * Helper functions for encrypting / decrypting a 'Session'
+    , encryptSession
       -- * Classes and functions dealing with Session Key
     , HasSessionKey(..)
     )
@@ -12,7 +14,8 @@ module Kucipong.Session
 
 import Kucipong.Prelude
 
-import Web.ClientSession ( Key )
+import "emailaddress" Text.Email.Validate ( toByteString )
+import Web.ClientSession ( Key, encryptIO )
 
 class HasSessionKey r where
     getSessionKey :: r -> Key
@@ -21,10 +24,6 @@ instance HasSessionKey Key where
     getSessionKey :: Key -> Key
     getSessionKey = id
 
--- | Raw session data.  This is used by 'AdminSession' and 'StoreSession'.
-newtype RawSession = RawSession { unRawSession :: Text }
-    deriving (Data, Eq, Generic, Show, Typeable)
-
 -- | Tag for 'AdminSession'
 data Admin
 
@@ -32,8 +31,25 @@ data Admin
 data Store
 
 data Session :: * -> * where
-    AdminSession :: RawSession -> Session Admin
-    StoreSession :: RawSession -> Session Store
+    AdminSession :: EmailAddress -> Session Admin
+    StoreSession :: EmailAddress -> Session Store
 
-createRawSession :: MonadIO m => m RawSession
-createRawSession = undefined
+encryptSession
+    :: ( HasSessionKey r
+       , MonadIO m
+       , MonadReader r m
+       )
+    => Session sessionType -> m Text
+encryptSession (AdminSession email) = encryptEmail email
+encryptSession (StoreSession email) = encryptEmail email
+
+encryptEmail
+    :: ( HasSessionKey r
+       , MonadIO m
+       , MonadReader r m
+       )
+    => EmailAddress -> m Text
+encryptEmail email = do
+    key <- reader getSessionKey
+    encryptedEmail <- liftIO . encryptIO key $ toByteString email
+    pure $ decodeUtf8 encryptedEmail
