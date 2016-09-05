@@ -16,6 +16,8 @@
 /* Main */
 body {
   @include ms-respond(font-size, 1);
+
+  font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', Meiryo, メイリオ, Osaka, 'MS PGothic', arial, helvetica, sans-serif;
 }
 
 a {
@@ -89,7 +91,7 @@ h6 {
 
   .location .location_map {
     margin: 0 auto;
-    padding: 0 2em;
+    padding: 0 1em 0 0;
 
     .location_map-frame {
       width: 100%;
@@ -105,6 +107,7 @@ h6 {
   .moreContents {
     font-size: 0.8em;
     padding: 0 1em;
+    color: $font-color-light;
 
     .moreContents_txt {
       margin: 0;
@@ -192,6 +195,10 @@ h6 {
 
         .storeBody_info_body_btnRow {
           padding: 1em 0;
+
+          .btn {
+            width: 100%;
+          }
         }
 
         .storeBody_info_body_row {

@@ -2,7 +2,11 @@
 
 .store {
   .storeSubmit {
-    padding: 1em;
+    padding: 1em 0;
+
+    .btn {
+      width: 100%;
+    }
   }
 
   .store_editBtn {
@@ -96,13 +100,13 @@
     .checkbox:checked ~ .checkboxLabel {
       @include defaultButton($main-color, $invert-font-color);
 
-      transition: all 1s ease;
+      transition: color, background-color 1s ease;
     }
 
     .checkbox:not(:checked) ~ .checkboxLabel {
       @include outerButton($border-color-light);
 
-      transition: all 1s ease;
+      transition: color, background-color 1s ease;
     }
   }
 }
