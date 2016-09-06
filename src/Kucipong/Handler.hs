@@ -5,7 +5,9 @@ import Kucipong.Prelude
 
 import Web.Spock ( Path, (<//>), get, html, root, runSpock, spockT, subcomponent, text, var )
 
-import Kucipong.Config ( Config, HasPort(..) )
+import Kucipong.Config ( Config )
+import Kucipong.Handler.Admin ( adminComponent )
+import Kucipong.Host ( HasPort(..) )
 import Kucipong.Monad ( KucipongM, runKucipongM )
 
 -- TODO: Remove this:
@@ -13,7 +15,6 @@ import Kucipong.Email
 import Mail.Hailgun
 import "emailaddress" Text.Email.Validate (emailAddress)
 
-import Kucipong.Handler.Admin ( adminComponent )
 
 helloR :: Path '[Text]
 helloR = "hello" <//> var
