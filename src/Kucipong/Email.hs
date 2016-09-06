@@ -8,10 +8,13 @@ import Mail.Hailgun
     ( HailgunContext, HailgunErrorMessage, HailgunErrorResponse(..)
     , HailgunMessage, HailgunSendResponse, MessageContent(..)
     , MessageRecipients(..), emptyMessageRecipients, hailgunMessage, sendEmail )
+import Network.HTTP.Base ( urlEncode )
 import "emailaddress" Text.Email.Validate ( toByteString )
 import Text.Shakespeare.Text ( st )
 
 import Kucipong.Errors ( AppErr, AppErrEnum(..), throwAppErr )
+import Kucipong.Host
+    ( HasHost, HasProtocol, Host, Protocol, mHost, mProtocol )
 import Kucipong.LoginToken ( LoginToken(..) )
 
 class HasHailgunContext r where
@@ -56,6 +59,8 @@ sendEmailGeneric createMessageResult = do
 sendAdminLoginEmail
     :: forall r m
      . ( HasHailgunContext r
+       , HasHost r
+       , HasProtocol r
        , MonadError AppErr m
        , MonadIO m
        , MonadReader r m
@@ -63,25 +68,35 @@ sendAdminLoginEmail
     => EmailAddress
     -> LoginToken
     -> m HailgunSendResponse
-sendAdminLoginEmail = (sendEmailGeneric .) . adminLoginMsg
+sendAdminLoginEmail adminEmail loginToken = do
+    protocol <- mProtocol
+    host <- mHost
+    sendEmailGeneric $ adminLoginMsg protocol host adminEmail loginToken
 
-adminLoginMsg :: EmailAddress -> LoginToken -> Either HailgunErrorMessage HailgunMessage
-adminLoginMsg adminEmail url =
-    let subject = "Kucipong Admin Login"
-        content = TextOnly $ encodeUtf8 textContent
+adminLoginMsg
+    :: Protocol
+    -> Host
+    -> EmailAddress
+    -> LoginToken
+    -> Either HailgunErrorMessage HailgunMessage
+adminLoginMsg protocol host adminEmail loginToken = do
+    let loginTokenText =
+            asText $ pack $ urlEncode $ unpack $ unLoginToken loginToken
+        subject = "Kucipong Admin Login"
+        content = TextOnly . encodeUtf8 $ textContent loginTokenText
         replyTo = "no-reply@kucipong.com"
         to = toByteString adminEmail
         recipients = emptyMessageRecipients { recipientsTo = [ to ] }
         attachements = []
-    in hailgunMessage subject content replyTo recipients attachements
+    hailgunMessage subject content replyTo recipients attachements
   where
-    textContent :: Text
-    textContent =
+    textContent :: Text -> Text
+    textContent loginTokenText =
         [st|
-             This is an email from Kucipong.  You can use the following URL to
-             login as an admin:
+This is an email from Kucipong.  You can use the following URL to
+login as an admin:
 
-             TODO: Actually add login email here.
+#{protocol}://#{host}/admin/login/#{loginTokenText}
         |]
 
 

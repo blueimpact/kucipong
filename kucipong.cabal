@@ -57,6 +57,7 @@ library
                      , emailaddress
                      , envelope
                      , hailgun
+                     , HTTP
                      , http-api-data
                      , http-client
                      , http-conduit
