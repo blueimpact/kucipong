@@ -6,6 +6,7 @@ module Kucipong.Config
 import Kucipong.Prelude
 
 import Control.Monad.Logger ( runStdoutLoggingT )
+import Data.ByteString.Base64 ( decode )
 import Database.Persist.Postgresql ( ConnectionPool )
 import Database.PostgreSQL.Simple ( ConnectInfo(..) )
 import Mail.Hailgun ( HailgunContext(..) )
@@ -16,13 +17,14 @@ import Network.Wai.Handler.Warp ( Port )
 import Network.Wai.Middleware.RequestLogger ( logStdoutDev, logStdout )
 import Network.Wai ( Middleware )
 import System.ReadEnvVar ( lookupEnvDef, readEnvVarDef )
-import Web.ClientSession ( Key )
+import Web.ClientSession ( Key, initKey )
 
 import Kucipong.Db
     ( DbPoolConnNum, DbPoolConnTimeout, HasDbPool(..), makePool )
 import Kucipong.Environment ( Environment(..), HasEnv(..) )
 import Kucipong.Email ( HasHailgunContext(..) )
 import Kucipong.Session ( HasSessionKey(..) )
+import Kucipong.Util ( fromEitherM )
 
 -- | A 'Config' used by our application.  It contains things used
 -- throughout a request.
@@ -84,6 +86,33 @@ kucipongHost Test = "127.0.0.1"
 kucipongHost Development = "127.0.0.1"
 kucipongHost Production = "kucipong.com"
 
+-- | This is the key for encrypting session data.  A new key for use in
+-- production can be created like the following:
+--
+-- @
+--   import Data.ByteString.Base64 ( 'encode' )
+--   import Web.ClientSession ( 'randomKey' )
+--
+--   newKey :: IO 'ByteString'
+--   newKey =
+--       (byteString, _) <- 'randomKey'
+--       'encode' byteString
+-- @
+kucipongSessionKeyDev :: ByteString
+kucipongSessionKeyDev =
+    "lCNWb2gFVE8QtvV+dqjmYMWK6aq1Y9vQ5PmJb0ZMiZ5AG6G9zp+bJY8aficESqo+uX" <>
+    "+UEbhQN5dUqQXSEk0H8F/FGLUGywKCvnw8e7UcPx5rgK7xCdeGLJXm8R4B2ihK"
+
+-- | Initialize a Session 'Key' out of a base64-encoded 'ByteString'.  Throws
+-- an error if they input key is either not base64-encoded, or the
+-- base64-decoded key is not exactly 96 bytes.
+initKucipongSessionKey :: ByteString -> IO Key
+initKucipongSessionKey = fromEitherM handleErr . (initKey <=< decode)
+  where
+    handleErr :: String -> a
+    handleErr err =
+        error $ "error with decoding session key: " <> err
+
 createConfigFromEnv :: IO Config
 createConfigFromEnv = do
     env <- readEnvVarDef "KUCIPONG_ENV" Development
@@ -97,7 +126,8 @@ createConfigFromEnv = do
     dbUser <- lookupEnvDef "KUCIPONG_DB_USER" "kucipong"
     dbPass <- lookupEnvDef "KUCIPONG_DB_PASSWORD" "nuy07078akyy1y7anvya7072"
     dbDatabase <- lookupEnvDef "KUCIPONG_DB_DATABASE" "kucipong"
-    sessionKey <- undefined "KUCIPONG_SESSION_KEY" undefined
+    sessionKeyRaw <- lookupEnvDef "KUCIPONG_SESSION_KEY" kucipongSessionKeyDev
+    sessionKey <- initKucipongSessionKey sessionKeyRaw
     createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
         dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbDatabase
         sessionKey
