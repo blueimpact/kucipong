@@ -53,6 +53,20 @@ class Monad m => MonadKucipongDb m where
         => LoginToken -> t n (Maybe (Entity AdminLoginToken))
     dbFindAdminLoginToken = lift . dbFindAdminLoginToken
 
+    dbUpsertAdmin
+        :: EmailAddress
+        -> Text
+        -- ^ Admin name
+        -> m (Entity Admin)
+    default dbUpsertAdmin
+        :: ( Monad (t n)
+           , MonadKucipongDb n
+           , MonadTrans t
+           , m ~ t n
+           )
+        => EmailAddress -> Text -> t n (Entity Admin)
+    dbUpsertAdmin = (lift .) . dbUpsertAdmin
+
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
 instance MonadKucipongDb m => MonadKucipongDb (IdentityT m)
