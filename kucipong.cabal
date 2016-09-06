@@ -28,6 +28,7 @@ library
                      , Kucipong.Errors
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
+                     , Kucipong.Host
                      , Kucipong.LoginToken
                      , Kucipong.Monad
                      , Kucipong.Monad.Cookie
