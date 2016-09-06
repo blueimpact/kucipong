@@ -50,12 +50,12 @@ instance ( MonadBaseControl IO m
             currTime <- currentTime
             randomLoginToken <- createRandomLoginToken
             let plusOneDay = addOneDay currTime
-            let adminLoginToken =
+            let newAdminLoginTokenVal =
                     AdminLoginToken adminKey (CreatedTime currTime)
                         (UpdatedTime currTime) Nothing randomLoginToken
                         (LoginTokenExpirationTime plusOneDay)
-            adminLoginTokenKey <- runDb $ insert adminLoginToken
-            pure $ Entity adminLoginTokenKey adminLoginToken
+            runDb $ repsert (AdminLoginTokenKey adminKey) newAdminLoginTokenVal
+            pure $ Entity (AdminLoginTokenKey adminKey) newAdminLoginTokenVal
 
     dbFindAdminLoginToken :: LoginToken -> KucipongDbT m (Maybe (Entity AdminLoginToken))
     dbFindAdminLoginToken loginToken = lift go
