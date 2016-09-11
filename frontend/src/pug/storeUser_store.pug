@@ -1,0 +1,73 @@
+include _layout
+  body#main.wrapper
+    include _storeHeader
+      | 店舗情報
+    include _messageArea
+    .store
+      .store_editBtn
+        a.btn.outerBtn(href="/store/edit") 店舗情報編集
+      header.storeHeader
+        .annotatedImageGroup
+          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
+          span.annotatedImageGroup-annotation 画像は一例です
+        .highlightedBlock
+          h2.highlightedBlock.storeHeader-title
+            | 七輪焼肉・安安
+      .storeBody
+        .storeBody_description
+          p 七輪焼き肉・安安は、美味しい焼肉を...
+          p ...
+        .storeBody_couponBtn
+          a.btn.defaultBtn(href="/store/coupon/create") クーポン一覧
+        .storeBody_info
+          .storeBody_info_titleArea
+            .storeBody_info_titleArea-text
+              | 店舗情報
+          .storeBody_info_body
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | カテゴリ
+              .storeBody_info_body_row-body
+                | グルメ
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 店舗の特徴
+              .storeBody_info_body_row-body.simpleTagWrapper
+                .simpleTag
+                  | 焼き肉
+                .simpleTag
+                  | 広い店内
+                .simpleTag
+                  | 広い店内
+                .simpleTag
+                  | 広い店内
+                .simpleTag
+                  | 広い店内
+                .simpleTag
+                  | 広い店内
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 住所
+              .storeBody_info_body_row-body
+                .storeBody_info_body_row-body-address
+                  | 渋谷区桜丘町2-12 渋谷亀八ビル4F
+                .storeBody_info_body_row-body-map(data-latitude="41.40243" data-longitude="2.17551")
+                  iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 電話番号
+              .storeBody_info_body_row-body
+                | 03-3464-0722
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 営業時間
+              .storeBody_info_body_row-body
+                p 月〜木 17:00〜翌4:30
+                p 金土日祝・祝前 16:00〜翌4:30
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 定休日
+              .storeBody_info_body_row-body
+                | 元旦のみ
+            .storeBody_info_body_btnRow
+              a.btn.outerBtn(href="http://www.fuji-tatsu.co.jp/") オフィシャルサイト

@@ -1,0 +1,47 @@
+{
+  "name": "kucipong-front-end",
+  "description": "Kucipong front-end",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Blue Impact",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blueimpact/kucipong"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --inline --hot",
+    "build": "rimraf dist && webpack",
+    "watch": "webpack --watch"
+  },
+  "devDependencies": {
+    "stylelint": "^7.1.0",
+    "stylelint-config-standard": "^12.0.0"
+  },
+  "dependencies": {
+    "autoprefixer": "^6.4.0",
+    "copy-webpack-plugin": "^3.0.1",
+    "css-loader": "^0.23.1",
+    "elm": "^0.17.1",
+    "elm-hot-loader": "^0.3.3",
+    "elm-webpack-loader": "^3.0.4",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
+    "html-webpack-plugin": "^2.22.0",
+    "modularscale-sass": "^2.1.1",
+    "node-sass": "^3.8.0",
+    "postcss-flexbugs-fixes": "~2.0.0",
+    "postcss-loader": "^0.9.1",
+    "postcss-reporter": "^1.4.1",
+    "pug": "^2.0.0-beta5",
+    "pug-loader": "^2.2.1",
+    "pug-walk": "0.0.4",
+    "rimraf": "^2.5.4",
+    "sanitize.css": "^4.1.0",
+    "sass-loader": "^4.0.0",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1",
+    "webpack-merge": "^0.14.1"
+  }
+}

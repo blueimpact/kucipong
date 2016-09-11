@@ -1,0 +1,126 @@
+include _layout
+  body#main.wrapper
+    include _storeHeader
+      | 店舗情報 編集
+    form.store(enctype="multipart/form-data" method="POST")
+      .storeBody
+        .storeBody_info
+          .storeBody_info_titleArea
+            .storeBody_info_titleArea-text
+              | 店舗情報
+          .storeBody_info_body
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 店舗名
+              .storeBody_info_body_row-body
+                input#storeName(
+                  name="storeName" type="text"
+                  value="七輪焼肉・安安"
+                )
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | カテゴリ
+              .storeBody_info_body_row-body
+                select#storeCategory(
+                  name="storeCategory"
+                  value="0"
+                )
+                  option(value="0") グルメ
+                  option(value="1") ファッション
+                  option(value="2") ガジェット
+                  option(value="3") 旅行
+                  option(value="4") 美容
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 店舗の特徴
+              .storeBody_info_body_row-body.checkboxGroup
+                .checkboxWrapper
+                  input.checkbox#storeTags0(
+                    type="checkbox" name="storeTags0"
+                    checked
+                  )
+                  label.checkboxLabel(for="storeTags0")
+                    | 焼き肉
+                .checkboxWrapper
+                  input.checkbox#storeTags1(
+                    type="checkbox" name="storeTags1"
+                  )
+                  label.checkboxLabel(for="storeTags1")
+                    | 日本食
+                .checkboxWrapper
+                  input.checkbox#storeTags2(
+                    type="checkbox" name="storeTags2"
+                  )
+                  label.checkboxLabel(for="storeTags2")
+                    | 寿司
+                .checkboxWrapper
+                  input.checkbox#storeTags3(
+                    type="checkbox" name="storeTags3"
+                    checked
+                  )
+                  label.checkboxLabel(for="storeTags3")
+                    | 広々とした店内
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 店舗の説明
+              .storeBody_info_body_row-body
+                textarea#storeDescription(
+                  name="storeDescription"
+                  type="text"
+                )
+                  | 七輪焼き肉・安安は、美味しい焼肉を...
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 住所
+              .storeBody_info_body_row-body
+                .storeBody_info_body_row-body-address
+                  input#storeAddress(
+                    name="storeAddress" type="text"
+                    value="渋谷区桜丘町2-12 渋谷亀八ビル4F"
+                  )
+                .storeBody_info_body_row-body-map(data-latitude="41.40243" data-longitude="2.17551")
+                  iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 電話番号
+              .storeBody_info_body_row-body
+                input#storePhoneNumber(
+                  name="storePhoneNumber" type="text"
+                  value="03-3464-0722"
+                )
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 営業時間
+              .storeBody_info_body_row-body
+                textarea#storeHours(
+                  name="storeHours" type="text"
+                )
+                  | 月〜木 17:00〜翌4:30
+                  | 金土日祝・祝前 16:00〜翌4:30
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 定休日
+              .storeBody_info_body_row-body
+                textarea#storeCloseOn(
+                  name="storeCloseOn" type="text"
+                )
+                  | 元旦のみ
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | オフィシャルサイト
+              .storeBody_info_body_row-body
+                input#storeURL(
+                  name="storeURL" type="url"
+                  value="http://www.fuji-tatsu.co.jp/"
+                )
+            .storeBody_info_body_row
+              .storeBody_info_body_row-header
+                | 店舗イメージ画像
+              .storeBody_info_body_row-body
+                input#storeImage(
+                  name="storeImage" type="file"
+                )
+                img.storeBody_info_body_row-body-image(src="./img/dummy.jpg")
+            .storeSubmit
+              button.btn.outerBtn(type="submit")
+                | この内容で店舗情報を更新する

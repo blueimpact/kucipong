@@ -1,0 +1,21 @@
+include _layout
+  body#main.wrapper
+    include _adminHeader
+      | 店舗ユーザとしてログイン
+    .admin
+      .adminBody
+        .signboard_titleArea
+          .signboard_titleArea-title
+            | 店舗ユーザとしてログイン
+        form.signboard_body(method="POST")
+          .labeledRow
+            label.labeledRow-header(for="storeEmail")
+              | 店舗ユーザのメールアドレス
+            .labeledRow-body
+              input#storeEmail(
+                name="storeEmail" type="email"
+                required
+              )
+          .submitRow
+            button.btn.outerBtn(type="submit")
+              | この店舗ユーザとしてログイン

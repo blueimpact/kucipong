@@ -1,0 +1,8 @@
+include _layout
+  body#main.wrapper
+    include _storeHeader
+      | クーポン情報
+    .store
+      .store_editBtn
+        a.btn.outerBtn(href="/store/coupon/3/edit") クーポン情報編集
+    include _coupon_id

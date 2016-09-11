@@ -1,0 +1,27 @@
+/* Helper module for button component */
+
+@mixin button($rate) {
+  min-height: 3em;
+  width: calc(100% / #{$rate});
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 2px;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin: 0 auto;
+  @content;
+}
+
+@mixin outerButton($color) {
+  border-color: $color;
+  color: $color;
+}
+
+@mixin defaultButton($color, $font-color) {
+  border-color: $color;
+  background-color: $color;
+  color: $font-color;
+}

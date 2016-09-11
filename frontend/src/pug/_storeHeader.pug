@@ -1,0 +1,16 @@
+header.header
+  .home.showMenu
+    input#storeHeaderShowMenu.showMenu_checkbox(type="checkbox")
+    label.showMenu_label(for="storeHeaderShowMenu")
+      img.showMenu_label-image(src=require("../img/hamburger.svg"))
+    .sideMenu
+      .sideMenu_hide
+        label.sideMenu_hide-text(for="storeHeaderShowMenu")
+      a.btn.outerBtn(href="/store") 店舗情報
+      a.btn.outerBtn(href="/store/coupon") クーポン一覧
+
+  h1.title
+    yield
+  .icons
+    a.icon.icon-me(href="/store")
+      img(src=require("../img/me.svg"))

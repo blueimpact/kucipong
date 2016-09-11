@@ -1,0 +1,28 @@
+/* Helper module for labeled row component */
+
+@import "mixin";
+
+@mixin labeledRow($breakpoint: 640px) {
+  @include max-screen($breakpoint) {
+    flex-wrap: wrap;
+  }
+
+  padding: 1em 0;
+  display: flex;
+  font-size: 0.8em;
+}
+
+@mixin labeledRow_header($breakpoint: 640px) {
+  flex: 1 1 12em;
+  padding-right: 2em;
+  @content;
+
+  @include max-screen($breakpoint) {
+    width: auto;
+  }
+}
+
+@mixin labeledRow_body {
+  flex: 1 1 22em;
+  @content;
+}

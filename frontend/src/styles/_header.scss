@@ -1,0 +1,83 @@
+/* Helper module for button component */
+
+@mixin header($main-color: #07b8eb, $font-color: #fff, $shadow-color:rgba(0, 0, 0, 0.5)) {
+  background-color: $main-color;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  position: relative;
+  box-shadow: 0 18px 15px -22px $shadow-color;
+
+  .showMenu {
+    display: flex;
+    align-items: center;
+
+    .showMenu_checkbox {
+      display: none;
+    }
+
+    .showMenu_label {
+      cursor: pointer;
+      padding: 0 1em;
+    }
+  }
+
+  .sideMenu {
+    position: absolute;
+    transform-origin: 0 0;
+    width: 40%;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    // background-color: $main-color;
+    background-color: white;
+    z-index: 1;
+    box-shadow: 2px 4px 12px -2px $shadow-color;
+
+    .sideMenu_hide {
+      width: 100%;
+      display: inline-block;
+      text-align: end;
+    }
+
+    .sideMenu_hide-text {
+      &::after {
+        content: '×';
+        cursor: pointer;
+        font-size: 1.6em;
+        color: $main-color;
+        margin-left: auto;
+        padding: 0.5em;
+      }
+    }
+
+    .btn {
+      margin-top: -2px;
+    }
+  }
+
+  .showMenu_checkbox:checked ~ .sideMenu {
+    transform: scaleX(1);
+    opacity: 1;
+    transition: opacity, transform 1s ease;
+  }
+
+  .showMenu_checkbox:not(:checked) ~ .sideMenu {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+
+  .title {
+    font-size: 1em;
+    font-weight: normal;
+    color: $invert-font-color;
+  }
+
+  .icons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding-right: 0.6em;
+  }
+}

@@ -1,0 +1,11 @@
+include _layout
+  body#main.wrapper
+    include _storeHeader
+      | クーポン一覧
+    .store
+      .store_editBtn
+        a.btn.outerBtn(href="/store/coupon/create") クーポン追加
+
+    include _couponSimple
+    include _couponSimple
+    include _couponSimple

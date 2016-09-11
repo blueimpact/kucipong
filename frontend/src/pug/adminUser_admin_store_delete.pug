@@ -1,0 +1,20 @@
+include _layout
+  body#main.wrapper
+    include _adminHeader
+      | 店舗ユーザ削除
+    .admin
+      .adminBody
+        .signboard_titleArea
+          .signboard_titleArea-title
+            | 店舗ユーザの削除
+        form.signboard_body(method="GET" action="/admin/store/delete/confirm")
+          .labeledRow
+            label.labeledRow-header(for="storeEmail")
+              | 削除する店舗ユーザのメールアドレス
+            .labeledRow-body
+              input#storeEmail(
+                name="storeEmail" type="email"
+              )
+          .submitRow
+            button.btn.outerBtn(type="submit")
+              | 削除する店舗ユーザの確認
