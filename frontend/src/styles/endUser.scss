@@ -25,3 +25,26 @@
     }
   }
 }
+
+.icon-fav.checkableIcon {
+  .checkableIcon-check {
+    display: none;
+  }
+
+  .checkableIcon-icon {
+    display: block;
+    cursor: pointer;
+    background-size: contain;
+    background-position: center center;
+    width: 1.4em;
+    height: 1.4em;
+  }
+
+  .checkableIcon-check:not(:checked) ~ .checkableIcon-icon {
+    background-image: url("../img/heart-outer.svg");
+  }
+
+  .checkableIcon-check:checked ~ .checkableIcon-icon {
+    background-image: url("../img/heart.svg");
+  }
+}

@@ -3,8 +3,9 @@
     .card_header
       h2.card_header_text 七輪焼肉・安安
       .card_header_icon
-        .icon.icon-like(data-coupon-id="3")
-          img(src=require("../img/heart.svg"))
+        .icon.icon-fav.checkableIcon
+          input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="3")
+          label.checkableIcon-icon(for="js-fav-3")
     .annotatedImageGroup
       img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
       span.annotatedImageGroup-annotation 画像は一例です
