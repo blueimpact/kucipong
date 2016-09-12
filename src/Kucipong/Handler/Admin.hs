@@ -8,8 +8,8 @@ import Control.Monad.Time ( MonadTime(..) )
 import Database.Persist ( Entity(..) )
 import Network.HTTP.Types ( forbidden403 )
 import Web.Spock
-    ( ActionCtxT, Path, SpockCtxT, (<//>), get, html, root, runSpock
-    , setStatus, spockT, text, var )
+    ( ActionCtxT, Path, SpockCtxT, (<//>), get, html, root, redirect
+    , renderRoute, runSpock, setStatus, spockT, text, var )
 
 import Kucipong.Db ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..), adminLoginTokenExpirationTime )
 import Kucipong.LoginToken ( LoginToken )
@@ -37,10 +37,9 @@ login loginToken = do
             adminLoginToken ^. adminLoginTokenExpirationTime
     when (now > expirationTime) tokenExpiredError
     setAdminCookie adminEmail
-    html "<p>okay</p>"
-    -- TODO: Figure out what to actually return.  Also relevant below in the
-    -- error cases.
+    redirect $ renderRoute root
   where
+    -- TODO: What should actually be returned for these two error cases?
     noAdminLoginTokenError :: ActionCtxT ctx m a
     noAdminLoginTokenError = do
         setStatus forbidden403
