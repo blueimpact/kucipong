@@ -6,6 +6,7 @@ module Kucipong.Config
 import Kucipong.Prelude
 
 import Control.Monad.Logger ( runStdoutLoggingT )
+import Data.ByteString.Base64 ( decode )
 import Database.Persist.Postgresql ( ConnectionPool )
 import Database.PostgreSQL.Simple ( ConnectInfo(..) )
 import Mail.Hailgun ( HailgunContext(..) )
@@ -16,24 +17,29 @@ import Network.Wai.Handler.Warp ( Port )
 import Network.Wai.Middleware.RequestLogger ( logStdoutDev, logStdout )
 import Network.Wai ( Middleware )
 import System.ReadEnvVar ( lookupEnvDef, readEnvVarDef )
+import Web.ClientSession ( Key, initKey )
 
-import Kucipong.Environment ( Environment(..), HasEnv(..) )
-import Kucipong.Email ( HasHailgunContext(..) )
 import Kucipong.Db
     ( DbPoolConnNum, DbPoolConnTimeout, HasDbPool(..), makePool )
+import Kucipong.Environment ( Environment(..), HasEnv(..) )
+import Kucipong.Email ( HasHailgunContext(..) )
+import Kucipong.Host
+    ( HasHost(..), HasPort(..), HasProtocol(..), Host, Protocol )
+import Kucipong.Session ( HasSessionKey(..) )
+import Kucipong.Util ( fromEitherM )
 
 -- | A 'Config' used by our application.  It contains things used
 -- throughout a request.
 data Config = Config
     { configEnv  :: Environment
     , configHailgunContext :: HailgunContext
+    , configHost :: Text
     , configHttpManager :: Manager
     , configPool :: ConnectionPool
     , configPort :: Port
+    , configProtocol :: Text
+    , configSessionKey :: Key
     }
-
-class HasPort a where
-    getPort :: a -> Port
 
 instance HasDbPool Config where
     getDbPool :: Config -> ConnectionPool
@@ -47,6 +53,10 @@ instance HasHailgunContext Config where
     getHailgunContext :: Config -> HailgunContext
     getHailgunContext = configHailgunContext
 
+instance HasHost Config where
+    getHost :: Config -> Text
+    getHost = configHost
+
 instance HasHttpManager Config where
     getHttpManager :: Config -> Manager
     getHttpManager = configHttpManager
@@ -55,27 +65,46 @@ instance HasPort Config where
     getPort :: Config -> Port
     getPort = configPort
 
+instance HasProtocol Config where
+    getProtocol :: Config -> Text
+    getProtocol = configProtocol
+
+instance HasSessionKey Config where
+    getSessionKey :: Config -> Key
+    getSessionKey = configSessionKey
+
 -- | Returns a 'Middleware' with our logger.
 setLogger :: Environment -> Middleware
 setLogger Test = id
 setLogger Development = logStdoutDev
 setLogger Production = logStdout
 
--- | This represents a URL to the kucipong service.
+-- | This is the key for encrypting session data.  A new key for use in
+-- production can be created like the following:
 --
--- This should probably be a 'Network.HTTP.Client.Request' type instead of
--- 'Text'.  If it is 'Request', the path and querystring can be added used the
--- 'Network.HTTP.Client.path' and 'Network.HTTP.Client.querystring' methods
--- as <http://www.yesodweb.com/book/settings-types described here>.
-kucipongBaseRequest :: Environment -> Text
-kucipongBaseRequest Test = "http://www.kucipong.com/"
-kucipongBaseRequest Development = "http://127.0.0.1:8091/"
-kucipongBaseRequest Production = "https://www.kucipong.com/"
+-- @
+--   import Data.ByteString.Base64 ( 'encode' )
+--   import Web.ClientSession ( 'randomKey' )
+--
+--   newKey :: IO 'ByteString'
+--   newKey =
+--       (byteString, _) <- 'randomKey'
+--       'encode' byteString
+-- @
+kucipongSessionKeyDev :: ByteString
+kucipongSessionKeyDev =
+    "lCNWb2gFVE8QtvV+dqjmYMWK6aq1Y9vQ5PmJb0ZMiZ5AG6G9zp+bJY8aficESqo+uX" <>
+    "+UEbhQN5dUqQXSEk0H8F/FGLUGywKCvnw8e7UcPx5rgK7xCdeGLJXm8R4B2ihK"
 
-kucipongHost :: Environment -> Text
-kucipongHost Test = "127.0.0.1"
-kucipongHost Development = "127.0.0.1"
-kucipongHost Production = "kucipong.com"
+-- | Initialize a Session 'Key' out of a base64-encoded 'ByteString'.  Throws
+-- an error if they input key is either not base64-encoded, or the
+-- base64-decoded key is not exactly 96 bytes.
+initKucipongSessionKey :: ByteString -> IO Key
+initKucipongSessionKey = fromEitherM handleErr . (initKey <=< decode)
+  where
+    handleErr :: String -> a
+    handleErr err =
+        error $ "error with decoding session key: " <> err
 
 createConfigFromEnv :: IO Config
 createConfigFromEnv = do
@@ -90,8 +119,13 @@ createConfigFromEnv = do
     dbUser <- lookupEnvDef "KUCIPONG_DB_USER" "kucipong"
     dbPass <- lookupEnvDef "KUCIPONG_DB_PASSWORD" "nuy07078akyy1y7anvya7072"
     dbDatabase <- lookupEnvDef "KUCIPONG_DB_DATABASE" "kucipong"
+    sessionKeyRaw <- lookupEnvDef "KUCIPONG_SESSION_KEY" kucipongSessionKeyDev
+    sessionKey <- initKucipongSessionKey sessionKeyRaw
+    host <- lookupEnvDef "KUCIPONG_HOST" "localhost:8101"
+    protocol <- lookupEnvDef "KUCIPONG_PROTOCOL" "http"
     createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
         dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbDatabase
+        sessionKey host protocol
 
 type DbHost = String
 type DbPort = Word16
@@ -114,9 +148,13 @@ createConfigFromValues
     -> DbUser
     -> DbPassword
     -> DbName
+    -> Key
+    -> Host
+    -> Protocol
     -> IO Config
 createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
-        dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName = do
+        dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName
+        sessionKey host protocol = do
     httpManager <- newManager tlsManagerSettings
     let hailgunContext = HailgunContext
             { hailgunDomain = hailgunContextDomain
@@ -136,5 +174,8 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
         , configEnv = env
         , configHailgunContext = hailgunContext
         , configHttpManager = httpManager
+        , configHost = host
         , configPort = port
+        , configProtocol = protocol
+        , configSessionKey = sessionKey
         }

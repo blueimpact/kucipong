@@ -4,7 +4,6 @@ module Main where
 import Kucipong.Prelude
 
 import Control.Lens ( view )
-import Control.Monad.Time ( MonadTime(..) )
 import Database.Persist ( Entity(..) )
 import Options.Applicative
     ( InfoMod, Parser, ParserInfo, ReadM, argument, eitherReader, execParser
@@ -16,6 +15,7 @@ import Kucipong.Config ( createConfigFromEnv )
 import Kucipong.Db ( adminLoginTokenLoginToken )
 import Kucipong.Monad
     ( MonadKucipongDb(..), MonadKucipongSendEmail(..), runKucipongM )
+import Kucipong.Util ( fromEitherM )
 
 data AddAdminCommand = AddAdminCommand
     { addAdminEmail :: EmailAddress
@@ -23,17 +23,39 @@ data AddAdminCommand = AddAdminCommand
     }
     deriving (Data, Eq, Generic, Show, Typeable)
 
+tryExceptT :: (MonadBaseControl IO m, Exception e) => m a -> ExceptT e m a
+tryExceptT = ExceptT . try
+
+-- | Add a new 'Admin'.  If an 'Admin' with the 'EmailAddress' already exists,
+-- just create a new 'AdminLoginToken' for them and then send them an email.
 addAdmin
-    :: ( MonadKucipongDb m
+    :: ( MonadBaseControl IO m
+       , MonadIO m
+       , MonadKucipongDb m
        , MonadKucipongSendEmail m
-       , MonadTime m
        )
-    => EmailAddress -> Text -> m ()
+    => EmailAddress
+    -> Text
+    -- ^ Name of the 'Admin'
+    -> m ()
 addAdmin email name = do
-    (Entity adminKey _) <- dbCreateAdmin email name
-    (Entity _ adminLoginToken) <- dbCreateAdminMagicLoginToken adminKey
+    eitherAdminEntity <- try $ dbUpsertAdmin email name
+    (Entity adminKey _) <- fromEitherM handleUpsertAdminError eitherAdminEntity
+    eitherAdminLoginToken <- try $ dbCreateAdminMagicLoginToken adminKey
+    (Entity _ adminLoginToken) <-
+        fromEitherM handleCreateAdminLoginTokenError eitherAdminLoginToken
     let loginToken = view adminLoginTokenLoginToken adminLoginToken
     sendAdminLoginEmail email loginToken
+    putStrLn $ "Created (or updated) admin with email " <> tshow email <>
+        " and name \"" <> name <> "\".\nSent email with login url."
+  where
+    handleUpsertAdminError :: SomeException -> m a
+    handleUpsertAdminError err =
+        error $ "Error when trying to upsert admin: " <> show err
+
+    handleCreateAdminLoginTokenError :: SomeException -> m a
+    handleCreateAdminLoginTokenError err =
+        error $ "Error when trying to create admin login token: " <> show err
 
 run :: AddAdminCommand -> IO ()
 run (AddAdminCommand email name) = do

@@ -7,27 +7,14 @@ resolver: lts-6.13
 # Local packages, usually specified by relative directory name
 packages:
     - '.'
-    # TODO: This was added here: https://github.com/fpco/stackage/pull/1782
-    # Hopefull we'll be able to use it when lts-6.14 comes out.  It should be
-    # out sometime around 2016/09/01.
-    - location:
-        git: 'https://bitbucket.org/cdepillabout/hailgun'
-        commit: '275a4ebdeab79f7fb048e6174ca2f2bf75aa1f71' # derive-show branch
-    # TODO: This will probably be in stackage lts-6.14.  It can get removed
-    # then.  Also, it can get pushed down to the "extra-deps" section sometime
-    # after 8/23.  It can't be done immediately because stack's hackage
-    # databases only update every 24 hours.
-    - location:
-        git: 'https://github.com/cdepillabout/emailaddress'
-        commit: v0.1.6.0
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps: []
-    # This will probably be in lts-6.14.
-    # - emailaddress-0.1.6.0
-    # This will probably be available sometime after 8/22 in hackage, and in
-    # lts-6.14.
-    # - hailgun-0.4.1.0
+extra-deps:
+    # This might not be available until the next major lts release.
+    - emailaddress-0.1.6.0
+    # This will probably be available at least by 9/15 in hackage, and in
+    # lts-6.15. (Or it might not be available until the next major lts release.)
+    - hailgun-0.4.1.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}
