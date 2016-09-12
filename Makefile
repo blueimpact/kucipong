@@ -1,11 +1,21 @@
-.PHONY: build clean dump-th ghci haddock haddock-server hlint lint release repl run test watch watch-tests watch-test
+.PHONY: build build-frontend build-server clean clean-frontend clean-server dump-th ghci haddock haddock-server hlint lint release repl run test watch watch-tests watch-test
 all: build
 
-build:
+build-frontend:
+	$(MAKE) -C frontend build
+
+build-server:
 	stack build kucipong
 
-clean:
+build: build-frontend build-server
+
+clean-frontend:
+	$(MAKE) -C frontend clean
+
+clean-server:
 	stack clean
+
+clean: clean-frontend clean-server
 
 devel:
 	stack exec -- yesod devel
@@ -51,9 +61,15 @@ run: build
 test:
 	stack test
 
+watch-frontend:
+	$(MAKE) -C frontend watch
+
 # Watch for changes.
-watch:
+watch-server:
 	stack build --file-watch --fast kucipong
+
+# TODO: Figure out how to watch on both frontend and server.
+watch: watch-server
 
 # Watch for changes.
 watch-test: watch-tests
