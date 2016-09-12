@@ -65,6 +65,13 @@ const commonConfig = {
       inject:   'body',
       filename: 'chat.html',
     }),
+    new HtmlWebpackPlugin({
+      chunks: ['chat'],
+      template: 'src/style-guide/chat.html',
+      inject:   'body',
+      filename: 'style-guide_chat.html',
+    }),
+
     // Compile end-user related pages
     new HtmlWebpackPlugin({
       chunks: ['endUser'],
@@ -225,10 +232,11 @@ if (TARGET_ENV === 'development') {
         {
           test: /\.(css|scss)$/,
           loaders: [
-            'style-loader',
-            'css-loader',
-            'sass-loader',
-            'postcss-loader',
+            'style',
+            'css',
+            'resolve-url',
+            'sass',
+            'postcss',
           ]
         }
       ]
@@ -273,10 +281,11 @@ if (TARGET_ENV === 'production') {
         },
         {
           test: /\.(css|scss)$/,
-          loader: ExtractTextPlugin.extract('style-loader', [
-            'css-loader',
-            'sass-loader',
-            'postcss-loader',
+          loader: ExtractTextPlugin.extract('style', [
+            'css',
+            'resolve-url',
+            'sass',
+            'postcss',
           ])
         }
       ]
