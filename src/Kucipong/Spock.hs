@@ -4,11 +4,16 @@ module Kucipong.Spock
     , setStoreCookie
     , getAdminCookie
     , getStoreCookie
+    , ContainsAdminSession
+    , getAdminEmail
+    , ContainsStoreSession
+    , getStoreEmail
     ) where
 
 import Kucipong.Prelude
 
-import Web.Spock ( ActionCtxT, cookie, setCookie )
+import Data.HVect ( HVect, ListContains, findFirst )
+import Web.Spock ( ActionCtxT, cookie, getContext, setCookie )
 
 import Kucipong.Monad ( MonadKucipongCookie(..) )
 import Kucipong.Session ( Admin, Session(AdminSession, StoreSession), Store )
@@ -61,3 +66,23 @@ getCookieGeneic
 getCookieGeneic cookieKey cookieValDecryptFun = do
     maybeRawCookie <- cookie cookieKey
     maybe (pure Nothing) cookieValDecryptFun maybeRawCookie
+
+getAdminEmail
+    :: forall n xs m
+     . ( ContainsAdminSession n xs
+       , MonadIO m
+       )
+    => ActionCtxT (HVect xs) m (Session Admin)
+getAdminEmail = findFirst <$> getContext
+
+type ContainsAdminSession n xs = ListContains n (Session Admin) xs
+
+getStoreEmail
+    :: forall n xs m
+     . ( ContainsStoreSession n xs
+       , MonadIO m
+       )
+    => ActionCtxT (HVect xs) m (Session Store)
+getStoreEmail = findFirst <$> getContext
+
+type ContainsStoreSession n xs = ListContains n (Session Store) xs

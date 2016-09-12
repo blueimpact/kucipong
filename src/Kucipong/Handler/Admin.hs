@@ -12,11 +12,15 @@ import Web.Spock
     ( ActionCtxT, Path, SpockCtxT, (<//>), get, getContext, html, prehook, root
     , redirect, renderRoute, runSpock, setStatus, spockT, text, var )
 
-import Kucipong.Db ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..), adminLoginTokenExpirationTime )
+import Kucipong.Db
+    ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..)
+    , adminLoginTokenExpirationTime )
 import Kucipong.LoginToken ( LoginToken )
-import Kucipong.Monad ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
-import Kucipong.Spock ( getAdminCookie, setAdminCookie )
-import Kucipong.Session ( Admin, Session )
+import Kucipong.Monad
+    ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
+import Kucipong.Spock
+    ( ContainsAdminSession, getAdminCookie, getAdminEmail, setAdminCookie )
+import Kucipong.Session ( Admin, Session(..) )
 import Kucipong.Util ( fromMaybeM )
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
@@ -54,11 +58,15 @@ login loginToken = do
 
 -- | Return the store create page for an admin.
 storeCreate
-    :: forall ctx m
-     . ( MonadIO m
+    :: forall xs n m
+     . ( ContainsAdminSession n xs
+       , MonadIO m
        )
-    => ActionCtxT ctx m ()
-storeCreate = undefined
+    => ActionCtxT (HVect xs) m ()
+storeCreate = do
+    (AdminSession email) <- getAdminEmail
+    -- TODO: Actually return the correct html from here.
+    html $ "admin email: " <> tshow email
 
 adminAuthHook
     :: ( MonadIO m
@@ -68,7 +76,9 @@ adminAuthHook
 adminAuthHook = do
     maybeAdminSession <- getAdminCookie
     case maybeAdminSession of
-        Nothing -> undefined
+        -- TODO: Need to return an error page here that tells the user they
+        -- need to be logged in as an admin to access this page.
+        Nothing -> html "<p>Need to be logged in as admin in order to access this page.</p>"
         Just adminSession -> do
             oldCtx <- getContext
             return $ adminSession :&: oldCtx
