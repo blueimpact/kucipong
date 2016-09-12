@@ -6,6 +6,7 @@ module Kucipong.Session
     , Admin
     , Store
       -- * Helper functions for encrypting / decrypting a 'Session'
+    , decryptSessionGeneric
     , encryptSession
       -- * Classes and functions dealing with Session Key
     , HasSessionKey(..)
@@ -14,8 +15,8 @@ module Kucipong.Session
 
 import Kucipong.Prelude
 
-import "emailaddress" Text.Email.Validate ( toByteString )
-import Web.ClientSession ( Key, encryptIO )
+import "emailaddress" Text.Email.Validate ( emailAddress, toByteString )
+import Web.ClientSession ( Key, decrypt, encryptIO )
 
 class HasSessionKey r where
     getSessionKey :: r -> Key
@@ -53,3 +54,17 @@ encryptEmail email = do
     key <- reader getSessionKey
     encryptedEmail <- liftIO . encryptIO key $ toByteString email
     pure $ decodeUtf8 encryptedEmail
+
+decryptSessionGeneric
+    :: ( HasSessionKey r
+       , MonadReader r m
+       )
+    => (EmailAddress -> Session sessionType)
+    -> Text
+    -> m (Maybe (Session sessionType))
+decryptSessionGeneric createSessionFun encryptedSession = do
+    key <- reader getSessionKey
+    pure $
+        decrypt key (encodeUtf8 encryptedSession) >>=
+        emailAddress >>=
+        Just . createSessionFun

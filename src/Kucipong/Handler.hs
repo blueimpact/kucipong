@@ -3,7 +3,10 @@ module Kucipong.Handler where
 
 import Kucipong.Prelude
 
-import Web.Spock ( Path, (<//>), get, html, root, runSpock, spockT, subcomponent, text, var )
+import Data.HVect ( HVect(HNil) )
+import Web.Spock
+    ( ActionCtxT, Path, (<//>), get, html, prehook, root, runSpock, spockT, subcomponent
+    , text, var )
 
 import Kucipong.Config ( Config )
 import Kucipong.Handler.Admin ( adminComponent )
@@ -25,10 +28,14 @@ addR = "calculator" <//> var <//> "+" <//> var
 runKucipongMHandleErrors :: Config -> KucipongM a -> IO a
 runKucipongMHandleErrors config = either throwIO pure <=< runKucipongM config
 
+baseHook :: Monad m => ActionCtxT () m (HVect '[])
+baseHook = pure HNil
+
 app :: Config -> IO ()
 app config = runSpock (getPort config) $
     spockT (runKucipongMHandleErrors config) $ do
-        subcomponent "admin" adminComponent
+        prehook baseHook $
+            subcomponent "admin" adminComponent
         get root $ do
             -- dbLoginUser undefined undefined
             html "<p>hello world</p>"

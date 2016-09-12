@@ -11,7 +11,9 @@ import Web.Spock
 import Kucipong.Environment ( Environment(Production), HasEnv(getEnv) )
 import Kucipong.Monad.Cookie.Class ( MonadKucipongCookie(..) )
 import Kucipong.Monad.Cookie.Trans ( KucipongCookieT(..) )
-import Kucipong.Session ( HasSessionKey, Session, encryptSession )
+import Kucipong.Session
+    ( Admin, HasSessionKey, Session(AdminSession, StoreSession), Store
+    , decryptSessionGeneric, encryptSession )
 import Kucipong.Util ( oneYear )
 
 instance
@@ -39,3 +41,11 @@ instance
 
     encryptSessionCookie :: Session sessionType -> KucipongCookieT m Text
     encryptSessionCookie = lift . encryptSession
+
+    decryptAdminSessionCookie
+        :: Text -> KucipongCookieT m (Maybe (Session Admin))
+    decryptAdminSessionCookie = decryptSessionGeneric AdminSession
+
+    decryptStoreSessionCookie
+        :: Text -> KucipongCookieT m (Maybe (Session Store))
+    decryptStoreSessionCookie = decryptSessionGeneric StoreSession
