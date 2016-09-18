@@ -10,3 +10,22 @@ other libraries but that we use here.
 -}
 
 module Kucipong.Orphans where
+
+import ClassyPrelude
+
+import Control.Monad.Logger ( LoggingT, MonadLogger )
+import Control.Monad.Random ( MonadRandom(..) )
+import Language.Haskell.TH ( Q, runIO )
+import Web.Spock ( ActionCtxT )
+
+instance MonadRandom m => MonadRandom (LoggingT m) where
+    getRandom = lift getRandom
+    getRandomR = lift . getRandomR
+    getRandoms = lift getRandoms
+    getRandomRs = lift . getRandomRs
+
+instance MonadLogger m => MonadLogger (ActionCtxT ctx m)
+
+instance MonadIO Q where
+    liftIO :: IO a -> Q a
+    liftIO = runIO
