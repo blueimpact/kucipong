@@ -79,3 +79,25 @@ $ make build
 $ export KUCIPONG_MAILGUN_APIKEY="key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 $ stack exec -- kucipong-add-admin kucipong.dev@gmail.com "Some User Name"
 ```
+
+The email will include a url like this: http://localhost:8101/admin/login/4on%2FXBbDmKxFE%2F9pA3gw0m5T2BNhJNDGiZfcgpsKS7rEHEursYi8%2Bm3Fn3l%2FTZRQ%2FPc%3D
+
+This url can be accessed with `curl` in order to get an admin cookie:
+
+```bash
+$ curl -v 'http://localhost:8101/admin/login/4on%2FXBbDmKxFE%2F9pA3gw0m5T2BNhJNDGiZfcgpsKS7rEHEursYi8%2Bm3Fn3l%2FTZRQ%2FPc%3D'
+...
+HTTP/1.1 302 Found
+Transfer-Encoding: chunked
+Date: Sun, 18 Sep 2016 02:00:04 GMT
+Server: Warp/3.2.8
+Location: /
+Set-Cookie: adminEmail=wv6kyV14ZoF5tMlVLrBP%2FgPLkvEFKog2Lvu%2F8PY4zt4tWbQwbki7hG3Mn83Zilr6LTGWdphD4mnDL96RvMbcxWj1rZbhfQ%3D%3D; path=/; max-age=31536000; expires=Mon, 18-Sep-2017 02:00:04 UTC; HttpOnly
+...
+```
+
+This admin cookie can be used to access login-protected urls:
+
+```bash
+$ curl --cookie "adminEmail=wv6kyV14ZoF5tMlVLrBP%2FgPLkvEFKog2Lvu%2F8PY4zt4tWbQwbki7hG3Mn83Zilr6LTGWdphD4mnDL96RvMbcxWj1rZbhfQ%3D%3D" 'http://localhost:8101/admin/store/create'
+```
