@@ -14,4 +14,7 @@ import Data.Proxy as X ( Proxy(Proxy) )
 import Data.Word as X ( Word16 )
 import "emailaddress" Text.Email.Validate as X ( EmailAddress )
 
+-- Orphan instances
+
 import Kucipong.Orphans as X ()
+import Instances.TH.Lift as X ()

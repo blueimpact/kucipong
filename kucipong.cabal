@@ -82,6 +82,7 @@ library
                      , shakespeare
                      , Spock
                      , template-haskell
+                     , th-lift-instances
                      , time
                      , transformers
                      , transformers-base
