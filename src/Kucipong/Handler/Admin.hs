@@ -5,9 +5,11 @@ import Kucipong.Prelude
 
 import Control.Lens ( (^.) )
 import Control.Monad.Time ( MonadTime(..) )
+import Data.Aeson ( (.=) )
 import Data.HVect ( HVect(..) )
 import Database.Persist ( Entity(..) )
 import Network.HTTP.Types ( forbidden403 )
+import Text.EDE ( eitherParse, eitherRender, fromPairs )
 import Web.Spock
     ( ActionCtxT, Path, SpockCtxT, (<//>), get, getContext, html, prehook, root
     , redirect, renderRoute, runSpock, setStatus, spockT, text, var )
@@ -21,7 +23,7 @@ import Kucipong.Monad
 import Kucipong.Spock
     ( ContainsAdminSession, getAdminCookie, getAdminEmail, setAdminCookie )
 import Kucipong.Session ( Admin, Session(..) )
-import Kucipong.Util ( fromMaybeM )
+import Kucipong.Util ( fromEitherM, fromMaybeM )
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
@@ -66,7 +68,18 @@ storeCreate
 storeCreate = do
     (AdminSession email) <- getAdminEmail
     -- TODO: Actually return the correct html from here.
-    html $ "admin email: " <> tshow email
+    let rawTemplate = "{{ hello }}{% if var %}\nHello, {{ var }}!\n{% else %}\nnegative!\n{% endif %}\n"
+        env = fromPairs [ "var1" .= ("World" :: Text) ]
+        eitherParsedTemplate = eitherParse rawTemplate
+    template <- fromEitherM
+        (html . ("err occured when parsing template: " <>) . pack)
+        eitherParsedTemplate
+    let eitherRenderedTemplate = eitherRender template env
+    renderedTemplate <- fromEitherM
+        (html . ("err occured when trying to render template: " <>) . pack)
+        eitherRenderedTemplate
+    html . toStrict $ "rendered template: " <> renderedTemplate
+    -- $(renderTemplateFromEnv "adminUser_admin_store_create.html")
 
 adminAuthHook
     :: ( MonadIO m
