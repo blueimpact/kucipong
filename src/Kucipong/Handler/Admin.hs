@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 
 module Kucipong.Handler.Admin where
 
@@ -63,6 +64,7 @@ storeCreate
     :: forall xs n m
      . ( ContainsAdminSession n xs
        , MonadIO m
+       , MonadLogger m
        )
     => ActionCtxT (HVect xs) m ()
 storeCreate = do
@@ -102,6 +104,7 @@ adminComponent
        , MonadKucipongCookie m
        , MonadKucipongDb m
        , MonadKucipongSendEmail m
+       , MonadLogger m
        , MonadTime m
        )
     => SpockCtxT (HVect xs) m ()
