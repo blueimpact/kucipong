@@ -70,21 +70,8 @@ storeCreate
     => ActionCtxT (HVect xs) m ()
 storeCreate = do
     (AdminSession email) <- getAdminEmail
-    -- TODO: Actually return the correct html from here.
-    let rawTemplate = "{% if var %}\nHello, {{ var }}!\n{% else %}\nnegative!\n{% endif %}\n"
-        env = fromPairs [ "var1" .= ("World" :: Text) ]
-        eitherParsedTemplate = eitherParse rawTemplate
-    template <- fromEitherM
-        (html . ("err occured when parsing template: " <>) . pack)
-        eitherParsedTemplate
-    let eitherRenderedTemplate = eitherRender template env
-    renderedTemplate <- fromEitherM
-        (html . ("err occured when trying to render template: " <>) . pack)
-        eitherRenderedTemplate
-    let lala = $(renderTemplateFromEnv "adminUser_admin_store_create.html")
-    $(logDebug) $ lala
-    html . toStrict $ "rendered template: " <> renderedTemplate
-    -- $(renderTemplateFromEnv "adminUser_admin_store_create.html")
+    $(renderTemplateFromEnv "adminUser_admin_store_create.html") $ fromPairs
+        [ "adminEmail" .= email ]
 
 adminAuthHook
     :: ( MonadIO m
