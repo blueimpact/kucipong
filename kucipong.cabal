@@ -46,6 +46,7 @@ library
                      , Kucipong.Monad.SendEmail.Trans
                      , Kucipong.Orphans
                      , Kucipong.Prelude
+                     , Kucipong.RenderTemplate
                      , Kucipong.Session
                      , Kucipong.Spock
                      , Kucipong.Util
@@ -80,6 +81,7 @@ library
                      , resource-pool
                      , shakespeare
                      , Spock
+                     , template-haskell
                      , time
                      , transformers
                      , transformers-base

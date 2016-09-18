@@ -21,6 +21,7 @@ import Kucipong.Db
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad
     ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
+import Kucipong.RenderTemplate ( renderTemplateFromEnv )
 import Kucipong.Spock
     ( ContainsAdminSession, getAdminCookie, getAdminEmail, setAdminCookie )
 import Kucipong.Session ( Admin, Session(..) )
@@ -70,7 +71,7 @@ storeCreate
 storeCreate = do
     (AdminSession email) <- getAdminEmail
     -- TODO: Actually return the correct html from here.
-    let rawTemplate = "{{ hello }}{% if var %}\nHello, {{ var }}!\n{% else %}\nnegative!\n{% endif %}\n"
+    let rawTemplate = "{% if var %}\nHello, {{ var }}!\n{% else %}\nnegative!\n{% endif %}\n"
         env = fromPairs [ "var1" .= ("World" :: Text) ]
         eitherParsedTemplate = eitherParse rawTemplate
     template <- fromEitherM
@@ -80,6 +81,8 @@ storeCreate = do
     renderedTemplate <- fromEitherM
         (html . ("err occured when trying to render template: " <>) . pack)
         eitherRenderedTemplate
+    let lala = $(renderTemplateFromEnv "adminUser_admin_store_create.html")
+    $(logDebug) $ lala
     html . toStrict $ "rendered template: " <> renderedTemplate
     -- $(renderTemplateFromEnv "adminUser_admin_store_create.html")
 
