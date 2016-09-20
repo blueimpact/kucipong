@@ -4,6 +4,7 @@ module Components.SubmitArea.Types exposing (..)
 # Common
 
 @docs InputField
+@docs Location
 
 # Input box
 
@@ -17,6 +18,8 @@ module Components.SubmitArea.Types exposing (..)
 @docs InputRangeConfig
 @docs InputPlaceConfig
 @docs InputPlaceInput
+@docs InputLocationConfig
+@docs InputLocationInput
 
 # Select box
 
@@ -38,6 +41,12 @@ import Maybe.Extra as Maybe
 import String
 
 
+type alias Location =
+  { latitude : Float
+  , longitude : Float
+  }
+
+
 type InputField
   = InputNone
 
@@ -53,6 +62,7 @@ type InputField
   | InputDateTime InputDateTimeConfig
   | InputRange InputRangeConfig
   | InputPlace InputPlaceConfig
+  | InputLocation InputLocationConfig
   | SelectList SelectListConfig
   | SelectPhoto SelectPhotoConfig
   | MultiSelect MultiSelectConfig
@@ -93,6 +103,8 @@ calcNextKey a =
       toString c.input
     InputPlace c ->
       toString c.input.region
+    InputLocation c ->
+      toString (c.input.latitude, c.input.longitude)
     SelectList c ->
       c.input
     SelectPhoto c ->
@@ -140,6 +152,8 @@ formatInputField a =
       c.input.streetAddress ++ " " ++
       c.input.extendedAddress ++ " " ++
       c.input.building
+    InputLocation c ->
+      toString (c.input.latitude, c.input.longitude)
 
     SelectList c ->
       let
@@ -202,6 +216,13 @@ type alias InputPlaceInput =
   , extendedAddress : String
   , building : String
   }
+
+
+type alias InputLocationConfig =
+  { input : InputLocationInput }
+
+
+type alias InputLocationInput = Location
 
 
 type alias FamilyName = String

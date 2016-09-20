@@ -432,6 +432,9 @@ view model =
     InputPlace config ->
       renderInputPlace config
 
+    InputLocation config ->
+      renderInputLocation config
+
     SelectList config ->
       renderSelectList config
 
@@ -825,6 +828,24 @@ renderInputPlace c =
           , src "../img/airplane-white-bold.svg"
           , alt "送信する"
           ] []
+        ]
+      ]
+    ]
+
+
+-- TODO It's just a dummy.
+renderInputLocation : InputLocationConfig -> Html Msg
+renderInputLocation c =
+  Html.form
+    [ class "submitArea"
+    , onSubmit (OnSubmit (InputLocation c))
+    ]
+    [ div [class "submit"]
+      [ button
+        [ class "btn default"
+        , type' "submit"
+        ]
+        [ text "送信する"
         ]
       ]
     ]

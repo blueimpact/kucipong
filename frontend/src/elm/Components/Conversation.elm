@@ -32,7 +32,7 @@ type alias Model = Conversation
 
 init : (Model, Cmd Msg)
 init =
-  ( { getTalkKey = "tags"
+  ( { getTalkKey = "hello"
     , dict = dict
     }
   , Cmd.none
@@ -145,7 +145,47 @@ putDefaultUserSettings settings model =
 
 dict : Dict.Dict String Question
 dict = Dict.fromList
-  [ ( "tags"
+  [ ( "hello"
+    , { question =
+        { speaker = AI
+        , feeling = Just FeelNormal
+        , balloons =
+          [ [ { ptag = PlainParagraph
+              , value = "kucipong は、私がご主人様（あなた）のために、ご主人様にピッタリなクーポンを見つけ出すサービスですにゃ"
+              }
+            ]
+          ]
+        }
+      , submitType =
+        InputConfirm
+          { input = "OK"
+          , label = "いいね！"
+          }
+      , next = always "area"
+      }
+    )
+  , ( "area"
+    , { question =
+        { speaker = AI
+        , feeling = Just FeelNormal
+        , balloons =
+          [ [ { ptag = PlainParagraph
+              , value = "Area"
+              }
+            ]
+          ]
+        }
+      , submitType =
+        InputLocation
+          { input =
+            { latitude = 0
+            , longitude = 0
+            }
+          }
+      , next = always "tags"
+      }
+    )
+  , ( "tags"
     , { question =
         { speaker = AI
         , feeling = Just FeelNormal

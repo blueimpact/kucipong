@@ -4,8 +4,9 @@ module Components.UserSettings.Types exposing (..)
 # Common
 
 @docs UserSettings
-@docs Location
 -}
+
+import Components.SubmitArea.Types exposing (Location)
 
 
 type alias UserSettings =
@@ -13,10 +14,4 @@ type alias UserSettings =
   , tags : List Int
   , favorites : List Int
   , history : List Int
-  }
-
-
-type alias Location =
-  { latitude : Float
-  , longitude : Float
   }
