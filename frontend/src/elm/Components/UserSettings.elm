@@ -2,7 +2,11 @@ port module Components.UserSettings
   exposing
     ( Model
     , Location
-    , Msg (OnLoadUserSettings)
+    , Msg
+      ( OnLoadUserSettings
+      , AskStoreUserSetting
+      , OnStoreUserSetting
+      )
     , init
     , update
     , subscriptions
@@ -10,23 +14,33 @@ port module Components.UserSettings
 {-| Module to store user settings.
 -}
 
+import List
+import Result
+import String
+
+import Components.Conversation.Types exposing (..)
+import Components.SubmitArea.Types exposing (..)
+
 
 
 -- PORTS
 
-port askStoreUserSettings : Model -> Cmd msg
-port onStoreUserSettings : (() -> msg) -> Sub msg
+port askStoreUserSettings : { key : TalkKey, settings : Model } -> Cmd msg
+port onStoreUserSettings : (TalkKey -> msg) -> Sub msg
 
 
 port askLoadUserSettings : () -> Cmd msg
-port onLoadUserSettings : (Model -> msg) -> Sub msg
+port onLoadUserSettings : ((Maybe UserSettings) -> msg) -> Sub msg
 
 
 
 -- MODEL
 
 
-type alias Model = Maybe
+type alias Model = UserSettings
+
+
+type alias UserSettings =
   { areas : List Location
   , tags : List Int
   , favorites : List Int
@@ -42,7 +56,11 @@ type alias Location =
 
 init : (Model, Cmd Msg)
 init =
-  ( Nothing
+  ( { areas = []
+    , tags = []
+    , favorites = []
+    , history = []
+    }
   , askLoadUserSettings ()
   )
 
@@ -52,24 +70,39 @@ init =
 
 
 type Msg
-  = OnStoreUserSettings
-  | OnLoadUserSettings Model
+  = OnLoadUserSettings (Maybe Model)
+  | AskStoreUserSetting TalkKey InputField
+  | OnStoreUserSetting TalkKey
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    OnStoreUserSettings ->
+    OnLoadUserSettings Nothing ->
       ( model
       , Cmd.none
       )
 
-    OnLoadUserSettings model' ->
-      Debug.log "onload"
+    OnLoadUserSettings (Just model') ->
       ( model'
       , Cmd.none
       )
 
+    AskStoreUserSetting key input ->
+      let
+        model' = updateUserSettings key input model
+      in
+        ( model'
+        , askStoreUserSettings
+          { key = key
+          , settings = model'
+          }
+        )
+
+    OnStoreUserSetting _ ->
+      ( model
+      , Cmd.none
+      )
 
 
 -- SUBSCRIPTIONS
@@ -78,6 +111,39 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ onStoreUserSettings (always OnStoreUserSettings)
+    [ onStoreUserSettings OnStoreUserSetting
     , onLoadUserSettings OnLoadUserSettings
     ]
+
+
+
+-- HELPER FUNCTIONS
+
+
+updateUserSettings : TalkKey -> InputField -> UserSettings -> UserSettings
+updateUserSettings key input model =
+  case Debug.log "key" key of
+    "area" ->
+      { model
+      | areas = takeLocation input :: model.areas
+      }
+    "tags" ->
+      { model
+      | tags = takeTags input
+      }
+    _ -> model
+
+takeLocation : InputField -> Location
+takeLocation _ =
+  { latitude = 0
+  , longitude = 0
+  }
+
+takeTags : InputField -> List Int
+takeTags input = Debug.log "takeTags" <|
+  case Debug.log "tagsInput" input of
+    MultiSelect { inputs } ->
+      List.filterMap
+        (String.toInt >> Result.toMaybe)
+        inputs
+    _ -> []

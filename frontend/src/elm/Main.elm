@@ -88,6 +88,12 @@ update message model =
                   TalkArea.PushNewUserString <|
                   formatInputField input
                 )
+              , Cmd.map UserSettings
+                ( cmdSucceed <|
+                  UserSettings.AskStoreUserSetting
+                    model.conversation.getTalkKey
+                    input
+                )
               , Cmd.map Conversation
                 ( cmdSucceed <|
                   Conversation.LoadNextQuestion input

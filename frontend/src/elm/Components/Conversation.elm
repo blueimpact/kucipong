@@ -32,7 +32,7 @@ init =
   let
     -- TODO: Also store current question
     model =
-      { getTalkKey = "1"
+      { getTalkKey = "tags"
       , dict = dict
       }
     cmd = case Dict.get model.getTalkKey model.dict of
@@ -109,20 +109,35 @@ subscriptions model =
 
 dict : Dict.Dict String Question
 dict = Dict.fromList
-  [ ( "1"
+  [ ( "tags"
     , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "Test"
+              , value = "Tags"
               }
             ]
           ]
         }
       , submitType =
-        InputString
-          { input = "Hi!"
+        MultiSelect
+          { inputs = []
+          , selection =
+            [ { label = "タグ1"
+              , value = "1"
+              }
+            , { label = "タグ2"
+              , value = "2"
+              }
+            , { label = "タグ3"
+              , value = "3"
+              }
+            , { label = "タグ4"
+              , value = "4"
+              }
+            ]
+          , maximum = 2
           }
       , next = always "2"
       }
