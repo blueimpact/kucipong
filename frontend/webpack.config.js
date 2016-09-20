@@ -36,6 +36,9 @@ const commonConfig = {
   resolve: {
     modulesDirectories: ['node_modules'],
     extensions: ['', '.js', '.elm'],
+    root: [
+      path.resolve('src/elm'),
+    ]
   },
 
   module: {

@@ -4,14 +4,17 @@
     "repository": "https://github.com/blueimpact/kucipong.git",
     "license": "MIT",
     "source-directories": [
-        "src"
+        "src/elm"
     ],
     "exposed-modules": [],
     "dependencies": {
+        "elm-community/list-extra": "3.1.0 <= v < 4.0.0",
+        "elm-community/maybe-extra": "1.1.0 <= v < 2.0.0",
         "elm-lang/core": "4.0.0 <= v < 5.0.0",
         "elm-lang/html": "1.0.0 <= v < 2.0.0",
         "evancz/elm-http": "3.0.1 <= v < 4.0.0",
-        "evancz/elm-markdown": "3.0.0 <= v < 4.0.0"
+        "evancz/elm-markdown": "3.0.0 <= v < 4.0.0",
+        "justinmimbs/elm-date-extra": "2.0.0 <= v < 3.0.0"
     },
     "elm-version": "0.17.0 <= v < 0.18.0"
 }
