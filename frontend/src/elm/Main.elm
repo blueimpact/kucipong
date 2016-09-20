@@ -118,14 +118,37 @@ update message model =
     UserSettings msg ->
       let
         (model', cmd') = UserSettings.update msg model.userSettings
+        newModel =
+          { model
+          | userSettings = model'
+          }
+        newCmd = Cmd.map UserSettings cmd'
       in
-        ( { model | userSettings = model' }
-        , Cmd.batch
-          [ Cmd.map UserSettings cmd'
-          -- TODO
-          -- , loadNewConversation model'
-          ]
-        )
+        case msg of
+          UserSettings.OnLoadUserSettings (Just settings) ->
+            ( newModel
+            , Cmd.batch
+              [ Cmd.map Conversation
+                ( cmdSucceed <|
+                  Conversation.PutDefaultUserSettings settings
+                )
+              , newCmd
+              ]
+            )
+          UserSettings.OnLoadUserSettings Nothing ->
+            ( newModel
+            , Cmd.batch
+              [ Cmd.map Conversation
+                ( cmdSucceed <|
+                  Conversation.LoadInitialQuestion
+                )
+              , newCmd
+              ]
+            )
+          _ ->
+            ( newModel
+            , newCmd
+            )
 
     Conversation msg ->
       let
@@ -179,6 +202,8 @@ subscriptions model =
   Sub.batch
     [ Sub.map TalkArea <| TalkArea.subscriptions model.talkArea
     , Sub.map SubmitArea <| SubmitArea.subscriptions model.submitArea
+    , Sub.map Conversation <| Conversation.subscriptions model.conversation
+    , Sub.map UserSettings <| UserSettings.subscriptions model.userSettings
     ]
 
 

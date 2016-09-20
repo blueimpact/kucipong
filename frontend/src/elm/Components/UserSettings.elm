@@ -1,7 +1,6 @@
 port module Components.UserSettings
   exposing
     ( Model
-    , Location
     , Msg
       ( AskLoadUserSettings
       , OnLoadUserSettings
@@ -21,6 +20,7 @@ import String
 
 import Components.Conversation.Types exposing (..)
 import Components.SubmitArea.Types exposing (..)
+import Components.UserSettings.Types exposing (..)
 import Util exposing (cmdSucceed)
 
 
@@ -40,20 +40,6 @@ port onLoadUserSettings : ((Maybe UserSettings) -> msg) -> Sub msg
 
 
 type alias Model = UserSettings
-
-
-type alias UserSettings =
-  { areas : List Location
-  , tags : List Int
-  , favorites : List Int
-  , history : List Int
-  }
-
-
-type alias Location =
-  { latitude : Float
-  , longitude : Float
-  }
 
 
 init : (Model, Cmd Msg)

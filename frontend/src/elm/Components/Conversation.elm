@@ -1,9 +1,11 @@
 module Components.Conversation exposing
   ( Model
   , Msg
-    ( LoadNextQuestion
+    ( LoadInitialQuestion
+    , LoadNextQuestion
     , OnLoadNextQuestion
     , OnErrorLoadNextQuestion
+    , PutDefaultUserSettings
     )
   , init
   , update
@@ -18,6 +20,7 @@ import Dict
 import Components.Conversation.Types exposing (..)
 import Components.SubmitArea.Types exposing (..)
 import Components.TalkArea.Types exposing (..)
+import Components.UserSettings.Types exposing (..)
 import Util exposing (cmdSucceed)
 
 
@@ -29,21 +32,11 @@ type alias Model = Conversation
 
 init : (Model, Cmd Msg)
 init =
-  let
-    -- TODO: Also store current question
-    model =
-      { getTalkKey = "tags"
-      , dict = dict
-      }
-    cmd = case Dict.get model.getTalkKey model.dict of
-      Nothing ->
-        cmdSucceed <| OnErrorLoadNextQuestion
-      Just q ->
-        cmdSucceed <| OnLoadNextQuestion q
-  in
-    ( model
-    , cmd
-    )
+  ( { getTalkKey = "tags"
+    , dict = dict
+    }
+  , Cmd.none
+  )
 
 
 
@@ -51,14 +44,25 @@ init =
 
 
 type Msg
-  = LoadNextQuestion InputField
+  = LoadInitialQuestion
+  | LoadNextQuestion InputField
   | OnLoadNextQuestion Question
   | OnErrorLoadNextQuestion
+  | PutDefaultUserSettings UserSettings
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
   case message of
+    LoadInitialQuestion ->
+      ( model
+      , cmdSucceed <|
+        case Dict.get model.getTalkKey model.dict of
+          Nothing ->
+            OnErrorLoadNextQuestion
+          Just q ->
+            OnLoadNextQuestion q
+      )
     LoadNextQuestion input ->
       let
         maybeNext =
@@ -93,6 +97,11 @@ update message model =
       , Cmd.none
       )
 
+    PutDefaultUserSettings settings ->
+      ( putDefaultUserSettings settings model
+      , cmdSucceed LoadInitialQuestion
+      )
+
 
 
 -- SUBSCRIPTIONS
@@ -101,6 +110,33 @@ update message model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
+
+
+
+-- HELPER FUNCTIONS
+
+
+putDefaultUserSettings : UserSettings -> Model -> Model
+putDefaultUserSettings settings model =
+  { model
+  | dict =
+    Dict.update "tags"
+      (Maybe.map
+        (\tags ->
+          { tags
+          | submitType =
+            case tags.submitType of
+              MultiSelect c ->
+                MultiSelect
+                  { c
+                  | inputs = List.map toString settings.tags
+                  }
+              a -> a
+          }
+        )
+      )
+      model.dict
+  }
 
 
 

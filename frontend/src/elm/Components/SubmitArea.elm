@@ -937,7 +937,7 @@ renderMultiSelect c =
                   , class "checkboxWrapper_checkbox"
                   , onCheck (OnCheckMultiSelect c select.value)
                   , checked
-                    <| List.member select.value c.inputs
+                    <| List.member select.value (Debug.log "inputs" c.inputs)
                   ]
                   []
                 , label
