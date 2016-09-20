@@ -3,7 +3,8 @@ port module Components.UserSettings
     ( Model
     , Location
     , Msg
-      ( OnLoadUserSettings
+      ( AskLoadUserSettings
+      , OnLoadUserSettings
       , AskStoreUserSetting
       , OnStoreUserSetting
       )
@@ -20,6 +21,7 @@ import String
 
 import Components.Conversation.Types exposing (..)
 import Components.SubmitArea.Types exposing (..)
+import Util exposing (cmdSucceed)
 
 
 
@@ -61,7 +63,7 @@ init =
     , favorites = []
     , history = []
     }
-  , askLoadUserSettings ()
+  , cmdSucceed AskLoadUserSettings
   )
 
 
@@ -70,7 +72,8 @@ init =
 
 
 type Msg
-  = OnLoadUserSettings (Maybe Model)
+  = AskLoadUserSettings
+  | OnLoadUserSettings (Maybe Model)
   | AskStoreUserSetting TalkKey InputField
   | OnStoreUserSetting TalkKey
 
@@ -78,6 +81,10 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    AskLoadUserSettings ->
+      ( model
+      , askLoadUserSettings ()
+      )
     OnLoadUserSettings Nothing ->
       ( model
       , Cmd.none
@@ -122,7 +129,7 @@ subscriptions model =
 
 updateUserSettings : TalkKey -> InputField -> UserSettings -> UserSettings
 updateUserSettings key input model =
-  case Debug.log "key" key of
+  case key of
     "area" ->
       { model
       | areas = takeLocation input :: model.areas
@@ -140,8 +147,8 @@ takeLocation _ =
   }
 
 takeTags : InputField -> List Int
-takeTags input = Debug.log "takeTags" <|
-  case Debug.log "tagsInput" input of
+takeTags input =
+  case input of
     MultiSelect { inputs } ->
       List.filterMap
         (String.toInt >> Result.toMaybe)
