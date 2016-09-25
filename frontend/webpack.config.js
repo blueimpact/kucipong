@@ -17,10 +17,16 @@ const ENV = TARGET_ENV === 'production' ?
     'apiRoot': JSON.stringify(
       process.env.API_ROOT || 'http://kucipong.com/api/v0/'
     ),
+    'googleMapApiKey': JSON.stringify(
+      process.env.GOOGLE_MAP_API_KEY || ''
+    ),
   } :
   {
     'apiRoot': JSON.stringify(
       process.env.API_ROOT || 'http://localhost:8081/v0/'
+    ),
+    'googleMapApiKey': JSON.stringify(
+      process.env.GOOGLE_MAP_API_KEY || ''
     ),
   };
 

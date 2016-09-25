@@ -25,3 +25,22 @@ app.ports.askLoadUserSettings.subscribe(function() {
   }
   app.ports.onLoadUserSettings.send(settings);
 });
+
+// Google Map API
+var googleMapApiKey = process.env.googleMapApiKey
+window.onLoadMapApi = function() {
+  app.ports.onLoadGoogleMapApi.send(googleMapApiKey);
+  app.ports.askGetGeocode.subscribe(function(address) {
+    var geocoder = new google.maps.Geocoder();
+    geocoder.geocode({'address': address}, function(results, status) {
+      if (status === google.maps.GeocoderStatus.OK) {
+        app.ports.onGetGeocode.send({
+          latitude: results[0].geometry.location.lat(),
+          longitude: results[0].geometry.location.lng()
+        });
+      } else {
+        app.ports.onErrorGetGeocode.send(status);
+      }
+    });
+  });
+}

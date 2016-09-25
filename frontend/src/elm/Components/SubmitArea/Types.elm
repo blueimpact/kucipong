@@ -104,7 +104,7 @@ calcNextKey a =
     InputPlace c ->
       toString c.input.region
     InputLocation c ->
-      toString (c.input.latitude, c.input.longitude)
+      toString c.input.address
     SelectList c ->
       c.input
     SelectPhoto c ->
@@ -153,7 +153,7 @@ formatInputField a =
       c.input.extendedAddress ++ " " ++
       c.input.building
     InputLocation c ->
-      toString (c.input.latitude, c.input.longitude)
+      c.input.address
 
     SelectList c ->
       let
@@ -222,7 +222,10 @@ type alias InputLocationConfig =
   { input : InputLocationInput }
 
 
-type alias InputLocationInput = Location
+type alias InputLocationInput =
+  { location : Location
+  , address : String
+  }
 
 
 type alias FamilyName = String

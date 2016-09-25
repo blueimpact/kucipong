@@ -158,14 +158,20 @@ update message model =
       in
         case msg of
           Conversation.OnLoadNextQuestion q ->
-            ( { newModel
-              | submitArea = q.submitType
-              }
-            , Cmd.batch
-              [ Cmd.map TalkArea
-                (cmdSucceed <| TalkArea.PushTalkBlock q.question)
-              ]
-            )
+            let
+              submitArea = newModel.submitArea
+            in
+              ( { newModel
+                | submitArea =
+                  { submitArea
+                  | inputField = q.submitType
+                  }
+                }
+              , Cmd.batch
+                [ Cmd.map TalkArea
+                  (cmdSucceed <| TalkArea.PushTalkBlock q.question)
+                ]
+              )
 
           _ ->
             ( newModel

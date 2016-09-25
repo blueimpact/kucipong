@@ -12,27 +12,46 @@ import Date
 import Date.Extra as Date
 import Date.Extra.Facts as Date
 import Html exposing (..)
+import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import List.Extra as List
 import Regex
 
+import Components.Geocode as Geocode
 import Components.SubmitArea.Types exposing (..)
-import Util exposing (onChange, onChangeInt, onInputInt, intValue)
+import Util exposing
+  ( onChange
+  , onChangeInt
+  , onInputInt
+  , intValue
+  , cmdSucceed
+  )
 
 
 
 -- MODEL
 
 
-type alias Model = InputField
+type alias Model =
+  { inputField : InputField
+  , geocode : Geocode.Model
+  }
 
 
 init : (Model, Cmd Msg)
 init =
-  ( InputNone
-  , Cmd.none
-  )
+  let
+    (mGeocode, cGeocode) = Geocode.init
+  in
+    ( { inputField = InputNone
+      , geocode = mGeocode
+      }
+    , Cmd.batch
+      [ Cmd.none
+      , Cmd.map Geocode cGeocode
+      ]
+    )
 
 
 
@@ -65,63 +84,81 @@ type Msg
   | OnSelectPhoto SelectPhotoConfig String
   | OnCheckMultiSelect MultiSelectConfig String Bool
   | OnInputTextArea TextAreaConfig String
+  | OnInputLocation InputLocationConfig String
+  | Geocode Geocode.Msg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     OnSubmit input ->
-      ( InputNone
+      ( { model
+        | inputField = InputNone
+        }
       , Cmd.none
       )
 
     OnInputString c val ->
-      ( InputString
-        { c | input = val }
+      ( { model
+        | inputField = InputString
+          { c | input = val }
+        }
       , Cmd.none
       )
 
     OnInputEmail c val ->
-      ( InputEmail
-        { c | input = val }
+      ( { model
+        | inputField = InputEmail
+          { c | input = val }
+        }
       , Cmd.none
       )
 
     OnInputPhoneNumber c val ->
-      ( InputPhoneNumber
-        { c | input = val }
+      ( { model
+        | inputField = InputPhoneNumber
+          { c | input = val }
+        }
       , Cmd.none
       )
 
     OnInputPostalCode c val ->
-      ( InputPostalCode
-        { c | input = val }
+      ( { model
+        | inputField = InputPostalCode
+          { c | input = val }
+        }
       , Cmd.none
       )
 
     OnInputFamilyName c fam ->
-      ( InputName
-        { c | input =
-          { family = fam
-          , given = c.input.given
+      ( { model
+        | inputField = InputName
+          { c | input =
+            { family = fam
+            , given = c.input.given
+            }
           }
         }
       , Cmd.none
       )
 
     OnInputGivenName c given ->
-      ( InputName
-        { c | input =
-          { family = c.input.family
-          , given = given
+      ( { model
+        | inputField = InputName
+          { c | input =
+            { family = c.input.family
+            , given = given
+            }
           }
         }
       , Cmd.none
       )
 
     OnInputRange c v ->
-      ( InputRange
-        { c | input = v
+      ( { model
+        | inputField = InputRange
+          { c | input = v
+          }
         }
       , Cmd.none
       )
@@ -130,11 +167,13 @@ update msg model =
       let
         input = c.input
       in
-      ( InputPlace
-        { c
-        | input =
-          { input
-          | region = val
+      ( { model
+        | inputField = InputPlace
+          { c
+          | input =
+            { input
+            | region = val
+            }
           }
         }
       , Cmd.none
@@ -144,11 +183,13 @@ update msg model =
       let
         input = c.input
       in
-      ( InputPlace
-        { c
-        | input =
-          { input
-          | locality = val
+      ( { model
+        | inputField = InputPlace
+          { c
+          | input =
+            { input
+            | locality = val
+            }
           }
         }
       , Cmd.none
@@ -158,11 +199,13 @@ update msg model =
       let
         input = c.input
       in
-      ( InputPlace
-        { c
-        | input =
-          { input
-          | streetAddress = val
+      ( { model
+        | inputField = InputPlace
+          { c
+          | input =
+            { input
+            | streetAddress = val
+            }
           }
         }
       , Cmd.none
@@ -172,11 +215,13 @@ update msg model =
       let
         input = c.input
       in
-      ( InputPlace
-        { c
-        | input =
-          { input
-          | extendedAddress = val
+      ( { model
+        | inputField = InputPlace
+          { c
+          | input =
+            { input
+            | extendedAddress = val
+            }
           }
         }
       , Cmd.none
@@ -186,11 +231,13 @@ update msg model =
       let
         input = c.input
       in
-      ( InputPlace
-        { c
-        | input =
-          { input
-          | building = val
+      ( { model
+        | inputField = InputPlace
+          { c
+          | input =
+            { input
+            | building = val
+            }
           }
         }
       , Cmd.none
@@ -200,16 +247,18 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDate
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromCalendarDate
-                  year
-                  (Date.month i)
-                  (Date.day i)
-              )
-              input
+        ( { model
+          | inputField = InputDate
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromCalendarDate
+                    year
+                    (Date.month i)
+                    (Date.day i)
+                )
+                input
+            }
           }
         , Cmd.none
         )
@@ -218,16 +267,18 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDate
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromCalendarDate
-                  (Date.year i)
-                  (Date.monthFromMonthNumber month)
-                  (Date.day i)
-              )
-              input
+        ( { model
+          | inputField = InputDate
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromCalendarDate
+                    (Date.year i)
+                    (Date.monthFromMonthNumber month)
+                    (Date.day i)
+                )
+                input
+            }
           }
         , Cmd.none
         )
@@ -236,16 +287,18 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDate
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromCalendarDate
-                  (Date.year i)
-                  (Date.month i)
-                  day
-              )
-              input
+        ( { model
+          | inputField = InputDate
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromCalendarDate
+                    (Date.year i)
+                    (Date.month i)
+                    day
+                )
+                input
+            }
           }
         , Cmd.none
         )
@@ -254,20 +307,22 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDateTime
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromParts
-                  val
-                  (Date.month i)
-                  (Date.day i)
-                  (Date.hour i)
-                  (Date.minute i)
-                  (Date.second i)
-                  (Date.millisecond i)
-              )
-              input
+        ( { model
+          | inputField = InputDateTime
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromParts
+                    val
+                    (Date.month i)
+                    (Date.day i)
+                    (Date.hour i)
+                    (Date.minute i)
+                    (Date.second i)
+                    (Date.millisecond i)
+                )
+                input
+            }
           }
         , Cmd.none
         )
@@ -276,20 +331,22 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDateTime
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromParts
-                  (Date.year i)
-                  (Date.monthFromMonthNumber val)
-                  (Date.day i)
-                  (Date.hour i)
-                  (Date.minute i)
-                  (Date.second i)
-                  (Date.millisecond i)
-              )
-              input
+        ( { model
+          | inputField = InputDateTime
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromParts
+                    (Date.year i)
+                    (Date.monthFromMonthNumber val)
+                    (Date.day i)
+                    (Date.hour i)
+                    (Date.minute i)
+                    (Date.second i)
+                    (Date.millisecond i)
+                )
+                input
+            }
           }
         , Cmd.none
         )
@@ -298,20 +355,22 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDateTime
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromParts
-                  (Date.year i)
-                  (Date.month i)
-                  val
-                  (Date.hour i)
-                  (Date.minute i)
-                  (Date.second i)
-                  (Date.millisecond i)
-              )
-              input
+        ( { model
+          | inputField = InputDateTime
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromParts
+                    (Date.year i)
+                    (Date.month i)
+                    val
+                    (Date.hour i)
+                    (Date.minute i)
+                    (Date.second i)
+                    (Date.millisecond i)
+                )
+                input
+            }
           }
         , Cmd.none
         )
@@ -320,20 +379,22 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDateTime
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromParts
-                  (Date.year i)
-                  (Date.month i)
-                  (Date.day i)
-                  val
-                  (Date.minute i)
-                  (Date.second i)
-                  (Date.millisecond i)
-              )
-              input
+        ( { model
+          | inputField = InputDateTime
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromParts
+                    (Date.year i)
+                    (Date.month i)
+                    (Date.day i)
+                    val
+                    (Date.minute i)
+                    (Date.second i)
+                    (Date.millisecond i)
+                )
+                input
+            }
           }
         , Cmd.none
         )
@@ -342,54 +403,109 @@ update msg model =
       let
         input = c.input
       in
-        ( InputDateTime
-          { c | input =
-            Maybe.map
-              (\i ->
-                Date.fromParts
-                  (Date.year i)
-                  (Date.month i)
-                  (Date.day i)
-                  (Date.hour i)
-                  val
-                  (Date.second i)
-                  (Date.millisecond i)
-              )
-              input
+        ( { model
+          | inputField = InputDateTime
+            { c | input =
+              Maybe.map
+                (\i ->
+                  Date.fromParts
+                    (Date.year i)
+                    (Date.month i)
+                    (Date.day i)
+                    (Date.hour i)
+                    val
+                    (Date.second i)
+                    (Date.millisecond i)
+                )
+                input
+            }
           }
         , Cmd.none
         )
 
     OnSelectList c val ->
-      ( SelectList
-        { c | input = val }
+      ( { model
+        | inputField = SelectList
+          { c | input = val }
+        }
       , Cmd.none
       )
 
     OnSelectPhoto c val ->
-      ( SelectPhoto
-        { c | input = val }
+      ( { model
+        | inputField = SelectPhoto
+          { c | input = val }
+        }
       , Cmd.none
       )
 
     OnCheckMultiSelect c val checked ->
-      Debug.log "OnCheckMultiSelect" ( MultiSelect
-        { c
-        | inputs =
-          if checked
-          then
-            (Debug.log "val" val) :: c.inputs
-          else
-            List.filter ((/=) val) c.inputs
+      ( { model
+        | inputField = MultiSelect
+          { c
+          | inputs =
+            if checked
+            then
+              (Debug.log "val" val) :: c.inputs
+            else
+              List.filter ((/=) val) c.inputs
+          }
         }
       , Cmd.none
       )
 
     OnInputTextArea c val ->
-      ( TextArea
-        { c | input = val }
+      ( { model
+        | inputField = TextArea
+          { c | input = val }
+        }
       , Cmd.none
       )
+
+    OnInputLocation c val ->
+      let
+        input = c.input
+      in
+        ( { model
+          | inputField = InputLocation
+            { c | input =
+              { input
+              | address = val
+              }
+            }
+          }
+        , Cmd.none
+        )
+
+    Geocode msg ->
+      let
+        (model', cmd') = Geocode.update msg model.geocode
+        newModel =
+          ( { model
+            | geocode = model'
+            }
+          )
+        newCmd = Cmd.map Geocode cmd'
+      in
+        case msg of
+          Geocode.OnGetGeocode address location ->
+            ( newModel
+            , Cmd.batch
+              [ cmdSucceed <| OnSubmit <|
+                InputLocation
+                  { input =
+                    { location = location
+                    , address = address
+                    }
+                  }
+              , newCmd
+              ]
+            )
+
+          _ ->
+            ( newModel
+            , newCmd
+            )
 
 
 
@@ -398,7 +514,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  case model of
+  case model.inputField of
     InputNone ->
       renderInputNone
 
@@ -433,7 +549,7 @@ view model =
       renderInputPlace config
 
     InputLocation config ->
-      renderInputLocation config
+      renderInputLocation model config
 
     SelectList config ->
       renderSelectList config
@@ -834,20 +950,10 @@ renderInputPlace c =
 
 
 -- TODO It's just a dummy.
-renderInputLocation : InputLocationConfig -> Html Msg
-renderInputLocation c =
-  Html.form
-    [ class "submitArea"
-    , onSubmit (OnSubmit (InputLocation c))
-    ]
-    [ div [class "submit"]
-      [ button
-        [ class "btn default"
-        , type' "submit"
-        ]
-        [ text "送信する"
-        ]
-      ]
+renderInputLocation : Model -> InputLocationConfig -> Html Msg
+renderInputLocation model c =
+  div [class "popupMap"]
+    [ App.map Geocode (Geocode.view model.geocode)
     ]
 
 
@@ -1034,4 +1140,6 @@ escapeSpace =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  Sub.batch
+    [ Sub.map Geocode <| Geocode.subscriptions model.geocode
+    ]
