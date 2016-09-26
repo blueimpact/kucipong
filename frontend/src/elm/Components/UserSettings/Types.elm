@@ -6,11 +6,11 @@ module Components.UserSettings.Types exposing (..)
 @docs UserSettings
 -}
 
-import Components.SubmitArea.Types exposing (Location)
+import Components.SubmitArea.Types exposing (InputLocationInput)
 
 
 type alias UserSettings =
-  { areas : List Location
+  { areas : List InputLocationInput
   , tags : List Int
   , favorites : List Int
   , history : List Int

@@ -178,8 +178,11 @@ dict = Dict.fromList
       , submitType =
         InputLocation
           { input =
-            { latitude = 0
-            , longitude = 0
+            { location =
+              { latitude = 0
+              , longitude = 0
+              }
+            , address = ""
             }
           }
       , next = always "tags"

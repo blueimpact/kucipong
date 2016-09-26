@@ -126,11 +126,18 @@ updateUserSettings key input model =
       }
     _ -> model
 
-takeLocation : InputField -> Location
-takeLocation _ =
-  { latitude = 0
-  , longitude = 0
-  }
+takeLocation : InputField -> InputLocationInput
+takeLocation input =
+  case input of
+    InputLocation { input } ->
+      input
+    _ ->
+      { location =
+        { latitude = 0
+        , longitude = 0
+        }
+      , address = ""
+      }
 
 takeTags : InputField -> List Int
 takeTags input =
