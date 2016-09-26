@@ -17,6 +17,8 @@ port module Components.Geocode
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Json
+import String
 
 import Components.SubmitArea.Types exposing (..)
 import Util exposing (cmdSucceed)
@@ -41,6 +43,8 @@ type alias Model =
   , error : Maybe Error
   , key : Maybe String
   , input : String
+  , showModal : Bool
+  , loading : Bool
   }
 
 
@@ -60,6 +64,8 @@ init =
     , error = Nothing
     , key = Nothing
     , input = ""
+    , showModal = False
+    , loading = False
     }
   , Cmd.none
   )
@@ -77,19 +83,27 @@ type Msg
   | OnLoadGoogleMapApi String
   | OnInputAddress String
   | OnUpdateMap
+  | OnLoadIframe
+  | OnHideModal
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     AskGetGeocode ->
-      ( model
+      ( { model
+        | loading = True
+        }
       , askGetGeocode model.address
       )
 
     OnGetGeocode' location ->
       ( { model
         | location = Just location
+        , loading = False
+        , showModal = False
+        , input = ""
+        , address = ""
         }
       , cmdSucceed <| OnGetGeocode model.address location
       )
@@ -124,6 +138,22 @@ update msg model =
     OnUpdateMap ->
       ( { model
         | address = model.input
+        , loading = True
+        , showModal = True
+        }
+      , Cmd.none
+      )
+
+    OnLoadIframe ->
+      ( { model
+        | loading = False
+        }
+      , Cmd.none
+      )
+
+    OnHideModal ->
+      ( { model
+        | showModal = False
         }
       , Cmd.none
       )
@@ -149,32 +179,44 @@ view model =
       [ type' "button"
       , class "getGeocodeArea-checkbutton"
       , onClick OnUpdateMap
+      , disabled (String.isEmpty model.input || model.loading)
       ]
-      [ text "地図で確認する" ]
-    , case (model.key, model.address) of
-      (_, "") ->
-        div [] []
-      (Just key, address) ->
-        div
-          []
-          [ iframe
-            [ class "embeddedMap"
-            , attribute "frameborder" "0"
-            , attribute "allowfullscreen" ""
-            , src <|
-              "https://www.google.com/maps/embed/v1/place?key=" ++
-              key ++
-              "&q=" ++
-              address
-            ]
-            []
-          , button
-            [ type' "submit"
-            ]
-            [ text "決定" ]
-          ]
-      _ ->
-        div [] []
+      [ text <| if model.loading
+        then "処理中..."
+        else "地図で確認する"
+      ]
+    , div
+      [ class "mapModal"
+      , hidden (not model.showModal || model.loading)
+      ]
+      [ iframe
+        [ class "mapModal-embeddedMap"
+        , attribute "frameborder" "0"
+        , attribute "allowfullscreen" ""
+        , on "load" (Json.succeed OnLoadIframe)
+        , src <|
+          "https://www.google.com/maps/embed/v1/place?key=" ++
+          Maybe.withDefault "" model.key ++
+          "&q=" ++
+          model.address
+        ]
+        []
+      , button
+        [ type' "submit"
+        , class "mapModal-submitButton"
+        , disabled model.loading
+        ]
+        [ text <| if model.loading
+          then "処理中..."
+          else "決定"
+        ]
+      , button
+        [ type' "button"
+        , class "mapModal-cancelButton"
+        , onClick OnHideModal
+        ]
+        [ text "場所を入力し直す" ]
+      ]
     ]
 
 
