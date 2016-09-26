@@ -592,11 +592,7 @@ renderInputStringHelper toMsg t c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]
@@ -659,11 +655,7 @@ renderInputName c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]
@@ -733,11 +725,7 @@ renderInputDate c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]
@@ -837,11 +825,7 @@ renderInputDateTime c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]
@@ -939,11 +923,7 @@ renderInputPlace c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]
@@ -990,11 +970,7 @@ renderSelectList c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]
@@ -1032,11 +1008,7 @@ renderSelectPhoto c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]
@@ -1075,27 +1047,23 @@ renderMultiSelect c =
                 ]
           )
           c.selection
-      , div [class "annotation"]
-        [ text "残り: "
-        , span
-            [ classList
-              [ ("error", left < 0)
-              ]
-            ]
-            [ text <| toString left ]
-        , text " 個"
-        ]
       , div [class "submit"]
-        [ button
+        [ div [class "annotation"]
+          [ text "残り: "
+          , span
+              [ classList
+                [ ("error", left < 0)
+                ]
+              ]
+              [ text <| toString left ]
+          , text " 個"
+          ]
+        , button
           [ class "btn default"
           , disabled (left < 0)
           , type' "submit"
           ]
-          [ img
-            [ class "btn-img"
-            , src "../img/airplane-white-bold.svg"
-            , alt "送信する"
-            ] []
+          [ text "送信する"
           ]
         ]
       ]
@@ -1119,11 +1087,7 @@ renderTextArea c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ img
-          [ class "btn-img"
-          , src "../img/airplane-white-bold.svg"
-          , alt "送信する"
-          ] []
+        [ text "送信する"
         ]
       ]
     ]

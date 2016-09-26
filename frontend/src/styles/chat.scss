@@ -100,13 +100,6 @@ body {
       @include formCommon($main-color, $second-color);
     }
 
-    select {
-      flex: 1;
-      height: 1.3em;
-      padding: 0 1em;
-      @include formCommon($main-color, $second-color);
-    }
-
     textarea {
       flex: 1;
       padding: .75em 1em 0;
@@ -136,10 +129,33 @@ body {
       }
     }
 
+    .selectList {
+      flex: 1 0 10em;
+
+      select {
+        width: 100%;
+        height: 1.8em;
+        padding: 0 1em;
+        border-radius: 6px;
+        border-color: $main-color;
+        margin-bottom: 0.2em;
+        @include formCommon($main-color, $second-color);
+      }
+    }
+
+    .multiSelect {
+      flex: 1 1 20em;
+
+      .checkboxWrapper {
+        display: inline-block;
+      }
+    }
+
     .submit {
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0.4em 0;
       background-color: $main-color;
     }
 
@@ -172,7 +188,7 @@ body {
   }
 
   .checkboxWrapper_label {
-    padding: 0.4em;
+    padding: 0.2em 0.4em;
     border-radius: 4px;
     border-style: solid;
     border-width: 2px;
@@ -266,17 +282,105 @@ body {
 
 .btn {
   margin-left: 0.5em;
-  min-height: 2em;
-  flex: 0 1 5em;
-  border-radius: 8px;
-  border-style: solid;
-  border-width: 2px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  border-color: $invert-font-color;
-  background-color: $main-color;
-  color: $invert-font-color;
-  padding: 0 0.2em;
+  @include btn(
+    $invert-font-color,
+    $invert-font-color,
+    $main-color
+  );
+}
+
+.popupMap {
+  width: 100%;
+}
+
+.getGeocodeArea {
+  .getGeocodeArea-input {
+    margin-right: 1em;
+  }
+
+  .getGeocodeArea-checkbutton {
+    &:not(:disabled) {
+      @include btn(
+        $invert-font-color,
+        $invert-font-color,
+        $main-color
+      );
+    }
+
+    &:disabled {
+      @include btn(
+        $invert-font-color,
+        $font-color-light,
+        $font-color-light
+      );
+    }
+  }
+}
+
+.mapModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $shadow-color;
+  padding: 5%;
+
+  .mapModal-card {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background-color: $invert-font-color;
+    padding: 5%;
+    text-align: right;
+  }
+
+  .mapModal-card-embeddedMap {
+    width: 100%;
+    margin: 0 auto;
+    display: block;
+    height: calc(100% - 6em);
+  }
+
+  .mapModal-card-submitButton {
+    margin-top: 0.4em;
+    margin-left: 1em;
+    min-width: 10em;
+
+    &:not(:disabled) {
+      @include btn(
+        $invert-font-color,
+        $main-color,
+        $main-color
+      );
+    }
+
+    &:disabled {
+      @include btn(
+        $invert-font-color,
+        $font-color-light,
+        $font-color-light
+      );
+    }
+  }
+
+  .mapModal-card-cancelButton {
+    margin-top: 0.4em;
+
+    &:not(:disabled) {
+      @include btn(
+        $main-color,
+        $main-color,
+        $invert-font-color
+      );
+    }
+
+    &:disabled {
+      @include btn(
+        $invert-font-color,
+        $font-color-light,
+        $font-color-light
+      );
+    }
+  }
 }

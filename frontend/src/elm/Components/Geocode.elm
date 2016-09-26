@@ -173,6 +173,7 @@ view model =
       [ type' "text"
       , defaultValue model.address
       , onInput OnInputAddress
+      , class "getGeocodeArea-input"
       ]
       []
     , button
@@ -189,33 +190,36 @@ view model =
       [ class "mapModal"
       , hidden (not model.showModal || model.loading)
       ]
-      [ iframe
-        [ class "mapModal-embeddedMap"
-        , attribute "frameborder" "0"
-        , attribute "allowfullscreen" ""
-        , on "load" (Json.succeed OnLoadIframe)
-        , src <|
-          "https://www.google.com/maps/embed/v1/place?key=" ++
-          Maybe.withDefault "" model.key ++
-          "&q=" ++
-          model.address
+      [ div
+        [ class "mapModal-card" ]
+        [ iframe
+          [ class "mapModal-card-embeddedMap"
+          , attribute "frameborder" "0"
+          , attribute "allowfullscreen" ""
+          , on "load" (Json.succeed OnLoadIframe)
+          , src <|
+            "https://www.google.com/maps/embed/v1/place?key=" ++
+            Maybe.withDefault "" model.key ++
+            "&q=" ++
+            model.address
+          ]
+          []
+        , button
+          [ type' "button"
+          , class "mapModal-card-cancelButton"
+          , onClick OnHideModal
+          ]
+          [ text "場所を入力し直す" ]
+        , button
+          [ type' "submit"
+          , class "mapModal-card-submitButton"
+          , disabled model.loading
+          ]
+          [ text <| if model.loading
+            then "処理中..."
+            else "決定"
+          ]
         ]
-        []
-      , button
-        [ type' "submit"
-        , class "mapModal-submitButton"
-        , disabled model.loading
-        ]
-        [ text <| if model.loading
-          then "処理中..."
-          else "決定"
-        ]
-      , button
-        [ type' "button"
-        , class "mapModal-cancelButton"
-        , onClick OnHideModal
-        ]
-        [ text "場所を入力し直す" ]
       ]
     ]
 

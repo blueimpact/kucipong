@@ -103,6 +103,25 @@
   }
 }
 
+@mixin btn($color, $border-color, $background-color) {
+  min-height: 2em;
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 2px;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  border-color: $border-color;
+  background-color: $background-color;
+  color: $color;
+  padding: 0 0.2em;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
 /* ================
  * For page layout
  * ================ */
