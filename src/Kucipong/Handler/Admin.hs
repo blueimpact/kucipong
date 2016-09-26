@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 
 module Kucipong.Handler.Admin where
 
@@ -5,9 +6,11 @@ import Kucipong.Prelude
 
 import Control.Lens ( (^.) )
 import Control.Monad.Time ( MonadTime(..) )
+import Data.Aeson ( (.=) )
 import Data.HVect ( HVect(..) )
 import Database.Persist ( Entity(..) )
 import Network.HTTP.Types ( forbidden403 )
+import Text.EDE ( eitherParse, eitherRender, fromPairs )
 import Web.Spock
     ( ActionCtxT, Path, SpockCtxT, (<//>), get, getContext, html, prehook, root
     , redirect, renderRoute, runSpock, setStatus, spockT, text, var )
@@ -18,10 +21,11 @@ import Kucipong.Db
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad
     ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
+import Kucipong.RenderTemplate ( renderTemplateFromEnv )
 import Kucipong.Spock
     ( ContainsAdminSession, getAdminCookie, getAdminEmail, setAdminCookie )
 import Kucipong.Session ( Admin, Session(..) )
-import Kucipong.Util ( fromMaybeM )
+import Kucipong.Util ( fromEitherM, fromMaybeM )
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
@@ -61,12 +65,13 @@ storeCreate
     :: forall xs n m
      . ( ContainsAdminSession n xs
        , MonadIO m
+       , MonadLogger m
        )
     => ActionCtxT (HVect xs) m ()
 storeCreate = do
     (AdminSession email) <- getAdminEmail
-    -- TODO: Actually return the correct html from here.
-    html $ "admin email: " <> tshow email
+    $(renderTemplateFromEnv "adminUser_admin_store_create.html") $ fromPairs
+        [ "adminEmail" .= email ]
 
 adminAuthHook
     :: ( MonadIO m
@@ -89,6 +94,7 @@ adminComponent
        , MonadKucipongCookie m
        , MonadKucipongDb m
        , MonadKucipongSendEmail m
+       , MonadLogger m
        , MonadTime m
        )
     => SpockCtxT (HVect xs) m ()

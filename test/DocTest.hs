@@ -14,7 +14,8 @@ doDocTest options = doctest $ options <> ghcExtensions
 
 ghcExtensions :: [String]
 ghcExtensions =
-    [ "-XConstraintKinds"
+    [ "-XBangPatterns"
+    , "-XConstraintKinds"
     , "-XDataKinds"
     , "-XDeriveDataTypeable"
     , "-XDeriveFunctor"
