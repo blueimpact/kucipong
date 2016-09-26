@@ -26,6 +26,10 @@ app.ports.askLoadUserSettings.subscribe(function() {
   app.ports.onLoadUserSettings.send(settings);
 });
 
+app.ports.askRedirect.subscribe(function(url) {
+  location.href = url;
+});
+
 // Google Map API
 var googleMapApiKey = process.env.googleMapApiKey
 window.onLoadMapApi = function() {

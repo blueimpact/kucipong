@@ -1,4 +1,4 @@
-module Components.Conversation exposing
+port module Components.Conversation exposing
   ( Model
   , Msg
     ( LoadInitialQuestion
@@ -41,6 +41,9 @@ init =
 
 
 -- UPDATE
+
+
+port askRedirect : String -> Cmd msg
 
 
 type Msg
@@ -94,7 +97,7 @@ update message model =
 
     OnErrorLoadNextQuestion ->
       ( model
-      , Cmd.none
+      , askRedirect "/"
       )
 
     PutDefaultUserSettings settings ->
