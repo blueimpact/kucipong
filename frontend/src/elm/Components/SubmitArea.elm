@@ -629,7 +629,7 @@ renderInputConfirm c =
         [ class "btn default"
         , type' "submit"
         ]
-        [ text c.input ]
+        [ text c.label ]
       ]
     ]
 

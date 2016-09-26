@@ -15,6 +15,7 @@ port module Components.UserSettings
 -}
 
 import List
+import List.Extra as List
 import Result
 import String
 
@@ -116,9 +117,19 @@ subscriptions model =
 updateUserSettings : TalkKey -> InputField -> UserSettings -> UserSettings
 updateUserSettings key input model =
   case key of
+    "area0" ->
+      let
+        location = takeLocation input
+      in
+        { model
+        | areas = Maybe.withDefault [location] <|
+          List.setAt 0 location model.areas
+        }
     "area" ->
       { model
-      | areas = takeLocation input :: model.areas
+      | areas =
+        model.areas ++
+        [ takeLocation input ]
       }
     "tags" ->
       { model

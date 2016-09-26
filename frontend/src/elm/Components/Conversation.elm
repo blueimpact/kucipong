@@ -151,7 +151,7 @@ dict = Dict.fromList
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "kucipong は、私がご主人様（あなた）のために、ご主人様にピッタリなクーポンを見つけ出すサービスですにゃ"
+              , value = "kucipong は、我輩がご主人様（あなた）のために、ご主人様にピッタリなクーポンを見つけ出すサービスですにゃ"
               }
             ]
           ]
@@ -161,16 +161,16 @@ dict = Dict.fromList
           { input = "OK"
           , label = "いいね！"
           }
-      , next = always "area"
+      , next = always "area0"
       }
     )
-  , ( "area"
+  , ( "area0"
     , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "Area"
+              , value = "まずは、ご主人様の主な活動エリアの住所や建物名を教えてほしいですにゃ"
               }
             ]
           ]
@@ -185,7 +185,63 @@ dict = Dict.fromList
             , address = ""
             }
           }
-      , next = always "tags"
+      , next = always "moreArea"
+      }
+    )
+  , ( "moreArea"
+    , { question =
+        { speaker = AI
+        , feeling = Just FeelNormal
+        , balloons =
+          [ [ { ptag = PlainParagraph
+              , value = "職場付近など、他にもエリアを登録しますかにゃ？？"
+              }
+            ]
+          ]
+        }
+      , submitType =
+        SelectList
+          { input = "yes"
+          , options =
+            [ { label = "登録する！"
+              , value = "yes"
+              }
+            , { label = "大丈夫！"
+              , value = "no"
+              }
+            ]
+          }
+      , next = \v ->
+        case v of
+          (SelectList { input }) ->
+            if input == "yes"
+               then "area"
+               else "tags"
+          _ -> "tags"
+      }
+    )
+  , ( "area"
+    , { question =
+        { speaker = AI
+        , feeling = Just FeelNormal
+        , balloons =
+          [ [ { ptag = PlainParagraph
+              , value = "登録したいエリアを教えてほしいにゃん"
+              }
+            ]
+          ]
+        }
+      , submitType =
+        InputLocation
+          { input =
+            { location =
+              { latitude = 0
+              , longitude = 0
+              }
+            , address = ""
+            }
+          }
+      , next = always "moreArea"
       }
     )
   , ( "tags"
@@ -194,7 +250,7 @@ dict = Dict.fromList
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "Tags"
+              , value = "ご主人様の興味がある分野を教えてほしいにゃん！！"
               }
             ]
           ]
@@ -215,26 +271,48 @@ dict = Dict.fromList
             , { label = "タグ4"
               , value = "4"
               }
+            , { label = "タグ5"
+              , value = "5"
+              }
+            , { label = "タグ6"
+              , value = "6"
+              }
+            , { label = "タグ7"
+              , value = "7"
+              }
+            , { label = "タグ8"
+              , value = "8"
+              }
+            , { label = "タグ9"
+              , value = "9"
+              }
+            , { label = "タグ10"
+              , value = "10"
+              }
             ]
-          , maximum = 2
+          , maximum = 6
           }
-      , next = always "2"
+      , next = always "closing"
       }
     )
-  , ( "2"
+  , ( "closing"
     , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "Test 2"
+              , value = "これでご主人様にぴったりなクーポンを探せるにゃ！"
+              }
+            , { ptag = PlainParagraph
+              , value = "これからも、ご主人様の行動にあわせて、吾輩も賢くなっていくから、期待しててにゃん！！"
               }
             ]
           ]
         }
       , submitType =
-        InputString
-          { input = "Hi! 2"
+        InputConfirm
+          { input = "OK"
+          , label = "期待してるにゃん！"
           }
       , next = always "end"
       }

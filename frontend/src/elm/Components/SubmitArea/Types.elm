@@ -129,7 +129,7 @@ formatInputField a =
     InputPostalCode c ->
       c.input
     InputConfirm c ->
-      c.input
+      c.label
     InputName c ->
       c.input.family ++ " " ++ c.input.given
     InputDate c ->
