@@ -127,7 +127,7 @@ renderTalkBlock tb =
     ]
     [ div
       [ classList
-        [ ("img", True)
+        [ ("img", tb.speaker == AI)
         , (mapDefault "" showFeeling tb.feeling, isJust tb.feeling)
         ]
       ] []
