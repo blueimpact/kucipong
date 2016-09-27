@@ -294,11 +294,9 @@ body {
 }
 
 .getGeocodeArea {
-  .getGeocodeArea-input {
-    margin-right: 1em;
-  }
-
   .getGeocodeArea-checkbutton {
+    margin-left: 1em;
+
     &:not(:disabled) {
       @include btn(
         $invert-font-color,
