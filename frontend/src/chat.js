@@ -48,3 +48,5 @@ window.onLoadMapApi = function() {
     });
   });
 }
+var $script = require("scriptjs");
+$script("//maps.googleapis.com/maps/api/js?callback=onLoadMapApi&key=" + googleMapApiKey, function() {});

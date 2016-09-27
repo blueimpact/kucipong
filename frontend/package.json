@@ -39,6 +39,7 @@
     "rimraf": "^2.5.4",
     "sanitize.css": "^4.1.0",
     "sass-loader": "^4.0.0",
+    "scriptjs": "^2.5.8",
     "style-loader": "^0.13.1",
     "superagent": "^2.3.0",
     "url-loader": "^0.5.7",
