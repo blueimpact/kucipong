@@ -93,7 +93,6 @@ update msg model =
       )
 
     PushNewUserString str ->
-      Debug.log "push"
       ( model ++ List.singleton
           { speaker = User
           , feeling = Nothing

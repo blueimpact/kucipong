@@ -446,7 +446,7 @@ update msg model =
           | inputs =
             if checked
             then
-              (Debug.log "val" val) :: c.inputs
+              val :: c.inputs
             else
               List.filter ((/=) val) c.inputs
           }
@@ -1036,7 +1036,7 @@ renderMultiSelect c =
                   , class "checkboxWrapper_checkbox"
                   , onCheck (OnCheckMultiSelect c select.value)
                   , checked
-                    <| List.member select.value (Debug.log "inputs" c.inputs)
+                    <| List.member select.value c.inputs
                   ]
                   []
                 , label
