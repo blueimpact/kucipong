@@ -201,7 +201,12 @@ view model =
             "https://www.google.com/maps/embed/v1/place?key=" ++
             Maybe.withDefault "" model.key ++
             "&q=" ++
-            model.address
+            -- If you just put `model.address` here,
+            -- the user can not see modal after they canceled modal
+            -- and reopen without editing address.
+            if model.showModal
+               then model.address
+               else ""
           ]
           []
         , button
