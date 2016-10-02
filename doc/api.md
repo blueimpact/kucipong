@@ -741,6 +741,26 @@ For the user who supply the coupon.
     * Only way to register is done by admin user
 * Authorization token is needed on any API request
 
+### GET user login page
+
+Redirect here if user is not logged in.
+
+#### Sample request and response
+
+```bash
+$ curl -X GET "http://$domain/store/login"
+
+(Same as `./dist/storeUser_login.html`)
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+Same as `./dist/storeUser_login.html`.
+
 ### Request user verification
 
 #### Sample request and response
@@ -2089,6 +2109,26 @@ For kucipong staffs.
 * No password is required to log in
     * Always send special log in page URI to the registered email
 * Authorization token is needed on any API request
+
+### GET user login page
+
+Redirect here if user is not logged in.
+
+#### Sample request and response
+
+```bash
+$ curl -X GET "http://$domain/admin/login"
+
+(Same as `./dist/adminUser_login.html`)
+```
+
+#### Request Parameter and its type
+
+None.
+
+#### Response and its type
+
+Same as `./dist/adminUser_login.html`.
 
 ### Request user verification / user verification
 
