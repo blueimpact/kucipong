@@ -11,12 +11,14 @@ module Components.TalkArea exposing
   , subscriptions
   )
 
+import Dom.Scroll as Dom
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import List
 import List.Extra as List
 import Maybe.Extra exposing ((?), isJust, mapDefault)
 import String
+import Task
 
 import Components.TalkArea.Types exposing (..)
 
@@ -65,6 +67,7 @@ type Msg
   = PushTalkBlock TalkBlock
   | PushNewAITalk TalkBlock
   | PushNewUserString String
+  | None
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -84,12 +87,12 @@ update msg model =
               <| List.init model ? []
           else
             push tb model
-      , Cmd.none
+      , scrollToNewMsg
       )
 
     PushNewAITalk x ->
       ( model ++ List.singleton x
-      , Cmd.none
+      , scrollToNewMsg
       )
 
     PushNewUserString str ->
@@ -103,6 +106,10 @@ update msg model =
               ]
             ]
           }
+      , scrollToNewMsg
+      )
+    None ->
+      ( model
       , Cmd.none
       )
 
@@ -133,9 +140,6 @@ renderTalkBlock tb =
       ] []
     , div [class "message-area"]
       <| List.map renderTalkBody tb.balloons
-    , node "script" []
-      [ text "var b = document.getElementById('js-body'); b.scrollTop = b.scrollHeight;"
-      ]
     ]
 
 
@@ -184,3 +188,8 @@ userTalk talk =
 -}
 push : a -> List a -> List a
 push x xs = xs ++ List.singleton x
+
+
+scrollToNewMsg : Cmd Msg
+scrollToNewMsg =
+  Task.perform (always None) (always None) <| Dom.toBottom "js-body"
