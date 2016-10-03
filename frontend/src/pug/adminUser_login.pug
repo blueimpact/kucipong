@@ -1,0 +1,24 @@
+include _layout
+  body#main.wrapper
+    include _adminHeader
+      | 管理ユーザログイン
+    include _messageArea
+    .admin
+      form#js-request-verification.loginSignboard(
+        data-user-type="admin"
+      )
+        .loginSignboard_titleArea
+          .loginSignboard_titleArea-text
+            | 管理ユーザログイン
+        .loginSignboard_body
+          .labeledRow
+            label.labeledRow-header(for="email")
+              | メールアドレス
+            .labeledRow-body
+              input#email(
+                name="email" type="email"
+                required
+              )
+          .adminBody_info_body_btnRow
+            button#js-request-verification-btn.btn.outerBtn(type="submit")
+              | ログイン用URLをメールする

@@ -39,6 +39,22 @@
       }
     }
   }
+
+  .loginSignboard {
+    @include signboard($border-color-light);
+
+    .loginSignboard_titleArea {
+      @include signboard_titleArea;
+
+      .loginSignboard_titleArea-text {
+        @include signboard_roundedTitle($border-color-light, $invert-font-color);
+      }
+    }
+
+    .loginSignboard_body {
+      padding: 3em 2em 1em;
+    }
+  }
 }
 
 .couponEditor {

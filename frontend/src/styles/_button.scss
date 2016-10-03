@@ -13,15 +13,29 @@
   cursor: pointer;
   margin: 0 auto;
   @content;
+
+  &:disabled {
+    cursor: default;
+  }
 }
 
 @mixin outerButton($color) {
   border-color: $color;
   color: $color;
+
+  &:disabled {
+    border-color: white;
+    color: white;
+  }
 }
 
 @mixin defaultButton($color, $font-color) {
   border-color: $color;
   background-color: $color;
   color: $font-color;
+
+  &:disabled {
+    border-color: $font-color;
+    background-color: $font-color;
+  }
 }

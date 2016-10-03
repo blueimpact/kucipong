@@ -92,6 +92,12 @@ const commonConfig = {
 
     // Compile store-user related pages
     new HtmlWebpackPlugin({
+      chunks: ['storeUser', 'magicLogin'],
+      template: 'src/pug/storeUser_login.pug',
+      inject:   'body',
+      filename: 'storeUser_login.html',
+    }),
+    new HtmlWebpackPlugin({
       chunks: ['storeUser'],
       template: 'src/pug/storeUser_store.pug',
       inject:   'body',
@@ -123,6 +129,12 @@ const commonConfig = {
     }),
 
     // Compile admin-user related pages
+    new HtmlWebpackPlugin({
+      chunks: ['adminUser', 'magicLogin'],
+      template: 'src/pug/adminUser_login.pug',
+      inject:   'body',
+      filename: 'adminUser_login.html',
+    }),
     new HtmlWebpackPlugin({
       chunks: ['adminUser'],
       template: 'src/pug/adminUser_admin_store_create.pug',
@@ -186,6 +198,10 @@ if (TARGET_ENV === 'development') {
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/adminUser.js' )
       ],
+      magicLogin: [
+        'webpack-dev-server/client?http://localhost:8080',
+        path.join( __dirname, 'src/magicLogin.js' )
+      ],
     },
 
     devServer: {
@@ -233,6 +249,9 @@ if (TARGET_ENV === 'production') {
       ],
       adminUser: [
         path.join( __dirname, 'src/adminUser.js' )
+      ],
+      magicLogin: [
+        path.join( __dirname, 'src/magicLogin.js' )
       ],
     },
 
