@@ -27,9 +27,27 @@ import Kucipong.Spock
 import Kucipong.Session ( Admin, Session(..) )
 import Kucipong.Util ( fromEitherM, fromMaybeM )
 
+-- | Url prefix for all of the following 'Path's.
+adminUrlPrefix :: Path '[]
+adminUrlPrefix = "admin"
+
+loginPageR :: Path '[]
+loginPageR = "login"
+
+doLoginR :: Path '[LoginToken]
+doLoginR = "login" <//> var
+
+loginPage
+    :: forall ctx m
+     . ( MonadIO m
+       )
+    => ActionCtxT ctx m ()
+loginPage =
+    $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs []
+
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
-login
+doLogin
     :: forall ctx m
      . ( MonadIO m
        , MonadKucipongCookie m
@@ -37,7 +55,7 @@ login
        , MonadTime m
        )
     => LoginToken -> ActionCtxT ctx m ()
-login loginToken = do
+doLogin loginToken = do
     maybeAdminLoginTokenEntity <- dbFindAdminLoginToken loginToken
     (Entity (AdminLoginTokenKey (AdminKey adminEmail)) adminLoginToken) <-
         fromMaybeM noAdminLoginTokenError maybeAdminLoginTokenEntity
@@ -49,16 +67,13 @@ login loginToken = do
     setAdminCookie adminEmail
     redirect $ renderRoute root
   where
-    -- TODO: What should actually be returned for these two error cases?
     noAdminLoginTokenError :: ActionCtxT ctx m a
-    noAdminLoginTokenError = do
-        setStatus forbidden403
-        html "<p>loginToken incorrect</p>"
+    noAdminLoginTokenError =
+        redirect . renderRoute $ adminUrlPrefix <//> loginPageR
 
     tokenExpiredError :: ActionCtxT ctx m a
-    tokenExpiredError = do
-        setStatus forbidden403
-        html "<p>token expired error</p>"
+    tokenExpiredError =
+        redirect . renderRoute $ adminUrlPrefix <//> loginPageR
 
 -- | Return the store create page for an admin.
 storeCreate
@@ -81,9 +96,8 @@ adminAuthHook
 adminAuthHook = do
     maybeAdminSession <- getAdminCookie
     case maybeAdminSession of
-        -- TODO: Need to return an error page here that tells the user they
-        -- need to be logged in as an admin to access this page.
-        Nothing -> html "<p>Need to be logged in as admin in order to access this page.</p>"
+        Nothing ->
+            redirect . renderRoute $ adminUrlPrefix <//> loginPageR
         Just adminSession -> do
             oldCtx <- getContext
             return $ adminSession :&: oldCtx
@@ -99,6 +113,7 @@ adminComponent
        )
     => SpockCtxT (HVect xs) m ()
 adminComponent = do
-    get ("login" <//> var) login
+    get doLoginR doLogin
+    get loginPageR loginPage
     prehook adminAuthHook $
         get ("store" <//> "create") storeCreate

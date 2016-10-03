@@ -9,7 +9,7 @@ import Web.Spock
     , text, var )
 
 import Kucipong.Config ( Config )
-import Kucipong.Handler.Admin ( adminComponent )
+import Kucipong.Handler.Admin ( adminComponent, adminUrlPrefix )
 import Kucipong.Host ( HasPort(..) )
 import Kucipong.Monad ( KucipongM, runKucipongM )
 
@@ -35,7 +35,7 @@ app :: Config -> IO ()
 app config = runSpock (getPort config) $
     spockT (runKucipongMHandleErrors config) $ do
         prehook baseHook $
-            subcomponent "admin" adminComponent
+            subcomponent adminUrlPrefix adminComponent
         get root $ do
             -- dbLoginUser undefined undefined
             html "<p>hello world</p>"
