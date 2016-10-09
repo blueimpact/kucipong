@@ -17,11 +17,13 @@ newtype KucipongDbT m a = KucipongDbT { unKucipongDbT :: IdentityT m a }
         , Functor
         , Monad
         , MonadBase b
+        , MonadCatch
         , MonadError e
         , MonadIO
         , MonadLogger
         , MonadRandom
         , MonadReader r
+        , MonadThrow
         , MonadTime
         , MonadTrans
         )

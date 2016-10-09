@@ -12,7 +12,8 @@ import Kucipong.Prelude
 import Control.FromSum ( fromEitherM )
 import Data.HVect ( HasRep, HVectElim )
 -- import Web.FormUrlEncoded ( urlDecodeAsForm )
-import Web.Spock ( ActionCtxT, Path, SpockCtxT, body, post, redirect, renderRoute, root )
+import Web.Spock ( ActionCtxT, Path, body, post, redirect, renderRoute, root )
+import Web.Spock.Core ( SpockCtxT )
 
 getReqParam
     :: forall ctx m a

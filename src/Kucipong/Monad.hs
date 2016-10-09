@@ -32,11 +32,13 @@ type MonadKucipong' m =
 -- | This constraint synonym wraps up all of the type classes used by 'KucipongM'.
 type MonadKucipong m =
     ( MonadBaseControl IO m
+    , MonadCatch m
     , MonadError AppErr m
     , MonadIO m
     , MonadLogger m
     , MonadRandom m
     , MonadReader Config m
+    , MonadThrow m
     , MonadTime m
     , MonadKucipong' m
     )
@@ -51,11 +53,13 @@ newtype KucipongT m a = KucipongT
         , Functor
         , Monad
         , MonadBase b
+        , MonadCatch
         , MonadError e
         , MonadIO
         , MonadLogger
         , MonadRandom
         , MonadReader r
+        , MonadThrow
         , MonadTime
         )
 
@@ -118,11 +122,13 @@ newtype KucipongM a = KucipongM
         , Functor
         , Monad
         , MonadBase IO
+        , MonadCatch
         , MonadError AppErr
         , MonadIO
         , MonadLogger
         , MonadRandom
         , MonadReader Config
+        , MonadThrow
         , MonadTime
         , MonadKucipongCookie
         , MonadKucipongDb

@@ -11,9 +11,11 @@ import Data.HVect ( HVect(..) )
 import Database.Persist ( Entity(..) )
 import Network.HTTP.Types ( forbidden403 )
 import Text.EDE ( eitherParse, eitherRender, fromPairs )
+import Web.Routing.Combinators ( PathState(Open) )
 import Web.Spock
-    ( ActionCtxT, Path, SpockCtxT, (<//>), get, getContext, html, prehook, root
-    , redirect, renderRoute, runSpock, setStatus, spockT, text, var )
+    ( ActionCtxT, Path, (<//>), getContext, html
+    , root, redirect, renderRoute, runSpock, setStatus, text, var )
+import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook )
 
 import Kucipong.Db
     ( Store, StoreId, StoreLoginToken, Key(..), LoginTokenExpirationTime(..)
@@ -28,13 +30,13 @@ import Kucipong.Session ( Store, Session(..) )
 import Kucipong.Util ( fromEitherM, fromMaybeM )
 
 -- | Url prefix for all of the following 'Path's.
-storeUrlPrefix :: Path '[]
+storeUrlPrefix :: Path '[] 'Open
 storeUrlPrefix = "store"
 
-loginPageR :: Path '[]
+loginPageR :: Path '[] 'Open
 loginPageR = "login"
 
-doLoginR :: Path '[LoginToken]
+doLoginR :: Path '[LoginToken] 'Open
 doLoginR = loginPageR <//> var
 
 loginPage

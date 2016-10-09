@@ -18,11 +18,13 @@ newtype KucipongCookieT m a = KucipongCookieT { unKucipongCookieT :: IdentityT m
         , Functor
         , Monad
         , MonadBase b
+        , MonadCatch
         , MonadError e
         , MonadIO
         , MonadLogger
         , MonadRandom
         , MonadReader r
+        , MonadThrow
         , MonadTime
         , MonadTrans
         )

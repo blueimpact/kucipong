@@ -4,16 +4,15 @@ module Kucipong.Persist where
 import Kucipong.Prelude
 
 import Database.Persist
-    ( Entity(Entity), Key, PersistEntity, PersistEntityBackend, PersistStore
+    ( BaseBackend, Entity(Entity), Key, PersistEntity, PersistEntityBackend, PersistStore, PersistStoreWrite
     , repsert )
 
 repsertEntity
-    :: forall (m :: * -> *) record .
-       ( MonadIO m
-       , PersistStore (PersistEntityBackend record)
+    :: forall backend m record
+     . ( MonadIO m
+       , PersistEntityBackend record ~ BaseBackend backend
        , PersistEntity record
+       , PersistStoreWrite backend
        )
-    => Key record
-    -> record
-    -> ReaderT (PersistEntityBackend record) m (Entity record)
+    => Key record -> record -> ReaderT backend m (Entity record)
 repsertEntity key val = repsert key val $> Entity key val

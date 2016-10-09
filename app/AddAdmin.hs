@@ -23,13 +23,11 @@ data AddAdminCommand = AddAdminCommand
     }
     deriving (Data, Eq, Generic, Show, Typeable)
 
-tryExceptT :: (MonadBaseControl IO m, Exception e) => m a -> ExceptT e m a
-tryExceptT = ExceptT . try
-
 -- | Add a new 'Admin'.  If an 'Admin' with the 'EmailAddress' already exists,
 -- just create a new 'AdminLoginToken' for them and then send them an email.
 addAdmin
     :: ( MonadBaseControl IO m
+       , MonadCatch m
        , MonadIO m
        , MonadKucipongDb m
        , MonadKucipongSendEmail m

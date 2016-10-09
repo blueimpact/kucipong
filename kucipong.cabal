@@ -83,9 +83,11 @@ library
                      , postgresql-simple
                      , pwstore-fast
                      , read-env-var
+                     , reroute
                      , resource-pool
                      , shakespeare
                      , Spock
+                     , Spock-core
                      , template-haskell
                      , th-lift-instances
                      , time
@@ -111,6 +113,7 @@ library
                      , InstanceSigs
                      , MultiParamTypeClasses
                      , NoImplicitPrelude
+                     , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PackageImports
                      , PolyKinds
@@ -146,6 +149,7 @@ executable kucipong
                      , InstanceSigs
                      , MultiParamTypeClasses
                      , NoImplicitPrelude
+                     , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PolyKinds
                      , RankNTypes
@@ -186,6 +190,7 @@ executable kucipong-add-admin
                      , MultiParamTypeClasses
                      , NamedFieldPuns
                      , NoImplicitPrelude
+                     , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PolyKinds
                      , RankNTypes
