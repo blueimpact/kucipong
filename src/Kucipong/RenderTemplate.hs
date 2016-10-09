@@ -6,14 +6,13 @@ module Kucipong.RenderTemplate where
 import Kucipong.Prelude hiding ( try )
 
 import Control.Exception ( try )
+import Control.FromSum ( fromEitherM )
 import Language.Haskell.TH
     ( Exp, Q, appE, litE, lookupValueName, mkName, stringL, varE )
 import Language.Haskell.TH.Syntax ( addDependentFile )
 import Network.HTTP.Types ( internalServerError500 )
 import Text.EDE ( Template, eitherParse, eitherRender, fromPairs )
 import Web.Spock ( html, setStatus )
-
-import Kucipong.Util ( fromEitherM )
 
 templateDirectory :: FilePath
 templateDirectory = "frontend" </> "dist"

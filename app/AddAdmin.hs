@@ -3,6 +3,7 @@ module Main where
 
 import Kucipong.Prelude
 
+import Control.FromSum ( fromEitherM )
 import Control.Lens ( view )
 import Database.Persist ( Entity(..) )
 import Options.Applicative
@@ -15,7 +16,6 @@ import Kucipong.Config ( createConfigFromEnv )
 import Kucipong.Db ( adminLoginTokenLoginToken )
 import Kucipong.Monad
     ( MonadKucipongDb(..), MonadKucipongSendEmail(..), runKucipongM )
-import Kucipong.Util ( fromEitherM )
 
 data AddAdminCommand = AddAdminCommand
     { addAdminEmail :: EmailAddress

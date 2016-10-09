@@ -5,6 +5,7 @@ module Kucipong.Config
 
 import Kucipong.Prelude
 
+import Control.FromSum ( fromEitherM )
 import Control.Monad.Logger ( runStdoutLoggingT )
 import Data.ByteString.Base64 ( decode )
 import Database.Persist.Postgresql ( ConnectionPool )
@@ -26,7 +27,6 @@ import Kucipong.Email ( HasHailgunContext(..) )
 import Kucipong.Host
     ( HasHost(..), HasPort(..), HasProtocol(..), Host, Protocol )
 import Kucipong.Session ( HasSessionKey(..) )
-import Kucipong.Util ( fromEitherM )
 
 -- | A 'Config' used by our application.  It contains things used
 -- throughout a request.

@@ -169,6 +169,7 @@ executable kucipong-add-admin
   build-depends:       base
                      , kucipong
                      , emailaddress
+                     , from-sum
                      , lens
                      , monad-time
                      , optparse-applicative

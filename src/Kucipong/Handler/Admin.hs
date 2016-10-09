@@ -4,6 +4,7 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
+import Control.FromSum ( fromEitherM, fromMaybeM )
 import Control.Lens ( (^.) )
 import Control.Monad.Time ( MonadTime(..) )
 import Data.Aeson ( (.=) )
@@ -29,7 +30,6 @@ import Kucipong.Spock
     ( ContainsAdminSession, getAdminCookie, getAdminEmail, getReqParam
     , setAdminCookie )
 import Kucipong.Session ( Admin, Session(..) )
-import Kucipong.Util ( fromEitherM, fromMaybeM )
 
 -- | Url prefix for all of the following 'Path's.
 adminUrlPrefix :: Path '[] 'Open

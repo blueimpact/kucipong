@@ -4,6 +4,7 @@ module Kucipong.Handler.Store where
 
 import Kucipong.Prelude
 
+import Control.FromSum ( fromEitherM, fromMaybeM )
 import Control.Lens ( (^.) )
 import Control.Monad.Time ( MonadTime(..) )
 import Data.Aeson ( (.=) )
@@ -27,7 +28,6 @@ import Kucipong.RenderTemplate ( renderTemplateFromEnv )
 import Kucipong.Spock
     ( ContainsStoreSession, getStoreCookie, getStoreEmail, setStoreCookie )
 import Kucipong.Session ( Store, Session(..) )
-import Kucipong.Util ( fromEitherM, fromMaybeM )
 
 -- | Url prefix for all of the following 'Path's.
 storeUrlPrefix :: Path '[] 'Open
