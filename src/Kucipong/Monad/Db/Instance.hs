@@ -77,7 +77,7 @@ instance ( MonadBaseControl IO m
             case maybeExistingAdminVal of
                 Just existingAdminVal -> do
                     -- admin already exists.  update the name if it is different
-                    if (existingAdminVal ^. adminName /= name)
+                    if (adminName existingAdminVal /= name)
                         then do
                             newAdminVal <- updateGet (AdminKey email) [AdminName =. name]
                             pure $ Entity (AdminKey email) newAdminVal

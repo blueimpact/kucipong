@@ -4,7 +4,6 @@ module Main where
 import Kucipong.Prelude
 
 import Control.FromSum ( fromEitherM )
-import Control.Lens ( view )
 import Database.Persist ( Entity(..) )
 import Options.Applicative
     ( InfoMod, Parser, ParserInfo, ReadM, argument, eitherReader, execParser
@@ -42,7 +41,7 @@ addAdmin email name = do
     eitherAdminLoginToken <- try $ dbCreateAdminMagicLoginToken adminKey
     (Entity _ adminLoginToken) <-
         fromEitherM handleCreateAdminLoginTokenError eitherAdminLoginToken
-    let loginToken = view adminLoginTokenLoginToken adminLoginToken
+    let loginToken = adminLoginTokenLoginToken adminLoginToken
     sendAdminLoginEmail email loginToken
     putStrLn $ "Created (or updated) admin with email " <> tshow email <>
         " and name \"" <> name <> "\".\nSent email with login url."

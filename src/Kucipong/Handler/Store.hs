@@ -64,7 +64,7 @@ doLogin loginToken = do
     -- check date on store login token
     now <- currentTime
     let (LoginTokenExpirationTime expirationTime) =
-            storeLoginToken ^. storeLoginTokenExpirationTime
+            storeLoginTokenExpirationTime storeLoginToken
     when (now > expirationTime) tokenExpiredError
     setStoreCookie storeEmail
     redirect $ renderRoute root

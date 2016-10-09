@@ -69,7 +69,7 @@ doLoginGet loginToken = do
     -- check date on admin login token
     now <- currentTime
     let (LoginTokenExpirationTime expirationTime) =
-            adminLoginToken ^. adminLoginTokenExpirationTime
+            adminLoginTokenExpirationTime adminLoginToken
     when (now > expirationTime) tokenExpiredError
     setAdminCookie adminEmail
     redirect $ renderRoute root
