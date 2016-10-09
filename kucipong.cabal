@@ -28,6 +28,7 @@ library
                      , Kucipong.Errors
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
+                     , Kucipong.Handler.Store
                      , Kucipong.Host
                      , Kucipong.LoginToken
                      , Kucipong.Monad
@@ -45,6 +46,7 @@ library
                      , Kucipong.Monad.SendEmail.Instance
                      , Kucipong.Monad.SendEmail.Trans
                      , Kucipong.Orphans
+                     , Kucipong.Persist
                      , Kucipong.Prelude
                      , Kucipong.RenderTemplate
                      , Kucipong.Session

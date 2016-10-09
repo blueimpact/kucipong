@@ -35,7 +35,7 @@ loginPageR :: Path '[]
 loginPageR = "login"
 
 doLoginR :: Path '[LoginToken]
-doLoginR = "login" <//> var
+doLoginR = loginPageR <//> var
 
 loginPage
     :: forall ctx m
@@ -57,7 +57,7 @@ doLogin
     => LoginToken -> ActionCtxT ctx m ()
 doLogin loginToken = do
     maybeStoreLoginTokenEntity <- dbFindStoreLoginToken loginToken
-    (Entity (StoreLoginTokenKey (StoreKey storeEmail)) storeLoginToken) <-
+    (Entity (StoreLoginTokenKey (StoreEmailKey storeEmail)) storeLoginToken) <-
         fromMaybeM noStoreLoginTokenError maybeStoreLoginTokenEntity
     -- check date on store login token
     now <- currentTime

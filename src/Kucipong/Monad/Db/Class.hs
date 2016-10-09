@@ -9,8 +9,8 @@ import Database.Persist ( Entity )
 import Web.Spock ( ActionCtxT )
 
 import Kucipong.Db
-        ( Admin, AdminLoginToken, Key
-        , Store, StoreLoginToken )
+        ( Admin, AdminLoginToken, Image, Key
+        , Store, StoreEmail, StoreLoginToken )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad.Cookie.Trans ( KucipongCookieT )
 import Kucipong.Monad.SendEmail.Trans ( KucipongSendEmailT )
@@ -82,9 +82,28 @@ class Monad m => MonadKucipongDb m where
     -- ===========
 
     dbCreateStore
-        :: EmailAddress
+        :: Key StoreEmail
+        -- ^ 'Key' for the 'StoreEmail'
         -> Text
-        -- ^ Store name
+        -- ^ 'Store' name
+        -> Text
+        -- ^ 'Store' category
+        -> Text
+        -- ^ 'Store' category detail
+        -> Maybe Image
+        -- ^ 'Image' for the 'Store'
+        -> Maybe Text
+        -- ^ Sales Point for the 'Store'
+        -> Maybe Text
+        -- ^ Address for the 'Store'
+        -> Maybe Text
+        -- ^ Phone number for the 'Store'
+        -> Maybe Text
+        -- ^ Business hours for the 'Store'
+        -> Maybe Text
+        -- ^ Regular holiday for the 'Store'
+        -> Maybe Text
+        -- ^ url for the 'Store'
         -> m (Entity Store)
     default dbCreateStore
         :: ( Monad (t n)
@@ -92,17 +111,42 @@ class Monad m => MonadKucipongDb m where
            , MonadTrans t
            , m ~ t n
            )
-        => EmailAddress -> Text -> t n (Entity Store)
-    dbCreateStore = (lift .) . dbCreateStore
+        => Key StoreEmail -> Text -> Text -> Text -> Maybe Image
+        -> Maybe Text -> Maybe Text -> Maybe Text -> Maybe Text
+        -> Maybe Text -> Maybe Text -> t n (Entity Store)
+    dbCreateStore email name category catdet image salesPoint address phoneNumber
+            businessHours regularHoliday url = lift $
+        dbCreateStore
+            email
+            name
+            category
+            catdet
+            image
+            salesPoint
+            address
+            phoneNumber
+            businessHours
+            regularHoliday
+            url
 
-    dbCreateStoreMagicLoginToken :: Key Store -> m (Entity StoreLoginToken)
+    dbCreateStoreEmail :: EmailAddress -> m (Entity StoreEmail)
+    default dbCreateStoreEmail
+        :: ( Monad (t n)
+           , MonadKucipongDb n
+           , MonadTrans t
+           , m ~ t n
+           )
+        => EmailAddress -> t n (Entity StoreEmail)
+    dbCreateStoreEmail = lift . dbCreateStoreEmail
+
+    dbCreateStoreMagicLoginToken :: Key StoreEmail -> m (Entity StoreLoginToken)
     default dbCreateStoreMagicLoginToken
         :: ( Monad (t n)
            , MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
-        => Key Store -> t n (Entity StoreLoginToken)
+        => Key StoreEmail -> t n (Entity StoreLoginToken)
     dbCreateStoreMagicLoginToken = lift . dbCreateStoreMagicLoginToken
 
     dbFindStoreLoginToken :: LoginToken -> m (Maybe (Entity StoreLoginToken))
@@ -115,19 +159,19 @@ class Monad m => MonadKucipongDb m where
         => LoginToken -> t n (Maybe (Entity StoreLoginToken))
     dbFindStoreLoginToken = lift . dbFindStoreLoginToken
 
-    dbUpsertStore
-        :: EmailAddress
-        -> Text
-        -- ^ Store name
-        -> m (Entity Store)
-    default dbUpsertStore
-        :: ( Monad (t n)
-           , MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => EmailAddress -> Text -> t n (Entity Store)
-    dbUpsertStore = (lift .) . dbUpsertStore
+    -- dbUpsertStore
+    --     :: EmailAddress
+    --     -> Text
+    --     -- ^ Store name
+    --     -> m (Entity Store)
+    -- default dbUpsertStore
+    --     :: ( Monad (t n)
+    --        , MonadKucipongDb n
+    --        , MonadTrans t
+    --        , m ~ t n
+    --        )
+    --     => EmailAddress -> Text -> t n (Entity Store)
+    -- dbUpsertStore = (lift .) . dbUpsertStore
 
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
