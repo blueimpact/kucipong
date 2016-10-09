@@ -26,6 +26,7 @@ library
                      , Kucipong.Email
                      , Kucipong.Environment
                      , Kucipong.Errors
+                     , Kucipong.Form
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
                      , Kucipong.Handler.Store
@@ -51,6 +52,7 @@ library
                      , Kucipong.RenderTemplate
                      , Kucipong.Session
                      , Kucipong.Spock
+                     , Kucipong.Spock.ReqParam
                      , Kucipong.Util
   build-depends:       base >= 4.7 && < 5
                      , aeson
@@ -60,6 +62,7 @@ library
                      , ede
                      , emailaddress
                      , envelope
+                     , from-sum
                      , hailgun
                      , HTTP
                      , http-api-data

@@ -15,6 +15,9 @@ extra-deps:
     # This will probably be available at least by 9/15 in hackage, and in
     # lts-6.15. (Or it might not be available until the next major lts release.)
     - hailgun-0.4.1.0
+    # This should be available in lts-8.
+    # - http-api-data-0.3.1
+    - from-sum-0.1.0.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}
