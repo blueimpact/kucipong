@@ -20,11 +20,12 @@ import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook )
 
 import Kucipong.Db
     ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..)
-    , adminLoginTokenExpirationTime )
+    , adminLoginTokenExpirationTime, storeEmailEmail
+    , storeLoginTokenLoginToken )
 import Kucipong.Form ( AdminStoreCreateForm(AdminStoreCreateForm) )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad
-    ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
+    ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail(..) )
 import Kucipong.RenderTemplate ( renderTemplateFromEnv )
 import Kucipong.Spock
     ( ContainsAdminSession, getAdminCookie, getAdminEmail, getReqParam
@@ -100,13 +101,19 @@ storeCreatePost
      . ( ContainsAdminSession n xs
        , MonadIO m
        , MonadKucipongDb m
+       , MonadKucipongSendEmail m
        , MonadLogger m
        )
     => ActionCtxT (HVect xs) m ()
 storeCreatePost = do
     (AdminSession email) <- getAdminEmail
-    (AdminStoreCreateForm storeEmail) <- getReqParam
-    dbCreateStoreEmail storeEmail
+    (AdminStoreCreateForm storeEmailParam) <- getReqParam
+    (Entity storeEmailKey storeEmail) <- dbCreateStoreEmail storeEmailParam
+    (Entity storeLoginTokenKey storeLoginToken) <-
+        dbCreateStoreMagicLoginToken storeEmailKey
+    sendStoreLoginEmail
+        (storeEmailEmail storeEmail)
+        (storeLoginTokenLoginToken storeLoginToken)
     -- TODO: Where to redirect this?
     redirect $ renderRoute root
 
