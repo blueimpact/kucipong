@@ -8,7 +8,9 @@ import Control.Monad.Trans ( MonadTrans )
 import Database.Persist ( Entity )
 import Web.Spock ( ActionCtxT )
 
-import Kucipong.Db ( Admin, AdminLoginToken, Key )
+import Kucipong.Db
+        ( Admin, AdminLoginToken, Key
+        , Store, StoreLoginToken )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad.Cookie.Trans ( KucipongCookieT )
 import Kucipong.Monad.SendEmail.Trans ( KucipongSendEmailT )
@@ -19,6 +21,14 @@ import Kucipong.Monad.SendEmail.Trans ( KucipongSendEmailT )
 -- Default implementations are used to easily derive instances for monads
 -- transformers that implement 'MonadTrans'.
 class Monad m => MonadKucipongDb m where
+    -- TODO
+    -- This is rough implementation.
+    -- Share functions with admin and store user.
+
+    -- ===========
+    --  For Admin
+    -- ===========
+
     dbCreateAdmin
         :: EmailAddress
         -> Text
@@ -66,6 +76,58 @@ class Monad m => MonadKucipongDb m where
            )
         => EmailAddress -> Text -> t n (Entity Admin)
     dbUpsertAdmin = (lift .) . dbUpsertAdmin
+
+    -- ===========
+    --  For Store
+    -- ===========
+
+    dbCreateStore
+        :: EmailAddress
+        -> Text
+        -- ^ Store name
+        -> m (Entity Store)
+    default dbCreateStore
+        :: ( Monad (t n)
+           , MonadKucipongDb n
+           , MonadTrans t
+           , m ~ t n
+           )
+        => EmailAddress -> Text -> t n (Entity Store)
+    dbCreateStore = (lift .) . dbCreateStore
+
+    dbCreateStoreMagicLoginToken :: Key Store -> m (Entity StoreLoginToken)
+    default dbCreateStoreMagicLoginToken
+        :: ( Monad (t n)
+           , MonadKucipongDb n
+           , MonadTrans t
+           , m ~ t n
+           )
+        => Key Store -> t n (Entity StoreLoginToken)
+    dbCreateStoreMagicLoginToken = lift . dbCreateStoreMagicLoginToken
+
+    dbFindStoreLoginToken :: LoginToken -> m (Maybe (Entity StoreLoginToken))
+    default dbFindStoreLoginToken
+        :: ( Monad (t n)
+           , MonadKucipongDb n
+           , MonadTrans t
+           , m ~ t n
+           )
+        => LoginToken -> t n (Maybe (Entity StoreLoginToken))
+    dbFindStoreLoginToken = lift . dbFindStoreLoginToken
+
+    dbUpsertStore
+        :: EmailAddress
+        -> Text
+        -- ^ Store name
+        -> m (Entity Store)
+    default dbUpsertStore
+        :: ( Monad (t n)
+           , MonadKucipongDb n
+           , MonadTrans t
+           , m ~ t n
+           )
+        => EmailAddress -> Text -> t n (Entity Store)
+    dbUpsertStore = (lift .) . dbUpsertStore
 
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
