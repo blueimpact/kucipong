@@ -11,13 +11,13 @@ import Kucipong.Prelude
 
 import Control.FromSum ( fromEitherM )
 import Data.HVect ( HasRep, HVectElim )
--- import Web.FormUrlEncoded ( urlDecodeAsForm )
+import Web.FormUrlEncoded ( FromForm, urlDecodeAsForm )
 import Web.Spock ( ActionCtxT, Path, body, post, redirect, renderRoute, root )
 import Web.Spock.Core ( SpockCtxT )
 
 getReqParam
     :: forall ctx m a
-     . ({- FromForm a, -} MonadIO m)
+     . (FromForm a, MonadIO m)
     => ActionCtxT ctx m a
 getReqParam = getReqParamErr handleFormDecodeError
   where
@@ -28,8 +28,7 @@ getReqParam = getReqParamErr handleFormDecodeError
 
 getReqParamErr
     :: forall ctx m a
-     . ({- FromForm a, -} MonadIO m)
+     . (FromForm a, MonadIO m)
      => (Text -> ActionCtxT ctx m a)
      -> ActionCtxT ctx m a
--- getReqParamErr errHandler = fromEitherM errHandler . urlDecodeAsForm =<< body
-getReqParamErr errHandler = fromEitherM errHandler . undefined =<< body
+getReqParamErr errHandler = fromEitherM errHandler . urlDecodeAsForm . fromStrict =<< body

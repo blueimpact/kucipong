@@ -21,7 +21,7 @@ import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook )
 import Kucipong.Db
     ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..)
     , adminLoginTokenExpirationTime )
-import Kucipong.Form ( AdminStoreCreateForm )
+import Kucipong.Form ( AdminStoreCreateForm(AdminStoreCreateForm) )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad
     ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
@@ -99,12 +99,15 @@ storeCreatePost
     :: forall xs n m
      . ( ContainsAdminSession n xs
        , MonadIO m
+       , MonadKucipongDb m
        , MonadLogger m
        )
     => ActionCtxT (HVect xs) m ()
 storeCreatePost = do
     (AdminSession email) <- getAdminEmail
-    (storeCreateForm :: AdminStoreCreateForm) <- getReqParam
+    (AdminStoreCreateForm storeEmail) <- getReqParam
+    dbCreateStoreEmail storeEmail
+    -- TODO: Where to redirect this?
     redirect $ renderRoute root
 
 adminAuthHook
