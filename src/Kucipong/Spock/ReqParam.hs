@@ -11,9 +11,10 @@ import Kucipong.Prelude
 
 import Control.FromSum ( fromEitherM )
 import Data.HVect ( HasRep, HVectElim )
-import Web.FormUrlEncoded ( FromForm, urlDecodeAsForm )
+import Network.Wai ( requestBody )
+import Web.FormUrlEncoded ( FromForm(fromForm), toForm, urlDecodeAsForm )
 import Web.Spock ( ActionCtxT, Path, body, post, redirect, renderRoute, root )
-import Web.Spock.Core ( SpockCtxT )
+import Web.Spock.Core ( SpockCtxT, request, params )
 
 getReqParam
     :: forall ctx m a
@@ -22,13 +23,20 @@ getReqParam
 getReqParam = getReqParamErr handleFormDecodeError
   where
     handleFormDecodeError :: Text -> ActionCtxT ctx m a
-    handleFormDecodeError _ =
+    handleFormDecodeError err = do
         -- TODO: How should we handle this error?
+        putStrLn $ "Error in getReqParam: " <> err
         redirect $ renderRoute root
 
 getReqParamErr
     :: forall ctx m a
      . (FromForm a, MonadIO m)
-     => (Text -> ActionCtxT ctx m a)
-     -> ActionCtxT ctx m a
-getReqParamErr errHandler = fromEitherM errHandler . urlDecodeAsForm . fromStrict =<< body
+    => (Text -> ActionCtxT ctx m a)
+    -> ActionCtxT ctx m a
+getReqParamErr errHandler = do
+    -- This should really be 'body', not 'params', but it looks like there is
+    -- some problem with using 'body'. It doesn't appear to return any data.
+    p <- params
+    let f = toForm p
+    let eitherItem = fromForm f
+    fromEitherM errHandler eitherItem
