@@ -15,9 +15,8 @@ staticComponent' :: Q Exp
 staticComponent' = do
     files <- runIO $ glob "frontend/dist/static/*"
     mapM_ addDependentFile files
-    eitherFileContents <- forM files $ \fpath ->
+    fileContents <- forM files $ \fpath ->
         liftIO . handleFileContent fpath . readFile $ fpath
-    let fileContents = catMaybes eitherFileContents
     -- TODO Appropreate content type
     -- setHeader "Content-Type" "text/html; charset=utf-8"
     [e| forM_ fileContents $ \(fp, content) ->
@@ -36,11 +35,8 @@ staticComponent' = do
             maybe (pure ()) (setHeader "Content-Type") contentType
             bytes $ encodeUtf8 content |]
   where
-    handleFileContent :: FilePath -> IO Text -> IO (Maybe (FilePath, Text))
+    handleFileContent :: FilePath -> IO Text -> IO (FilePath, Text)
     handleFileContent fp a =
-        catch (a >>= \v -> return (Just (fp, v))) $ \e -> do
-            void . fail $
-                "exception occured when trying to parse the static file \"" <>
-                fp <> ":\n" <> show (e :: SomeException)
-            pure Nothing
-
+        catch (a >>= \v -> pure (fp, v)) $ \e -> fail $
+            "exception occured when trying to parse the static file \"" <>
+            fp <> ":\n" <> show (e :: SomeException)
