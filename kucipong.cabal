@@ -96,6 +96,7 @@ library
                      , time
                      , transformers
                      , transformers-base
+                     , unordered-containers
                      , wai
                      , wai-extra
                      , warp

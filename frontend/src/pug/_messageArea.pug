@@ -2,10 +2,10 @@
   .messageGroup
     | {% for error in errors %}
     .messageBody-error
-      | {{ error.value | toLower }}
+      | {{ error.value | escape }}
     | {% endfor %}
 
     | {% for message in messages %}
     .messageBody
-      | {{ message.value }}
+      | {{ message.value | escape }}
     | {% endfor %}
