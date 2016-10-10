@@ -30,7 +30,7 @@ const commonConfig = {
   // Directory to output compiled files
   output: {
     path: path.resolve(__dirname, 'dist/'),
-    filename: '[name]-[hash].js',
+    filename: 'static/[name]-[hash].js',
   },
 
   resolve: {
@@ -42,8 +42,9 @@ const commonConfig = {
     noParse: /\.elm$/,
     loaders: [
       {
-        test: /\.(eot|ttf|woff|woff2|svg)$/,
+        test: /\.(eot|ttf|woff|woff2|svg|png|jpg)$/,
         loader: 'file-loader',
+        query: { name: "static/[name]-[hash].[ext]" }
       },
       {
         test: /\.pug$/,
@@ -276,10 +277,6 @@ if (TARGET_ENV === 'production') {
     plugins: [
       new CopyWebpackPlugin([
         {
-          from: 'src/img/',
-          to:   'img/',
-        },
-        {
           from: 'src/favicon.ico'
         },
       ]),
@@ -287,7 +284,7 @@ if (TARGET_ENV === 'production') {
       new webpack.optimize.OccurenceOrderPlugin(),
 
       // Extract CSS into a separate file
-      new ExtractTextPlugin( './[name]-[hash].css', { allChunks: true } ),
+      new ExtractTextPlugin( './static/[name]-[hash].css', { allChunks: true } ),
 
       // Minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({

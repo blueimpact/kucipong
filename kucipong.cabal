@@ -30,6 +30,7 @@ library
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
                      , Kucipong.Handler.Store
+                     , Kucipong.Handler.Static
                      , Kucipong.Host
                      , Kucipong.LoginToken
                      , Kucipong.Monad
@@ -63,6 +64,8 @@ library
                      , emailaddress
                      , envelope
                      , from-sum
+                     , filepath
+                     , Glob
                      , hailgun
                      , HTTP
                      , http-api-data
