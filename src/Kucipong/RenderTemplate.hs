@@ -8,13 +8,10 @@ import           Kucipong.Prelude           hiding (try)
 import           Control.Exception          (try)
 import           Control.FromSum            (fromEitherM)
 import qualified Data.HashMap.Strict        as HashMap
-import           Language.Haskell.TH        (Exp, Q, appE, litE,
-                                             lookupValueName, mkName, stringL,
-                                             varE)
+import           Language.Haskell.TH        (Exp, Q)
 import           Language.Haskell.TH.Syntax (addDependentFile)
 import           Network.HTTP.Types         (internalServerError500)
-import           Text.EDE                   (Template, eitherParse,
-                                             eitherRenderWith, fromPairs)
+import           Text.EDE                   (eitherParse, eitherRenderWith)
 import           Text.EDE.Filters           (Term, (@:))
 import           Web.Spock                  (html, setStatus)
 
