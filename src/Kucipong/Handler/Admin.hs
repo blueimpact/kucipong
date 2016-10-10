@@ -136,8 +136,6 @@ adminAuthHook = do
           $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
               [ "errors" .=
                 [ "Need to be logged in as admin in order to access this page." :: Text ]
-              , "messages" .=
-                [ "<script>alert(1);</script>" :: Text ]
               ]
         Just adminSession -> do
             oldCtx <- getContext
