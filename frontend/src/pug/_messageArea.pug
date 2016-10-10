@@ -1,4 +1,11 @@
 .messageArea
   .messageGroup
+    | {% for error in errors %}
+    .messageBody-error
+      | {{ error.value | toLower }}
+    | {% endfor %}
+
+    | {% for message in messages %}
     .messageBody
-      | バックエンドからのメッセージをここに表示します。
+      | {{ message.value }}
+    | {% endfor %}

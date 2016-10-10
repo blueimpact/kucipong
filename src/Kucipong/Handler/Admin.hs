@@ -76,12 +76,20 @@ doLoginGet loginToken = do
     redirect $ renderRoute root
   where
     noAdminLoginTokenError :: ActionCtxT ctx m a
-    noAdminLoginTokenError =
-        redirect . renderRoute $ adminUrlPrefix <//> loginR
+    noAdminLoginTokenError = do
+        setStatus forbidden403
+        $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
+            [ "errors" .=
+              [ "Failed to log in X(\nPlease try again." :: Text ]
+            ]
 
     tokenExpiredError :: ActionCtxT ctx m a
-    tokenExpiredError =
-        redirect . renderRoute $ adminUrlPrefix <//> loginR
+    tokenExpiredError = do
+        setStatus forbidden403
+        $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
+            [ "errors" .=
+              [ "This log in URL has been expired X(\nPlease try again." :: Text ]
+            ]
 
 -- | Return the store create page for an admin.
 storeCreateGet
@@ -125,7 +133,12 @@ adminAuthHook = do
     maybeAdminSession <- getAdminCookie
     case maybeAdminSession of
         Nothing ->
-            redirect . renderRoute $ adminUrlPrefix <//> loginR
+          $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
+              [ "errors" .=
+                [ "Need to be logged in as admin in order to access this page." :: Text ]
+              , "messages" .=
+                [ "<script>alert(1);</script>" :: Text ]
+              ]
         Just adminSession -> do
             oldCtx <- getContext
             return $ adminSession :&: oldCtx
