@@ -17,8 +17,12 @@ staticComponent' = do
     mapM_ addDependentFile files
     eitherFileContents <- forM files $ \fpath ->
         liftIO . handleFileContent fpath . readFile $ fpath
-    let (x:fileContents) = catMaybes eitherFileContents
-    setStaticContent x
+    let fileContents = catMaybes eitherFileContents
+    -- TODO Appropreate content type
+    -- setHeader "Content-Type" "text/html; charset=utf-8"
+    [e| forM_ fileContents $ \(fp, content) ->
+        get (static $ takeFileName fp) $
+            bytes $ encodeUtf8 content |]
   where
     handleFileContent :: FilePath -> IO Text -> IO (Maybe (FilePath, Text))
     handleFileContent fp a =
@@ -27,10 +31,4 @@ staticComponent' = do
                 "exception occured when trying to parse the static file \"" <>
                 fp <> ":\n" <> show (e :: SomeException)
             pure Nothing
-    setStaticContent :: (FilePath, Text) -> Q Exp
-    setStaticContent (fp, content) =
-        [e| get (static $ takeFileName fp) $ do
-            -- TODO Appropreate content type
-            -- setHeader "Content-Type" "text/html; charset=utf-8"
-            bytes $ encodeUtf8 content
-        |]
+
