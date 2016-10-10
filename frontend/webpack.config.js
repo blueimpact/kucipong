@@ -30,7 +30,7 @@ const commonConfig = {
   // Directory to output compiled files
   output: {
     path: path.resolve(__dirname, 'dist/'),
-    filename: 'static/[name]-[hash].js',
+    filename: '/static/[name]-[hash].js',
   },
 
   resolve: {
@@ -44,7 +44,7 @@ const commonConfig = {
       {
         test: /\.(eot|ttf|woff|woff2|svg|png|jpg)$/,
         loader: 'file-loader',
-        query: { name: "static/[name]-[hash].[ext]" }
+        query: { name: "/static/[name]-[hash].[ext]" }
       },
       {
         test: /\.pug$/,
@@ -284,7 +284,7 @@ if (TARGET_ENV === 'production') {
       new webpack.optimize.OccurenceOrderPlugin(),
 
       // Extract CSS into a separate file
-      new ExtractTextPlugin( './static/[name]-[hash].css', { allChunks: true } ),
+      new ExtractTextPlugin( '/static/[name]-[hash].css', { allChunks: true } ),
 
       // Minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({
