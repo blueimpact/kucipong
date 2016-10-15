@@ -24,3 +24,6 @@ instance
 
     sendAdminLoginEmail :: EmailAddress -> LoginToken -> KucipongSendEmailT m ()
     sendAdminLoginEmail = (void .) . Email.sendAdminLoginEmail
+
+    sendStoreLoginEmail :: EmailAddress -> LoginToken -> KucipongSendEmailT m ()
+    sendStoreLoginEmail = (void .) . Email.sendStoreLoginEmail

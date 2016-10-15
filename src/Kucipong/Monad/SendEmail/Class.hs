@@ -28,6 +28,19 @@ class Monad m => MonadKucipongSendEmail m where
         => EmailAddress -> LoginToken -> t n ()
     sendAdminLoginEmail = (lift .) . sendAdminLoginEmail
 
+    sendStoreLoginEmail
+        :: EmailAddress
+        -> LoginToken
+        -> m ()
+    default sendStoreLoginEmail
+        :: ( Monad (t n)
+           , MonadKucipongSendEmail n
+           , MonadTrans t
+           , m ~ t n
+           )
+        => EmailAddress -> LoginToken -> t n ()
+    sendStoreLoginEmail = (lift .) . sendStoreLoginEmail
+
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (ActionCtxT ctx m)
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (ExceptT e m)
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (IdentityT m)

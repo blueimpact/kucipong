@@ -82,7 +82,7 @@ adminLoginMsg
 adminLoginMsg protocol host adminEmail loginToken = do
     let loginTokenText =
             asText $ pack $ urlEncode $ unpack $ unLoginToken loginToken
-        subject = "Kucipong Admin Login"
+        subject = "Kucipong Store Login"
         content = TextOnly . encodeUtf8 $ textContent loginTokenText
         replyTo = "no-reply@kucipong.com"
         to = toByteString adminEmail
@@ -94,11 +94,53 @@ adminLoginMsg protocol host adminEmail loginToken = do
     textContent loginTokenText =
         [st|
 This is an email from Kucipong.  You can use the following URL to
-login as an admin:
+login as a Store:
 
-#{protocol}://#{host}/admin/login/#{loginTokenText}
+#{protocol}://#{host}/store/login/#{loginTokenText}
         |]
 
+sendStoreLoginEmail
+    :: forall r m
+     . ( HasHailgunContext r
+       , HasHost r
+       , HasProtocol r
+       , MonadError AppErr m
+       , MonadIO m
+       , MonadReader r m
+       )
+    => EmailAddress
+    -> LoginToken
+    -> m HailgunSendResponse
+sendStoreLoginEmail storeEmail loginToken = do
+    protocol <- mProtocol
+    host <- mHost
+    sendEmailGeneric $ storeLoginMsg protocol host storeEmail loginToken
+
+storeLoginMsg
+    :: Protocol
+    -> Host
+    -> EmailAddress
+    -> LoginToken
+    -> Either HailgunErrorMessage HailgunMessage
+storeLoginMsg protocol host storeEmail loginToken = do
+    let loginTokenText =
+            asText $ pack $ urlEncode $ unpack $ unLoginToken loginToken
+        subject = "Kucipong Store Login"
+        content = TextOnly . encodeUtf8 $ textContent loginTokenText
+        replyTo = "no-reply@kucipong.com"
+        to = toByteString storeEmail
+        recipients = emptyMessageRecipients { recipientsTo = [ to ] }
+        attachements = []
+    hailgunMessage subject content replyTo recipients attachements
+  where
+    textContent :: Text -> Text
+    textContent loginTokenText =
+        [st|
+This is an email from Kucipong.  You can use the following URL to
+login as an store:
+
+#{protocol}://#{host}/store/login/#{loginTokenText}
+        |]
 
 sendRegistrationCompletedEmail
     :: forall r m

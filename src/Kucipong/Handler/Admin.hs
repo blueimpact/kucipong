@@ -4,6 +4,7 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
+import Control.FromSum ( fromEitherM, fromMaybeM )
 import Control.Lens ( (^.) )
 import Control.Monad.Time ( MonadTime(..) )
 import Data.Aeson ( (.=) )
@@ -11,43 +12,50 @@ import Data.HVect ( HVect(..) )
 import Database.Persist ( Entity(..) )
 import Network.HTTP.Types ( forbidden403 )
 import Text.EDE ( eitherParse, eitherRender, fromPairs )
+import Web.Routing.Combinators ( PathState(Open) )
 import Web.Spock
-    ( ActionCtxT, Path, SpockCtxT, (<//>), get, getContext, html, prehook, root
-    , redirect, renderRoute, runSpock, setStatus, spockT, text, var )
+    ( ActionCtxT, Path, (<//>), getContext, html
+    , root, redirect, renderRoute, runSpock, setStatus, text, var )
+import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook )
 
 import Kucipong.Db
     ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..)
-    , adminLoginTokenExpirationTime )
+    , adminLoginTokenExpirationTime, storeEmailEmail
+    , storeLoginTokenLoginToken )
+import Kucipong.Form ( AdminStoreCreateForm(AdminStoreCreateForm) )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad
-    ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
+    ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail(..) )
 import Kucipong.RenderTemplate ( renderTemplateFromEnv )
 import Kucipong.Spock
-    ( ContainsAdminSession, getAdminCookie, getAdminEmail, setAdminCookie )
+    ( ContainsAdminSession, getAdminCookie, getAdminEmail, getReqParam
+    , setAdminCookie )
 import Kucipong.Session ( Admin, Session(..) )
-import Kucipong.Util ( fromEitherM, fromMaybeM )
 
 -- | Url prefix for all of the following 'Path's.
-adminUrlPrefix :: Path '[]
+adminUrlPrefix :: Path '[] 'Open
 adminUrlPrefix = "admin"
 
-loginPageR :: Path '[]
-loginPageR = "login"
+loginR :: Path '[] 'Open
+loginR = "login"
 
-doLoginR :: Path '[LoginToken]
-doLoginR = "login" <//> var
+doLoginR :: Path '[LoginToken] 'Open
+doLoginR = loginR <//> var
 
-loginPage
+storeCreateR :: Path '[] 'Open
+storeCreateR = "store" <//> "create"
+
+loginGet
     :: forall ctx m
      . ( MonadIO m
        )
     => ActionCtxT ctx m ()
-loginPage =
+loginGet =
     $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs []
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
-doLogin
+doLoginGet
     :: forall ctx m
      . ( MonadIO m
        , MonadKucipongCookie m
@@ -55,38 +63,58 @@ doLogin
        , MonadTime m
        )
     => LoginToken -> ActionCtxT ctx m ()
-doLogin loginToken = do
+doLoginGet loginToken = do
     maybeAdminLoginTokenEntity <- dbFindAdminLoginToken loginToken
     (Entity (AdminLoginTokenKey (AdminKey adminEmail)) adminLoginToken) <-
         fromMaybeM noAdminLoginTokenError maybeAdminLoginTokenEntity
     -- check date on admin login token
     now <- currentTime
     let (LoginTokenExpirationTime expirationTime) =
-            adminLoginToken ^. adminLoginTokenExpirationTime
+            adminLoginTokenExpirationTime adminLoginToken
     when (now > expirationTime) tokenExpiredError
     setAdminCookie adminEmail
     redirect $ renderRoute root
   where
     noAdminLoginTokenError :: ActionCtxT ctx m a
     noAdminLoginTokenError =
-        redirect . renderRoute $ adminUrlPrefix <//> loginPageR
+        redirect . renderRoute $ adminUrlPrefix <//> loginR
 
     tokenExpiredError :: ActionCtxT ctx m a
     tokenExpiredError =
-        redirect . renderRoute $ adminUrlPrefix <//> loginPageR
+        redirect . renderRoute $ adminUrlPrefix <//> loginR
 
 -- | Return the store create page for an admin.
-storeCreate
+storeCreateGet
     :: forall xs n m
      . ( ContainsAdminSession n xs
        , MonadIO m
        , MonadLogger m
        )
     => ActionCtxT (HVect xs) m ()
-storeCreate = do
+storeCreateGet = do
     (AdminSession email) <- getAdminEmail
     $(renderTemplateFromEnv "adminUser_admin_store_create.html") $ fromPairs
         [ "adminEmail" .= email ]
+
+storeCreatePost
+    :: forall xs n m
+     . ( ContainsAdminSession n xs
+       , MonadIO m
+       , MonadKucipongDb m
+       , MonadKucipongSendEmail m
+       , MonadLogger m
+       )
+    => ActionCtxT (HVect xs) m ()
+storeCreatePost = do
+    (AdminSession email) <- getAdminEmail
+    (AdminStoreCreateForm storeEmailParam) <- getReqParam
+    (Entity storeEmailKey storeEmail) <- dbCreateStoreEmail storeEmailParam
+    (Entity storeLoginTokenKey storeLoginToken) <-
+        dbCreateStoreMagicLoginToken storeEmailKey
+    sendStoreLoginEmail
+        (storeEmailEmail storeEmail)
+        (storeLoginTokenLoginToken storeLoginToken)
+    redirect . renderRoute $ adminUrlPrefix <//> storeCreateR
 
 adminAuthHook
     :: ( MonadIO m
@@ -97,7 +125,7 @@ adminAuthHook = do
     maybeAdminSession <- getAdminCookie
     case maybeAdminSession of
         Nothing ->
-            redirect . renderRoute $ adminUrlPrefix <//> loginPageR
+            redirect . renderRoute $ adminUrlPrefix <//> loginR
         Just adminSession -> do
             oldCtx <- getContext
             return $ adminSession :&: oldCtx
@@ -113,7 +141,9 @@ adminComponent
        )
     => SpockCtxT (HVect xs) m ()
 adminComponent = do
-    get doLoginR doLogin
-    get loginPageR loginPage
-    prehook adminAuthHook $
-        get ("store" <//> "create") storeCreate
+    get doLoginR doLoginGet
+    get loginR loginGet
+    prehook adminAuthHook $ do
+        get storeCreateR storeCreateGet
+        post storeCreateR storeCreatePost
+

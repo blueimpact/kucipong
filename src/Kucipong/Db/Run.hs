@@ -15,25 +15,29 @@ doMigrations :: (MonadIO m) => ReaderT SqlBackend m ()
 doMigrations = runMigration migrateAll
 
 -- | Run a Persistent query.
-runDb :: ( MonadIO m
-         , MonadReader r m
-         , HasDbPool r
-         , MonadBaseControl IO m
-         )
-      => ReaderT SqlBackend m a
-      -> m a
+runDb
+    :: ( MonadIO m
+       , MonadReader r m
+       , HasDbPool r
+       , MonadBaseControl IO m
+       )
+    => ReaderT SqlBackend m a
+    -> m a
 runDb query = reader getDbPool >>= runSqlPool query
 
 -- | Just like 'runDB' but catch SQL uniqueness violation errors and
 -- rethrow them as more specific Kucipong errors.
-runDbSafe :: forall m r b .  ( MonadError AppErr m
-                             , MonadIO m
-                             , MonadReader r m
-                             , HasDbPool r
-                             , MonadBaseControl IO m
-                             )
-          => ReaderT SqlBackend m b
-          -> m b
+runDbSafe
+    :: forall m r b
+     .  ( MonadCatch m
+        , MonadError AppErr m
+        , MonadIO m
+        , MonadReader r m
+        , HasDbPool r
+        , MonadBaseControl IO m
+        )
+    => ReaderT SqlBackend m b
+    -> m b
 runDbSafe query = do
     maybeResult <- try $ runDb query
     case maybeResult of
@@ -61,26 +65,29 @@ runDbSafe query = do
         throwAppErr errEnum . Just $ tshow sqlError
 
 -- | Just like 'runDb' but provide the current time to the callback.
-runDbCurrTime :: ( MonadIO m
-                 , MonadReader r m
-                 , HasDbPool r
-                 , MonadBaseControl IO m
-                 )
-              => (UTCTime -> ReaderT SqlBackend m b)
-              -> m b
+runDbCurrTime
+    :: ( MonadIO m
+       , MonadReader r m
+       , HasDbPool r
+       , MonadBaseControl IO m
+       )
+    => (UTCTime -> ReaderT SqlBackend m b)
+    -> m b
 runDbCurrTime query = do
     currentTime <- liftIO getCurrentTime
     runDb $ query currentTime
 
 -- | Combination of 'runDbCurrTime' and 'runDbSafe'.
-runDbSafeCurrTime :: ( MonadError AppErr m
-                     , MonadIO m
-                     , MonadReader r m
-                     , HasDbPool r
-                     , MonadBaseControl IO m
-                     )
-                  => (UTCTime -> ReaderT SqlBackend m b)
-                  -> m b
+runDbSafeCurrTime
+    :: ( MonadCatch m
+       , MonadError AppErr m
+       , MonadIO m
+       , MonadReader r m
+       , HasDbPool r
+       , MonadBaseControl IO m
+       )
+    => (UTCTime -> ReaderT SqlBackend m b)
+    -> m b
 runDbSafeCurrTime query = do
     currentTime <- liftIO getCurrentTime
     runDbSafe $ query currentTime

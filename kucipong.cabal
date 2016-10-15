@@ -26,8 +26,10 @@ library
                      , Kucipong.Email
                      , Kucipong.Environment
                      , Kucipong.Errors
+                     , Kucipong.Form
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
+                     , Kucipong.Handler.Store
                      , Kucipong.Host
                      , Kucipong.LoginToken
                      , Kucipong.Monad
@@ -45,10 +47,12 @@ library
                      , Kucipong.Monad.SendEmail.Instance
                      , Kucipong.Monad.SendEmail.Trans
                      , Kucipong.Orphans
+                     , Kucipong.Persist
                      , Kucipong.Prelude
                      , Kucipong.RenderTemplate
                      , Kucipong.Session
                      , Kucipong.Spock
+                     , Kucipong.Spock.ReqParam
                      , Kucipong.Util
   build-depends:       base >= 4.7 && < 5
                      , aeson
@@ -58,6 +62,7 @@ library
                      , ede
                      , emailaddress
                      , envelope
+                     , from-sum
                      , hailgun
                      , HTTP
                      , http-api-data
@@ -78,9 +83,11 @@ library
                      , postgresql-simple
                      , pwstore-fast
                      , read-env-var
+                     , reroute
                      , resource-pool
                      , shakespeare
                      , Spock
+                     , Spock-core
                      , template-haskell
                      , th-lift-instances
                      , time
@@ -106,6 +113,7 @@ library
                      , InstanceSigs
                      , MultiParamTypeClasses
                      , NoImplicitPrelude
+                     , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PackageImports
                      , PolyKinds
@@ -141,6 +149,7 @@ executable kucipong
                      , InstanceSigs
                      , MultiParamTypeClasses
                      , NoImplicitPrelude
+                     , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PolyKinds
                      , RankNTypes
@@ -160,6 +169,7 @@ executable kucipong-add-admin
   build-depends:       base
                      , kucipong
                      , emailaddress
+                     , from-sum
                      , lens
                      , monad-time
                      , optparse-applicative
@@ -181,6 +191,7 @@ executable kucipong-add-admin
                      , MultiParamTypeClasses
                      , NamedFieldPuns
                      , NoImplicitPrelude
+                     , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PolyKinds
                      , RankNTypes

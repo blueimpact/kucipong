@@ -18,11 +18,13 @@ newtype KucipongSendEmailT m a = KucipongSendEmailT { unKucipongSendEmailT :: Id
         , Functor
         , Monad
         , MonadBase b
+        , MonadCatch
         , MonadError e
         , MonadIO
         , MonadLogger
         , MonadRandom
         , MonadReader r
+        , MonadThrow
         , MonadTime
         , MonadTrans
         )

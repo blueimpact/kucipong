@@ -1,6 +1,7 @@
 
 module Kucipong.Spock
-    ( setAdminCookie
+    ( module Kucipong.Spock.ReqParam
+    , setAdminCookie
     , setStoreCookie
     , getAdminCookie
     , getStoreCookie
@@ -17,6 +18,7 @@ import Web.Spock ( ActionCtxT, cookie, getContext, setCookie )
 
 import Kucipong.Monad ( MonadKucipongCookie(..) )
 import Kucipong.Session ( Admin, Session(AdminSession, StoreSession), Store )
+import Kucipong.Spock.ReqParam
 
 setAdminCookie
     :: ( MonadIO m

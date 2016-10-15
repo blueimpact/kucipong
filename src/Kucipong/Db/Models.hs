@@ -24,7 +24,7 @@ import Kucipong.Db.Models.Base
 import Kucipong.Db.Models.EntityDefs ( kucipongEntityDefs )
 import Kucipong.LoginToken ( LoginToken )
 
-share [ mkPersist sqlSettings { mpsGenerateLenses = True }
+share [ mkPersist sqlSettings { mpsGenerateLenses = False }
       , mkMigrate "migrateAll"
       ]
       kucipongEntityDefs
