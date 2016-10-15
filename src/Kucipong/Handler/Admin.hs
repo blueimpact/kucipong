@@ -114,8 +114,7 @@ storeCreatePost = do
     sendStoreLoginEmail
         (storeEmailEmail storeEmail)
         (storeLoginTokenLoginToken storeLoginToken)
-    -- TODO: Where to redirect this?
-    redirect $ renderRoute root
+    redirect . renderRoute $ adminUrlPrefix <//> storeCreateR
 
 adminAuthHook
     :: ( MonadIO m
