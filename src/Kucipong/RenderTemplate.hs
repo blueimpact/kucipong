@@ -1,18 +1,19 @@
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE QuasiQuotes     #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Kucipong.RenderTemplate where
 
-import Kucipong.Prelude hiding ( try )
+import           Kucipong.Prelude           hiding (try)
 
-import Control.Exception ( try )
-import Control.FromSum ( fromEitherM )
-import Language.Haskell.TH
-    ( Exp, Q, appE, litE, lookupValueName, mkName, stringL, varE )
-import Language.Haskell.TH.Syntax ( addDependentFile )
-import Network.HTTP.Types ( internalServerError500 )
-import Text.EDE ( Template, eitherParse, eitherRender, fromPairs )
-import Web.Spock ( html, setStatus )
+import           Control.Exception          (try)
+import           Control.FromSum            (fromEitherM)
+import qualified Data.HashMap.Strict        as HashMap
+import           Language.Haskell.TH        (Exp, Q)
+import           Language.Haskell.TH.Syntax (addDependentFile)
+import           Network.HTTP.Types         (internalServerError500)
+import           Text.EDE                   (eitherParse, eitherRenderWith)
+import           Text.EDE.Filters           (Term, (@:))
+import           Web.Spock                  (html, setStatus)
 
 templateDirectory :: FilePath
 templateDirectory = "frontend" </> "dist"
@@ -32,7 +33,20 @@ renderTemplateFromEnv filename = do
     -- error during compile time to the user if it cannot.
     void $ fromEitherM handleIncorrectTemplate eitherParsedTemplate
     templateExp <- [e| unsafeFromRight $ eitherParse rawTemplate |]
-    eitherRenderLambdaExp <- [e| eitherRender $(pure templateExp) |]
+    eitherRenderLambdaExp <- [e|
+      let
+        escapeHtml :: Text -> Text
+        escapeHtml = concatMap $ \c -> case c of
+            '"' -> "&quot;"
+            '\'' -> "&#39;"
+            '&' -> "&amp;"
+            '<' -> "&lt;"
+            '>' -> "&gt;"
+            _ -> singleton c
+        filters :: HashMap Text Term
+        filters = HashMap.fromList [ "escape" @: escapeHtml ]
+      in
+        eitherRenderWith filters $(pure templateExp) |]
     [e| \environmentObject -> case $(pure eitherRenderLambdaExp) environmentObject of
             Left err -> do
                 setStatus internalServerError500
