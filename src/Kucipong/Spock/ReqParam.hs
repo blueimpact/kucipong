@@ -10,11 +10,9 @@ module Kucipong.Spock.ReqParam where
 import Kucipong.Prelude
 
 import Control.FromSum ( fromEitherM )
-import Data.HVect ( HasRep, HVectElim )
-import Network.Wai ( requestBody )
-import Web.FormUrlEncoded ( FromForm(fromForm), toForm, urlDecodeAsForm )
-import Web.Spock ( ActionCtxT, Path, body, post, redirect, renderRoute, root )
-import Web.Spock.Core ( SpockCtxT, request, params )
+import Web.FormUrlEncoded ( FromForm(fromForm), toForm )
+import Web.Spock ( ActionCtxT, redirect, renderRoute, root )
+import Web.Spock.Core ( params )
 
 getReqParam
     :: forall ctx m a

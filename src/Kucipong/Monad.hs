@@ -70,7 +70,6 @@ deriving instance
 
 deriving instance
     ( MonadBaseControl IO m
-    , MonadError AppErr m
     , MonadIO m
     , MonadRandom m
     , MonadReader Config m

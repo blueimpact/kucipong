@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures #-}
+{-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
 
 module Kucipong.Monad.SendEmail.Class where
 
@@ -20,8 +20,7 @@ class Monad m => MonadKucipongSendEmail m where
         -> LoginToken
         -> m ()
     default sendAdminLoginEmail
-        :: ( Monad (t n)
-           , MonadKucipongSendEmail n
+        :: ( MonadKucipongSendEmail n
            , MonadTrans t
            , m ~ t n
            )
@@ -33,8 +32,7 @@ class Monad m => MonadKucipongSendEmail m where
         -> LoginToken
         -> m ()
     default sendStoreLoginEmail
-        :: ( Monad (t n)
-           , MonadKucipongSendEmail n
+        :: ( MonadKucipongSendEmail n
            , MonadTrans t
            , m ~ t n
            )

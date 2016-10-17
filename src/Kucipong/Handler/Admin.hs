@@ -4,24 +4,22 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
-import Control.FromSum ( fromEitherM, fromMaybeM )
-import Control.Lens ( (^.) )
+import Control.FromSum ( fromMaybeM )
 import Control.Monad.Time ( MonadTime(..) )
 import Data.Aeson ( (.=) )
 import Data.HVect ( HVect(..) )
 import Database.Persist ( Entity(..) )
 import Network.HTTP.Types ( forbidden403 )
-import Text.EDE ( eitherParse, eitherRender, fromPairs )
+import Text.EDE ( fromPairs )
 import Web.Routing.Combinators ( PathState(Open) )
 import Web.Spock
-    ( ActionCtxT, Path, (<//>), getContext, html
-    , root, redirect, renderRoute, runSpock, setStatus, text, var )
-import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook )
+    ( ActionCtxT, Path, (<//>), getContext, root, redirect, renderRoute
+    , setStatus, var )
+import Web.Spock.Core ( SpockCtxT, get, post, prehook )
 
 import Kucipong.Db
-    ( Admin, AdminId, AdminLoginToken, Key(..), LoginTokenExpirationTime(..)
-    , adminLoginTokenExpirationTime, storeEmailEmail
-    , storeLoginTokenLoginToken )
+    ( Key(..), LoginTokenExpirationTime(..), adminLoginTokenExpirationTime
+    , storeEmailEmail, storeLoginTokenLoginToken )
 import Kucipong.Form ( AdminStoreCreateForm(AdminStoreCreateForm) )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad
@@ -101,7 +99,6 @@ storeCreateGet
     :: forall xs n m
      . ( ContainsAdminSession n xs
        , MonadIO m
-       , MonadLogger m
        )
     => ActionCtxT (HVect xs) m ()
 storeCreateGet = do
@@ -110,19 +107,16 @@ storeCreateGet = do
         [ "adminEmail" .= email ]
 
 storeCreatePost
-    :: forall xs n m
-     . ( ContainsAdminSession n xs
-       , MonadIO m
+    :: forall xs m
+     . ( MonadIO m
        , MonadKucipongDb m
        , MonadKucipongSendEmail m
-       , MonadLogger m
        )
     => ActionCtxT (HVect xs) m ()
 storeCreatePost = do
-    (AdminSession email) <- getAdminEmail
     (AdminStoreCreateForm storeEmailParam) <- getReqParam
     (Entity storeEmailKey storeEmail) <- dbCreateStoreEmail storeEmailParam
-    (Entity storeLoginTokenKey storeLoginToken) <-
+    (Entity _ storeLoginToken) <-
         dbCreateStoreMagicLoginToken storeEmailKey
     sendStoreLoginEmail
         (storeEmailEmail storeEmail)
@@ -153,7 +147,6 @@ adminComponent
        , MonadKucipongCookie m
        , MonadKucipongDb m
        , MonadKucipongSendEmail m
-       , MonadLogger m
        , MonadTime m
        )
     => SpockCtxT (HVect xs) m ()
