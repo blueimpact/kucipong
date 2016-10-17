@@ -14,7 +14,7 @@ import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook, subcomponent )
 import Kucipong.Config ( Config )
 import Kucipong.Handler.Admin ( adminComponent, adminUrlPrefix )
 import Kucipong.Handler.Store ( storeComponent, storeUrlPrefix )
-import Kucipong.Handler.Static ( staticComponent' )
+import Kucipong.Handler.Static ( staticComponent, staticUrlPrefix )
 import Kucipong.Host ( HasPort(..) )
 import Kucipong.Monad ( KucipongM, runKucipongM )
 
@@ -32,7 +32,7 @@ baseHook = pure HNil
 app :: Config -> IO ()
 app config = runSpock (getPort config) $
     spockT (runKucipongMHandleErrors config) $ do
-        subcomponent "static" $(staticComponent')
+        subcomponent staticUrlPrefix staticComponent
         prehook baseHook $ do
             subcomponent adminUrlPrefix adminComponent
             subcomponent storeUrlPrefix storeComponent
