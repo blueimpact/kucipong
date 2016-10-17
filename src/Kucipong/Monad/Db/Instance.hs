@@ -5,7 +5,6 @@ module Kucipong.Monad.Db.Instance where
 
 import Kucipong.Prelude
 
-import Control.Lens ( (^.) )
 import Control.Monad.Random ( MonadRandom(..) )
 import Control.Monad.Time ( MonadTime(..) )
 import Database.Persist
@@ -15,10 +14,9 @@ import Database.Persist
 import Kucipong.Config ( Config )
 import Kucipong.Db
     ( Admin(..), AdminLoginToken(..), CreatedTime(..), EntityField(..)
-    , Image(..), Key(..), LoginTokenExpirationTime(..), Store(..)
+    , Image, Key(..), LoginTokenExpirationTime(..), Store(..)
     , StoreEmail(..), StoreLoginToken(..), UpdatedTime(..), adminName, runDb
-    , runDbCurrTime, storeName )
-import Kucipong.Errors ( AppErr )
+    , runDbCurrTime )
 import Kucipong.LoginToken ( LoginToken, createRandomLoginToken )
 import Kucipong.Monad.Db.Class ( MonadKucipongDb(..) )
 import Kucipong.Monad.Db.Trans ( KucipongDbT(..) )
@@ -27,7 +25,6 @@ import Kucipong.Util ( addOneDay )
 
 instance ( MonadBaseControl IO m
          , MonadIO m
-         , MonadError AppErr m
          , MonadRandom m
          , MonadReader Config m
          , MonadTime m

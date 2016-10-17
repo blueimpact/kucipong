@@ -59,9 +59,7 @@ getStoreCookie
 getStoreCookie = getCookieGeneic "storeEmail" decryptStoreSessionCookie
 
 getCookieGeneic
-    :: ( MonadIO m
-       , MonadKucipongCookie m
-       )
+    :: MonadIO m
     => Text
     -> (Text -> ActionCtxT ctx m (Maybe (Session sessionType)))
     -> ActionCtxT ctx m (Maybe (Session sessionType))

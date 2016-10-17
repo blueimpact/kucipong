@@ -4,8 +4,8 @@ module Kucipong.Persist where
 import Kucipong.Prelude
 
 import Database.Persist
-    ( BaseBackend, Entity(Entity), Key, PersistEntity, PersistEntityBackend, PersistStore, PersistStoreWrite
-    , repsert )
+    ( BaseBackend, Entity(Entity), Key, PersistEntity, PersistEntityBackend
+    , PersistStoreWrite, repsert )
 
 repsertEntity
     :: forall backend m record
