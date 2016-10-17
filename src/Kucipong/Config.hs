@@ -74,10 +74,14 @@ instance HasSessionKey Config where
     getSessionKey = configSessionKey
 
 -- | Returns a 'Middleware' with our logger.
-setLogger :: Environment -> Middleware
-setLogger Test = id
-setLogger Development = logStdoutDev
-setLogger Production = logStdout
+setLoggerMiddleware
+    :: (HasEnv r)
+    => r -> Middleware
+setLoggerMiddleware r =
+    case getEnv r of
+        Test -> id
+        Development -> logStdoutDev
+        Production -> logStdout
 
 -- | This is the key for encrypting session data.  A new key for use in
 -- production can be created like the following:
