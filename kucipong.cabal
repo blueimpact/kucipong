@@ -31,6 +31,7 @@ library
                      , Kucipong.Handler.Admin
                      , Kucipong.Handler.Store
                      , Kucipong.Handler.Static
+                     , Kucipong.Handler.Static.TH
                      , Kucipong.Host
                      , Kucipong.LoginToken
                      , Kucipong.Monad
