@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures #-}
+{-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
 
 module Kucipong.Monad.Db.Class where
 
@@ -35,8 +35,7 @@ class Monad m => MonadKucipongDb m where
         -- ^ Admin name
         -> m (Entity Admin)
     default dbCreateAdmin
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -45,8 +44,7 @@ class Monad m => MonadKucipongDb m where
 
     dbCreateAdminMagicLoginToken :: Key Admin -> m (Entity AdminLoginToken)
     default dbCreateAdminMagicLoginToken
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -55,8 +53,7 @@ class Monad m => MonadKucipongDb m where
 
     dbFindAdminLoginToken :: LoginToken -> m (Maybe (Entity AdminLoginToken))
     default dbFindAdminLoginToken
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -69,8 +66,7 @@ class Monad m => MonadKucipongDb m where
         -- ^ Admin name
         -> m (Entity Admin)
     default dbUpsertAdmin
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -106,8 +102,7 @@ class Monad m => MonadKucipongDb m where
         -- ^ url for the 'Store'
         -> m (Entity Store)
     default dbCreateStore
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -131,8 +126,7 @@ class Monad m => MonadKucipongDb m where
 
     dbCreateStoreEmail :: EmailAddress -> m (Entity StoreEmail)
     default dbCreateStoreEmail
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -141,8 +135,7 @@ class Monad m => MonadKucipongDb m where
 
     dbCreateStoreMagicLoginToken :: Key StoreEmail -> m (Entity StoreLoginToken)
     default dbCreateStoreMagicLoginToken
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -151,8 +144,7 @@ class Monad m => MonadKucipongDb m where
 
     dbFindStoreLoginToken :: LoginToken -> m (Maybe (Entity StoreLoginToken))
     default dbFindStoreLoginToken
-        :: ( Monad (t n)
-           , MonadKucipongDb n
+        :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
@@ -165,8 +157,7 @@ class Monad m => MonadKucipongDb m where
     --     -- ^ Store name
     --     -> m (Entity Store)
     -- default dbUpsertStore
-    --     :: ( Monad (t n)
-    --        , MonadKucipongDb n
+    --     :: ( MonadKucipongDb n
     --        , MonadTrans t
     --        , m ~ t n
     --        )

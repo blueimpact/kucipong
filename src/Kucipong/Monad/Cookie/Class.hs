@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures #-}
+{-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
 
 module Kucipong.Monad.Cookie.Class where
 
@@ -18,8 +18,7 @@ class Monad m => MonadKucipongCookie m where
     cookieSettings
         :: m CookieSettings
     default cookieSettings
-        :: ( Monad (t n)
-           , MonadKucipongCookie n
+        :: ( MonadKucipongCookie n
            , MonadTrans t
            , m ~ t n
            )
@@ -29,8 +28,7 @@ class Monad m => MonadKucipongCookie m where
     encryptSessionCookie
         :: Session sessionType -> m Text
     default encryptSessionCookie
-        :: ( Monad (t n)
-           , MonadKucipongCookie n
+        :: ( MonadKucipongCookie n
            , MonadTrans t
            , m ~ t n
            )
@@ -40,8 +38,7 @@ class Monad m => MonadKucipongCookie m where
     decryptAdminSessionCookie
         :: Text -> m (Maybe (Session Admin))
     default decryptAdminSessionCookie
-        :: ( Monad (t n)
-           , MonadKucipongCookie n
+        :: ( MonadKucipongCookie n
            , MonadTrans t
            , m ~ t n
            )
@@ -51,8 +48,7 @@ class Monad m => MonadKucipongCookie m where
     decryptStoreSessionCookie
         :: Text -> m (Maybe (Session Store))
     default decryptStoreSessionCookie
-        :: ( Monad (t n)
-           , MonadKucipongCookie n
+        :: ( MonadKucipongCookie n
            , MonadTrans t
            , m ~ t n
            )
