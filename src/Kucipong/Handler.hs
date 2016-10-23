@@ -6,11 +6,8 @@ import Kucipong.Prelude
 
 import Data.HVect ( HVect(HNil) )
 import Network.Wai ( Middleware )
-import Web.Routing.Combinators ( PathState(Open) )
-import Web.Spock
-    ( ActionCtxT, Path, (<//>), getContext, html
-    , root, redirect, renderRoute, runSpock, setStatus, text, var )
-import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook, subcomponent )
+import Web.Spock ( ActionCtxT, html , root, runSpock )
+import Web.Spock.Core ( spockT, get, prehook, subcomponent )
 
 import Kucipong.Config ( Config )
 import Kucipong.Handler.Admin ( adminComponent, adminUrlPrefix )
@@ -18,11 +15,6 @@ import Kucipong.Handler.Store ( storeComponent, storeUrlPrefix )
 import Kucipong.Handler.Static ( staticComponent, staticUrlPrefix )
 import Kucipong.Host ( HasPort(..) )
 import Kucipong.Monad ( KucipongM, runKucipongM )
-
--- TODO: Remove this:
-import Kucipong.Email
-import Mail.Hailgun
-import "emailaddress" Text.Email.Validate (emailAddress)
 
 runKucipongMHandleErrors :: Config -> KucipongM a -> IO a
 runKucipongMHandleErrors config = either throwIO pure <=< runKucipongM config
