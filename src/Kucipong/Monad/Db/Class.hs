@@ -21,9 +21,6 @@ import Kucipong.Monad.SendEmail.Trans ( KucipongSendEmailT )
 -- Default implementations are used to easily derive instances for monads
 -- transformers that implement 'MonadTrans'.
 class Monad m => MonadKucipongDb m where
-    -- TODO
-    -- This is rough implementation.
-    -- Share functions with admin and store user.
 
     -- ===========
     --  For Admin

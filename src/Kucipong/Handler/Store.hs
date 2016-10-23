@@ -91,7 +91,6 @@ storeAuthHook = do
             oldCtx <- getContext
             return $ storeSession :&: oldCtx
 
--- TODO: It is better to make some module to share functions with admin handler.
 storeComponent
     :: forall m xs
      . ( MonadIO m
