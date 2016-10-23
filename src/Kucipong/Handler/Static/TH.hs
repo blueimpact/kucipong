@@ -17,8 +17,6 @@ staticComponent' = do
     mapM_ addDependentFile files
     fileContents <- forM files $ \fpath ->
         liftIO . handleFileContent fpath . readFile $ fpath
-    -- TODO Appropreate content type
-    -- setHeader "Content-Type" "text/html; charset=utf-8"
     [e| forM_ fileContents $ \(fp, content) ->
         get (static $ takeFileName fp) $
           let
