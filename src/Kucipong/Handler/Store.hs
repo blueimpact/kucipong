@@ -4,29 +4,26 @@ module Kucipong.Handler.Store where
 
 import Kucipong.Prelude
 
-import Control.FromSum ( fromEitherM, fromMaybeM )
-import Control.Lens ( (^.) )
+import Control.FromSum ( fromMaybeM )
 import Control.Monad.Time ( MonadTime(..) )
-import Data.Aeson ( (.=) )
 import Data.HVect ( HVect(..) )
 import Database.Persist ( Entity(..) )
-import Network.HTTP.Types ( forbidden403 )
-import Text.EDE ( eitherParse, eitherRender, fromPairs )
+import Text.EDE ( fromPairs )
 import Web.Routing.Combinators ( PathState(Open) )
 import Web.Spock
-    ( ActionCtxT, Path, (<//>), getContext, html
-    , root, redirect, renderRoute, runSpock, setStatus, text, var )
-import Web.Spock.Core ( SpockCtxT, spockT, get, post, prehook )
+    ( ActionCtxT, Path, (<//>), getContext
+    , root, redirect, renderRoute, var )
+import Web.Spock.Core ( SpockCtxT, get )
 
 import Kucipong.Db
-    ( Store, StoreId, StoreLoginToken, Key(..), LoginTokenExpirationTime(..)
+    ( Key(..), LoginTokenExpirationTime(..)
     , storeLoginTokenExpirationTime )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad
-    ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail )
+    ( MonadKucipongCookie, MonadKucipongDb(..) )
 import Kucipong.RenderTemplate ( renderTemplateFromEnv )
 import Kucipong.Spock
-    ( ContainsStoreSession, getStoreCookie, getStoreEmail, setStoreCookie )
+    ( getStoreCookie, setStoreCookie )
 import Kucipong.Session ( Store, Session(..) )
 
 -- | Url prefix for all of the following 'Path's.
@@ -97,8 +94,6 @@ storeComponent
      . ( MonadIO m
        , MonadKucipongCookie m
        , MonadKucipongDb m
-       , MonadKucipongSendEmail m
-       , MonadLogger m
        , MonadTime m
        )
     => SpockCtxT (HVect xs) m ()
