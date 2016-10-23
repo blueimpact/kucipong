@@ -48,11 +48,7 @@ loginGet
      . ( MonadIO m
        )
     => ActionCtxT ctx m ()
-loginGet =
-    $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
-        [ "errors" .= (empty :: [Text])
-        , "messages" .= (empty :: [Text])
-        ]
+loginGet = $(renderTemplateFromEnv "adminUser_login.html") mempty
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
@@ -82,7 +78,6 @@ doLoginGet loginToken = do
         $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
             [ "errors" .=
               [ "Failed to log in X(\nPlease try again." :: Text ]
-              , "messages" .= (empty :: [Text])
             ]
 
     tokenExpiredError :: ActionCtxT ctx m a
@@ -91,7 +86,6 @@ doLoginGet loginToken = do
         $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
             [ "errors" .=
               [ "This log in URL has been expired X(\nPlease try again." :: Text ]
-              , "messages" .= (empty :: [Text])
             ]
 
 -- | Return the store create page for an admin.
@@ -135,7 +129,6 @@ adminAuthHook = do
           $(renderTemplateFromEnv "adminUser_login.html") $ fromPairs
               [ "errors" .=
                 [ "Need to be logged in as admin in order to access this page." :: Text ]
-              , "messages" .= (empty :: [Text])
               ]
         Just adminSession -> do
             oldCtx <- getContext
@@ -156,4 +149,3 @@ adminComponent = do
     prehook adminAuthHook $ do
         get storeCreateR storeCreateGet
         post storeCreateR storeCreatePost
-

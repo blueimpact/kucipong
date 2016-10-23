@@ -7,13 +7,21 @@ import           Kucipong.Prelude           hiding (try)
 
 import           Control.Exception          (try)
 import           Control.FromSum            (fromEitherM)
+import           Data.Aeson                 (Object, (.=))
 import qualified Data.HashMap.Strict        as HashMap
 import           Language.Haskell.TH        (Exp, Q)
 import           Language.Haskell.TH.Syntax (addDependentFile)
 import           Network.HTTP.Types         (internalServerError500)
-import           Text.EDE                   (eitherParse, eitherRenderWith)
+import           Text.EDE                   (eitherParse, eitherRenderWith, fromPairs)
 import           Text.EDE.Filters           (Term, (@:))
 import           Web.Spock                  (html, setStatus)
+
+-- | Add empty @errors@ and @messages@ keys/values to an object if they don't
+-- already exist.
+addErrorsAndMessages :: Object -> Object
+addErrorsAndMessages obj =
+    union obj $
+    fromPairs ["errors" .= (empty :: [Text]), "messages" .= (empty :: [Text])]
 
 templateDirectory :: FilePath
 templateDirectory = "frontend" </> "dist"
@@ -47,7 +55,9 @@ renderTemplateFromEnv filename = do
         filters = HashMap.fromList [ "escape" @: escapeHtml ]
       in
         eitherRenderWith filters $(pure templateExp) |]
-    [e| \environmentObject -> case $(pure eitherRenderLambdaExp) environmentObject of
+    [e| \envObj ->
+          let envObjWithErrAndMsg = addErrorsAndMessages envObj
+          in case $(pure eitherRenderLambdaExp) envObjWithErrAndMsg of
             Left err -> do
                 setStatus internalServerError500
                 html $ "<h3>Error with rendering template:</h3>" <> pack err
