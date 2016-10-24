@@ -82,7 +82,7 @@ adminLoginMsg
 adminLoginMsg protocol host adminEmail loginToken = do
     let loginTokenText =
             asText $ pack $ urlEncode $ unpack $ unLoginToken loginToken
-        subject = "Kucipong Store Login"
+        subject = "Kucipong Admin Login"
         content = TextOnly . encodeUtf8 $ textContent loginTokenText
         replyTo = "no-reply@kucipong.com"
         to = toByteString adminEmail
@@ -94,9 +94,9 @@ adminLoginMsg protocol host adminEmail loginToken = do
     textContent loginTokenText =
         [st|
 This is an email from Kucipong.  You can use the following URL to
-login as a Store:
+login as an admin:
 
-#{protocol}://#{host}/store/login/#{loginTokenText}
+#{protocol}://#{host}/admin/login/#{loginTokenText}
         |]
 
 sendStoreLoginEmail

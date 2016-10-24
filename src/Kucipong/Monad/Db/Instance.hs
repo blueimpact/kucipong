@@ -65,6 +65,18 @@ instance ( MonadBaseControl IO m
         go :: m (Maybe (Entity AdminLoginToken))
         go = runDb $ selectFirst [AdminLoginTokenLoginToken ==. loginToken] []
 
+    dbFindAdmin :: EmailAddress -> KucipongDbT m (Maybe (Entity Admin))
+    dbFindAdmin email = lift go
+      where
+        go :: m (Maybe (Entity Admin))
+        go = fmap (fmap createEntity) . runDb $ get adminKey
+
+        createEntity :: Admin -> Entity Admin
+        createEntity = Entity adminKey
+
+        adminKey :: Key Admin
+        adminKey = AdminKey email
+
     dbUpsertAdmin :: EmailAddress -> Text -> KucipongDbT m (Entity Admin)
     dbUpsertAdmin email name = lift go
       where
