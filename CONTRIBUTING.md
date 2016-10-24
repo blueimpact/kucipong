@@ -8,6 +8,9 @@ Feel free to open an issue or a pull-request.
 ## Code Style
 
 We use the default [`hindent`](https://github.com/chrisdone/hindent) style.
+`hindent` is relatively new, and constantly changing, so we use the `master`
+branch of `hindent`.
+
 `hindent` generally sticks to the Johan Tibell style in the [Haskell Style
 Guide](https://github.com/tibbe/haskell-style-guide/blob/master/haskell-style.md).
 
