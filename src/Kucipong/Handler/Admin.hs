@@ -26,7 +26,7 @@ import Kucipong.Monad
     ( MonadKucipongCookie, MonadKucipongDb(..), MonadKucipongSendEmail(..) )
 import Kucipong.RenderTemplate ( renderTemplateFromEnv )
 import Kucipong.Spock
-    ( ContainsAdminSession, getAdminCookie, getAdminEmail, getReqParam
+    ( ContainsAdminSession, getAdminCookie, getAdminEmail, getReqParamErr
     , setAdminCookie )
 import Kucipong.Session ( Admin, Session(..) )
 
@@ -108,7 +108,7 @@ storeCreatePost
        )
     => ActionCtxT (HVect xs) m ()
 storeCreatePost = do
-    (AdminStoreCreateForm storeEmailParam) <- getReqParam
+    (AdminStoreCreateForm storeEmailParam) <- getReqParamErr handleErr
     (Entity storeEmailKey storeEmail) <- dbCreateStoreEmail storeEmailParam
     (Entity _ storeLoginToken) <-
         dbCreateStoreMagicLoginToken storeEmailKey
@@ -116,6 +116,11 @@ storeCreatePost = do
         (storeEmailEmail storeEmail)
         (storeLoginTokenLoginToken storeLoginToken)
     redirect . renderRoute $ adminUrlPrefix <//> storeCreateR
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg =
+      $(renderTemplateFromEnv "adminUser_admin_store_create.html") $
+      fromPairs ["errors" .= [errMsg]]
 
 adminAuthHook
     :: ( MonadIO m
