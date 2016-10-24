@@ -9,32 +9,21 @@ module Kucipong.Spock.ReqParam where
 
 import Kucipong.Prelude
 
-import Control.FromSum ( fromEitherM )
-import Web.FormUrlEncoded ( FromForm(fromForm), toForm )
-import Web.Spock ( ActionCtxT, redirect, renderRoute, root )
-import Web.Spock.Core ( params )
+import Control.FromSum (fromEitherM)
+import Web.FormUrlEncoded (FromForm(fromForm), toForm)
+import Web.Spock (ActionCtxT)
+import Web.Spock.Core (params)
 
+-- This should really be 'body', not 'params', but it looks like there is
+-- some problem with using 'body'. It doesn't appear to return any data.
 getReqParam
-    :: forall ctx m a
-     . (FromForm a, MonadIO m)
-    => ActionCtxT ctx m a
-getReqParam = getReqParamErr handleFormDecodeError
-  where
-    handleFormDecodeError :: Text -> ActionCtxT ctx m a
-    handleFormDecodeError err = do
-        -- TODO: How should we handle this error?
-        putStrLn $ "Error in getReqParam: " <> err
-        redirect $ renderRoute root
+  :: forall ctx m a.
+     (FromForm a, MonadIO m)
+  => ActionCtxT ctx m (Either Text a)
+getReqParam = fromForm . toForm <$> params
 
 getReqParamErr
-    :: forall ctx m a
-     . (FromForm a, MonadIO m)
-    => (Text -> ActionCtxT ctx m a)
-    -> ActionCtxT ctx m a
-getReqParamErr errHandler = do
-    -- This should really be 'body', not 'params', but it looks like there is
-    -- some problem with using 'body'. It doesn't appear to return any data.
-    p <- params
-    let f = toForm p
-    let eitherItem = fromForm f
-    fromEitherM errHandler eitherItem
+  :: forall ctx m a.
+     (FromForm a, MonadIO m)
+  => (Text -> ActionCtxT ctx m a) -> ActionCtxT ctx m a
+getReqParamErr errHandler = fromEitherM errHandler =<< getReqParam
