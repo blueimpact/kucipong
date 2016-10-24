@@ -9,11 +9,10 @@ module Kucipong.Form where
 
 import Kucipong.Prelude
 
-import Web.FormUrlEncoded ( FromForm )
+import Web.FormUrlEncoded (FromForm)
 
-data AdminStoreCreateForm =
-    AdminStoreCreateForm
-        { storeEmail :: EmailAddress }
-    deriving (Data, Eq, Generic, Show, Typeable)
+data AdminStoreCreateForm = AdminStoreCreateForm
+  { storeEmail :: EmailAddress
+  } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreCreateForm
