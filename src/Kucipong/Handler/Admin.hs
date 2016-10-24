@@ -19,9 +19,9 @@ import Web.Spock.Core (SpockCtxT, get, post, prehook)
 
 import Kucipong.Db
        (Key(..), LoginTokenExpirationTime(..),
-        adminLoginTokenExpirationTime, storeEmailEmail,
-        storeLoginTokenLoginToken)
-import Kucipong.Form (AdminStoreCreateForm(AdminStoreCreateForm))
+        adminLoginTokenExpirationTime, adminLoginTokenLoginToken,
+        storeEmailEmail, storeLoginTokenLoginToken)
+import Kucipong.Form (AdminLoginForm(..), AdminStoreCreateForm(..))
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
@@ -50,6 +50,24 @@ loginGet
      (MonadIO m)
   => ActionCtxT ctx m ()
 loginGet = $(renderTemplateFromEnv "adminUser_login.html") mempty
+
+loginPost
+  :: forall xs m.
+     (MonadIO m, MonadKucipongDb m, MonadKucipongSendEmail m)
+  => ActionCtxT (HVect xs) m ()
+loginPost = do
+  (AdminLoginForm email) <- getReqParamErr handleErr
+  maybeAdminEntity <- dbFindAdmin email
+  (Entity adminKey _) <-
+    fromMaybeM (handleErr "Could not login.") maybeAdminEntity
+  (Entity _ adminLoginToken) <- dbCreateAdminMagicLoginToken adminKey
+  sendAdminLoginEmail email (adminLoginTokenLoginToken adminLoginToken)
+  redirect . renderRoute $ adminUrlPrefix <//> loginR
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg =
+      $(renderTemplateFromEnv "adminUser_login.html") $
+      fromPairs ["errors" .= [errMsg]]
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
@@ -141,6 +159,7 @@ adminComponent
 adminComponent = do
   get doLoginR doLoginGet
   get loginR loginGet
+  post loginR loginPost
   prehook adminAuthHook $ do
     get storeCreateR storeCreateGet
     post storeCreateR storeCreatePost
