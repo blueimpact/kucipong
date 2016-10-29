@@ -3,7 +3,8 @@ module Kucipong.Db.Run where
 
 import Kucipong.Prelude
 
-import Database.Persist.Postgresql ( SqlBackend(..), runMigration, runSqlPool )
+import Database.Persist.Postgresql
+       (SqlBackend(..), runMigration, runSqlPool)
 import Database.PostgreSQL.Simple (SqlError(..))
 
 import Kucipong.Db.Pool (HasDbPool(..))
@@ -15,13 +16,8 @@ doMigrations = runMigration migrateAll
 
 -- | Run a Persistent query.
 runDb
-    :: ( MonadIO m
-       , MonadReader r m
-       , HasDbPool r
-       , MonadBaseControl IO m
-       )
-    => ReaderT SqlBackend m a
-    -> m a
+  :: (MonadIO m, MonadReader r m, HasDbPool r, MonadBaseControl IO m)
+  => ReaderT SqlBackend m a -> m a
 runDb query = reader getDbPool >>= runSqlPool query
 
 data DbSafeError
@@ -56,16 +52,11 @@ runDbSafe query = first sqlErrorToDbSafeError <$> try (runDb query)
 
 -- | Just like 'runDb' but provide the current time to the callback.
 runDbCurrTime
-    :: ( MonadIO m
-       , MonadReader r m
-       , HasDbPool r
-       , MonadBaseControl IO m
-       )
-    => (UTCTime -> ReaderT SqlBackend m a)
-    -> m a
+  :: (MonadIO m, MonadReader r m, HasDbPool r, MonadBaseControl IO m)
+  => (UTCTime -> ReaderT SqlBackend m a) -> m a
 runDbCurrTime query = do
-    currentTime <- liftIO getCurrentTime
-    runDb $ query currentTime
+  currentTime <- liftIO getCurrentTime
+  runDb $ query currentTime
 
 -- | Combination of 'runDbCurrTime' and 'runDbSafe'.
 runDbSafeCurrTime
