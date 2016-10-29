@@ -34,6 +34,7 @@ loginPageR = "login"
 doLoginR :: Path '[LoginToken] 'Open
 doLoginR = loginPageR <//> var
 
+-- | Handler for returning the store login page.
 loginPage
   :: forall ctx m.
      (MonadIO m)

@@ -768,13 +768,10 @@ Same as `./dist/storeUser_login.html`.
 Note that an email with verification URL will be sent to the email, too.
 
 ```bash
-$ curl -X POST "http://$domain/api/store/v1/request-verification" \
-  --data-urlencode 'email=example@example.com' \
-  | jq '.'
+$ curl -X POST "http://$domain/store/login" \
+  --data-urlencode 'email=example@example.com'
 
-{
-  "result": "Email was successfully sent."
-}
+(Redirects to http://$domain/store/login)
 ```
 
 #### Request Parameter and its type
@@ -786,12 +783,8 @@ newtype Email = Email { unEmail :: Text }
 
 #### Response and its type
 
-```haskell
--- Dummy data type representing response from back-end
-data Response = Response
-  { result :: Maybe Text
-  }
-```
+Sends an email to the store user with a login token they can use to login.
+Redirects to `http://$domain/store/login`.
 
 ### User verification
 
@@ -800,7 +793,7 @@ data Response = Response
 This URI is contained in email sent by the "Request user verification" API.
 
 ```bash
-$ curl -G "http://$domain/api/store/v1/verification/${one_time_verification_key}"
+$ curl -G "http://$domain/store/login/${one_time_verification_key}"
 
 (Redirect to the store home page)
 ```
