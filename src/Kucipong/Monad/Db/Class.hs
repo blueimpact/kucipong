@@ -4,16 +4,16 @@ module Kucipong.Monad.Db.Class where
 
 import Kucipong.Prelude
 
-import Control.Monad.Trans ( MonadTrans )
-import Database.Persist ( Entity )
-import Web.Spock ( ActionCtxT )
+import Control.Monad.Trans (MonadTrans)
+import Database.Persist (Entity)
+import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
-        ( Admin, AdminLoginToken, DbSafeError, Image, Key
-        , Store, StoreEmail, StoreLoginToken )
-import Kucipong.LoginToken ( LoginToken )
-import Kucipong.Monad.Cookie.Trans ( KucipongCookieT )
-import Kucipong.Monad.SendEmail.Trans ( KucipongSendEmailT )
+       (Admin, AdminLoginToken, DbSafeError, Image, Key, Store,
+        StoreEmail, StoreLoginToken)
+import Kucipong.LoginToken (LoginToken)
+import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
+import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
 
 -- | Type-class for monads that can perform Db actions.  For instance, querying
 -- the database for information or writing new information to the database.
