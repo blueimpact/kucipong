@@ -116,7 +116,9 @@ library
                      , GADTs
                      , GeneralizedNewtypeDeriving
                      , InstanceSigs
+                     , LambdaCase
                      , MultiParamTypeClasses
+                     , NamedFieldPuns
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
