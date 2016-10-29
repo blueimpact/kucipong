@@ -13,10 +13,10 @@ import Database.Persist
 
 import Kucipong.Config ( Config )
 import Kucipong.Db
-    ( Admin(..), AdminLoginToken(..), CreatedTime(..), EntityField(..)
-    , Image, Key(..), LoginTokenExpirationTime(..), Store(..)
-    , StoreEmail(..), StoreLoginToken(..), UpdatedTime(..), adminName, runDb
-    , runDbCurrTime )
+       (Admin(..), AdminLoginToken(..), CreatedTime(..), DbSafeError(..),
+        EntityField(..), Image, Key(..), LoginTokenExpirationTime(..),
+        Store(..), StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
+        adminName, runDb, runDbCurrTime, runDbSafe)
 import Kucipong.LoginToken ( LoginToken, createRandomLoginToken )
 import Kucipong.Monad.Db.Class ( MonadKucipongDb(..) )
 import Kucipong.Monad.Db.Trans ( KucipongDbT(..) )
@@ -24,6 +24,7 @@ import Kucipong.Persist ( repsertEntity )
 import Kucipong.Util ( addOneDay )
 
 instance ( MonadBaseControl IO m
+         , MonadCatch m
          , MonadIO m
          , MonadRandom m
          , MonadReader Config m
@@ -140,16 +141,20 @@ instance ( MonadBaseControl IO m
                         regularHoliday url
             runDb $ repsertEntity (StoreKey storeEmailKey) store
 
-    dbCreateStoreEmail :: EmailAddress -> KucipongDbT m (Entity StoreEmail)
+    dbCreateStoreEmail :: EmailAddress
+                       -> KucipongDbT m (Either DbSafeError (Entity StoreEmail))
     dbCreateStoreEmail email = lift go
       where
-        go :: m (Entity StoreEmail)
+        go :: m (Either DbSafeError (Entity StoreEmail))
         go = do
-            currTime <- currentTime
-            let storeEmail =
-                    StoreEmail email (CreatedTime currTime) (UpdatedTime currTime)
-                        Nothing
-            runDb $ insertEntity storeEmail
+          currTime <- currentTime
+          let storeEmail =
+                StoreEmail
+                  email
+                  (CreatedTime currTime)
+                  (UpdatedTime currTime)
+                  Nothing
+          runDbSafe $ insertEntity storeEmail
 
     dbCreateStoreMagicLoginToken :: Key StoreEmail -> KucipongDbT m (Entity StoreLoginToken)
     dbCreateStoreMagicLoginToken storeEmailKey = lift go

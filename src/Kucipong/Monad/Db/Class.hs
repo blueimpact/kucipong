@@ -9,7 +9,7 @@ import Database.Persist ( Entity )
 import Web.Spock ( ActionCtxT )
 
 import Kucipong.Db
-        ( Admin, AdminLoginToken, Image, Key
+        ( Admin, AdminLoginToken, DbSafeError, Image, Key
         , Store, StoreEmail, StoreLoginToken )
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad.Cookie.Trans ( KucipongCookieT )
@@ -130,13 +130,13 @@ class Monad m => MonadKucipongDb m where
             regularHoliday
             url
 
-    dbCreateStoreEmail :: EmailAddress -> m (Entity StoreEmail)
+    dbCreateStoreEmail :: EmailAddress -> m (Either DbSafeError (Entity StoreEmail))
     default dbCreateStoreEmail
         :: ( MonadKucipongDb n
            , MonadTrans t
            , m ~ t n
            )
-        => EmailAddress -> t n (Entity StoreEmail)
+        => EmailAddress -> t n (Either DbSafeError (Entity StoreEmail))
     dbCreateStoreEmail = lift . dbCreateStoreEmail
 
     dbCreateStoreMagicLoginToken :: Key StoreEmail -> m (Entity StoreLoginToken)
