@@ -5,6 +5,8 @@ include _layout
     include _messageArea
     .admin
       form#js-request-verification.loginSignboard(
+        action="/admin/login"
+        method="POST"
         data-user-type="admin"
       )
         .loginSignboard_titleArea

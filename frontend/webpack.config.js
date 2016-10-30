@@ -93,7 +93,7 @@ const commonConfig = {
 
     // Compile store-user related pages
     new HtmlWebpackPlugin({
-      chunks: ['storeUser', 'magicLogin'],
+      chunks: ['storeUser'],
       template: 'src/pug/storeUser_login.pug',
       inject:   'body',
       filename: 'storeUser_login.html',
@@ -131,7 +131,7 @@ const commonConfig = {
 
     // Compile admin-user related pages
     new HtmlWebpackPlugin({
-      chunks: ['adminUser', 'magicLogin'],
+      chunks: ['adminUser'],
       template: 'src/pug/adminUser_login.pug',
       inject:   'body',
       filename: 'adminUser_login.html',

@@ -64,7 +64,9 @@ loginPost = do
     fromMaybeM (handleErr "Could not login.") maybeAdminEntity
   (Entity _ adminLoginToken) <- dbCreateAdminMagicLoginToken adminKey
   sendAdminLoginEmail email (adminLoginTokenLoginToken adminLoginToken)
-  redirect . renderRoute $ adminUrlPrefix <//> loginR
+  $(renderTemplateFromEnv "adminUser_login.html") $
+    fromPairs
+      ["messages" .= ["We have sent you email with verification URL." :: Text]]
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg =
