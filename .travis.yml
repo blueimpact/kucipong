@@ -45,6 +45,8 @@ before_install:
 
 install:
 - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+# Install new version of npm
+- npm install npm -g
 - npm --version
 - if [ -f configure.ac ]; then autoreconf -i; fi
 - |
