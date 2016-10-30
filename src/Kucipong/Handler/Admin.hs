@@ -45,12 +45,14 @@ doLoginR = loginR <//> var
 storeCreateR :: Path '[] 'Open
 storeCreateR = "store" <//> "create"
 
+-- | Handler for returning the admin login page.
 loginGet
   :: forall ctx m.
      (MonadIO m)
   => ActionCtxT ctx m ()
 loginGet = $(renderTemplateFromEnv "adminUser_login.html") mempty
 
+-- | Handler for sending an email to the admin that they can use to login.
 loginPost
   :: forall xs m.
      (MonadIO m, MonadKucipongDb m, MonadKucipongSendEmail m)
@@ -85,7 +87,7 @@ doLoginGet loginToken = do
         adminLoginTokenExpirationTime adminLoginToken
   when (now > expirationTime) tokenExpiredError
   setAdminCookie adminEmail
-  redirect $ renderRoute root
+  redirect $ renderRoute adminUrlPrefix
   where
     noAdminLoginTokenError :: ActionCtxT ctx m a
     noAdminLoginTokenError = do
