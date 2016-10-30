@@ -36,6 +36,9 @@ import Kucipong.Spock
 adminUrlPrefix :: Path '[] 'Open
 adminUrlPrefix = "admin"
 
+rootR :: Path '[] 'Open
+rootR = ""
+
 loginR :: Path '[] 'Open
 loginR = "login"
 
@@ -165,5 +168,6 @@ adminComponent = do
   get loginR loginGet
   post loginR loginPost
   prehook adminAuthHook $ do
+    get rootR storeCreateGet
     get storeCreateR storeCreateGet
     post storeCreateR storeCreatePost
