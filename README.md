@@ -1,5 +1,7 @@
 # Kucipong
 
+[![Build Status](https://secure.travis-ci.org/blueimpact/kucipong.svg)](http://travis-ci.org/blueimpact/kucipong)
+
 ## What is Kucipong?
 
 TODO
