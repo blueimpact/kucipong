@@ -13,7 +13,7 @@ import Network.HTTP.Types (forbidden403)
 import Text.EDE (fromPairs)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, (<//>), getContext, root, redirect, renderRoute,
+       (ActionCtxT, Path, (<//>), getContext, redirect, renderRoute,
         setStatus, var)
 import Web.Spock.Core (SpockCtxT, get, post, prehook)
 
@@ -35,6 +35,9 @@ import Kucipong.Spock
 -- | Url prefix for all of the following 'Path's.
 adminUrlPrefix :: Path '[] 'Open
 adminUrlPrefix = "admin"
+
+rootR :: Path '[] 'Open
+rootR = ""
 
 loginR :: Path '[] 'Open
 loginR = "login"
@@ -165,5 +168,6 @@ adminComponent = do
   get loginR loginGet
   post loginR loginPost
   prehook adminAuthHook $ do
+    get rootR storeCreateGet
     get storeCreateR storeCreateGet
     post storeCreateR storeCreatePost
