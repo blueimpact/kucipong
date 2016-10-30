@@ -13,7 +13,7 @@ import Network.HTTP.Types (forbidden403)
 import Text.EDE (fromPairs)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, (<//>), getContext, root, redirect, renderRoute,
+       (ActionCtxT, Path, (<//>), getContext, redirect, renderRoute,
         setStatus, var)
 import Web.Spock.Core (SpockCtxT, get, post, prehook)
 
