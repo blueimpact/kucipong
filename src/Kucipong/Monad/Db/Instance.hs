@@ -30,7 +30,7 @@ instance ( MonadBaseControl IO m
          , MonadReader Config m
          , MonadTime m
          ) =>
-         MonadKucipongDb (KucipongDbT m)
+         MonadKucipongDb (KucipongDbT m) where
 
     -- ===========
     --  For Admin

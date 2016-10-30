@@ -91,16 +91,16 @@ instance MonadTransControl KucipongT where
   type StT KucipongT a = a
   liftWith f = lift (f runKucipongT)
   restoreT = liftToKucipongT
-    {-# INLINABLE liftWith #-}
-    {-# INLINABLE restoreT #-}
+  {-# INLINABLE liftWith #-}
+  {-# INLINABLE restoreT #-}
 
 instance (MonadBaseControl b m) =>
          MonadBaseControl b (KucipongT m) where
   type StM (KucipongT m) a = ComposeSt KucipongT m a
   liftBaseWith = defaultLiftBaseWith
   restoreM = defaultRestoreM
-    {-# INLINABLE liftBaseWith #-}
-    {-# INLINABLE restoreM #-}
+  {-# INLINABLE liftBaseWith #-}
+  {-# INLINABLE restoreM #-}
 
 -- | Monad transformer stack for our application.
 newtype KucipongM a = KucipongM
