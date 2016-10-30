@@ -45,14 +45,22 @@ before_install:
 
 install:
 - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+- npm --version
 - if [ -f configure.ac ]; then autoreconf -i; fi
 - |
   set -ex
+  cd frontend/
+  # TODO: We should install npm packages globally, and then cache that directory.
+  npm install
+  cd ../
   stack --no-terminal --install-ghc test --bench --only-dependencies
   set +ex
 
 script:
 - |
   set -ex
+  cd frontend/
+  npm run build
+  cd ../
   stack --no-terminal test --bench --no-run-benchmarks --haddock --no-haddock-deps
   set +ex
