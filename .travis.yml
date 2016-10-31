@@ -65,4 +65,4 @@ script:
   cd ../
   stack --no-terminal build --bench --no-run-benchmarks --haddock --no-haddock-deps
   set +ex
-- travis_wait 30 stack --no-terminal test
+- travis_wait 30 stack --no-terminal test --bench --no-run-benchmarks --haddock --no-haddock-deps
