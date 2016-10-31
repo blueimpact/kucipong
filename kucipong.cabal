@@ -154,10 +154,13 @@ executable kucipong
                      , GADTs
                      , GeneralizedNewtypeDeriving
                      , InstanceSigs
+                     , LambdaCase
                      , MultiParamTypeClasses
+                     , NamedFieldPuns
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
+                     , PackageImports
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
