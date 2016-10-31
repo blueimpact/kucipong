@@ -5,7 +5,7 @@
 sudo: false
 
 # Choose a lightweight base image; we provide our own build tools.
-language: c
+language: node_js
 
 # Caching so the next build will be fast too.
 cache:
@@ -21,7 +21,14 @@ matrix:
   include:
   - env:
     compiler: ": #stack default"
-    addons: {apt: {packages: [ghc-8.0.1], sources: [hvr-ghc]}}
+    addons:
+      apt:
+        packages:
+          - ghc-8.0.1
+        sources:
+          - hvr-ghc
+    # Use the latest version of node-6 available
+    node_js: "6"
 
 before_install:
 # Using compiler above sets CC to an invalid value, so unset it
@@ -43,16 +50,16 @@ before_install:
     echo 'jobs: $ncpus' >> $HOME/.cabal/config
   fi
 
+
 install:
 - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
-# Install new version of npm
-- npm install npm -g
+- node --version
 - npm --version
 - if [ -f configure.ac ]; then autoreconf -i; fi
 - |
   set -ex
   cd frontend/
-  # TODO: We should install npm packages globally, and then cache that directory.
+  # TODO: We could try installing npm packages globally, and then cache that directory.
   npm install
   cd ../
   stack --no-terminal --install-ghc test --bench --only-dependencies
