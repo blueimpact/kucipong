@@ -62,7 +62,7 @@ install:
   # TODO: We could try installing npm packages globally, and then cache that directory.
   npm install
   cd ../
-  travis_wait 30 stack --no-terminal --install-ghc test --bench --only-dependencies
+  stack --no-terminal --install-ghc test --bench --only-dependencies
   set +ex
 
 script:
@@ -71,5 +71,6 @@ script:
   cd frontend/
   npm run build
   cd ../
-  travis_wait 30 stack --no-terminal test --bench --no-run-benchmarks --haddock --no-haddock-deps
+  stack --no-terminal build --bench --no-run-benchmarks --haddock --no-haddock-deps
   set +ex
+- travis_wait 30 stack --no-terminal test
