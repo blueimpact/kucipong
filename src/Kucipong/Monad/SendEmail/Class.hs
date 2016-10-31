@@ -7,6 +7,7 @@ import Kucipong.Prelude
 import Control.Monad.Trans ( MonadTrans )
 import Web.Spock ( ActionCtxT )
 
+import Kucipong.Email (EmailError)
 import Kucipong.LoginToken ( LoginToken )
 import Kucipong.Monad.Cookie.Trans ( KucipongCookieT )
 import Kucipong.Monad.Db.Trans ( KucipongDbT )
@@ -18,25 +19,25 @@ class Monad m => MonadKucipongSendEmail m where
     sendAdminLoginEmail
         :: EmailAddress
         -> LoginToken
-        -> m ()
+        -> m (Maybe EmailError)
     default sendAdminLoginEmail
         :: ( MonadKucipongSendEmail n
            , MonadTrans t
            , m ~ t n
            )
-        => EmailAddress -> LoginToken -> t n ()
+        => EmailAddress -> LoginToken -> t n (Maybe EmailError)
     sendAdminLoginEmail = (lift .) . sendAdminLoginEmail
 
     sendStoreLoginEmail
         :: EmailAddress
         -> LoginToken
-        -> m ()
+        -> m (Maybe EmailError)
     default sendStoreLoginEmail
         :: ( MonadKucipongSendEmail n
            , MonadTrans t
            , m ~ t n
            )
-        => EmailAddress -> LoginToken -> t n ()
+        => EmailAddress -> LoginToken -> t n (Maybe EmailError)
     sendStoreLoginEmail = (lift .) . sendStoreLoginEmail
 
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (ActionCtxT ctx m)

@@ -12,7 +12,6 @@ import Network.HTTP.Base ( urlEncode )
 import "emailaddress" Text.Email.Validate ( toByteString )
 import Text.Shakespeare.Text ( st )
 
-import Kucipong.Errors ( AppErr, AppErrEnum(..), throwAppErr )
 import Kucipong.Host
     ( HasHost, HasProtocol, Host, Protocol, mHost, mProtocol )
 import Kucipong.LoginToken ( LoginToken(..) )
@@ -23,51 +22,57 @@ class HasHailgunContext r where
 instance HasHailgunContext HailgunContext where
     getHailgunContext = id
 
+-- | Datatype to represent possible errors with sending an email.
+data EmailError
+  = EmailErrorIncorrectEmailFormat HailgunErrorMessage
+  -- ^ Email was in incorrect format.  Since we are creating emails by hand,
+  -- this error should never occur.
+  | EmailErrorSendError HailgunErrorResponse
+  -- ^ Error from Mailgun when trying to send an email.
+  deriving (Generic, Show, Typeable)
+
 -- | Generic method for sending an email.  It takes an 'Either'
 -- 'HailgunErrorMessage' 'HailgunMessage'.
 --
 -- If the value is 'Left' 'HailgunErrorMessage', then throw an
--- 'OtherException'.  Normally it will not be 'Left', because we are creating
--- the 'HailgunMessage' by hand.
+-- 'EmailErrorIncorrectEmailFormat'.  Normally it will not be 'Left', because
+-- we are creating the 'HailgunMessage' by hand.
 --
 -- If the value is 'Right' 'HailgunMessage', then call 'sendEmail'' with the
 -- message. 'sendEmail'' may throw a 'HailgunErrorResponse'.  Rethrow this as
--- an 'AppErr' ('HailgunError').
+-- an 'EmailErrorSendError'.
 sendEmailGeneric
     :: forall r m
      . ( HasHailgunContext r
-       , MonadError AppErr m
        , MonadIO m
        , MonadReader r m
        )
     => Either HailgunErrorMessage HailgunMessage
-    -> m HailgunSendResponse
+    -> m (Either EmailError HailgunSendResponse)
 sendEmailGeneric createMessageResult = do
-    hailgunContext <- reader getHailgunContext
-    either handleMessageError (trySendEmail hailgunContext) createMessageResult
+  hailgunContext <- reader getHailgunContext
+  let eitherHailgunMessage =
+        first EmailErrorIncorrectEmailFormat createMessageResult
+      sendMsg msg = first EmailErrorSendError <$> sendEmail' hailgunContext msg
+  either (pure . Left) sendMsg eitherHailgunMessage
   where
-    handleMessageError :: String -> m a
-    handleMessageError = throwAppErr OtherException . Just . pack
-
-    handleSendError :: HailgunErrorResponse -> m a
-    handleSendError = throwAppErr HailgunError . Just . pack . herMessage
-
-    trySendEmail :: HailgunContext -> HailgunMessage -> m HailgunSendResponse
-    trySendEmail hailgunContext =
-        either handleSendError pure <=< sendEmail' hailgunContext
+    sendEmail'
+      :: HailgunContext
+      -> HailgunMessage
+      -> m (Either HailgunErrorResponse HailgunSendResponse)
+    sendEmail' = (liftIO .) . sendEmail
 
 sendAdminLoginEmail
     :: forall r m
      . ( HasHailgunContext r
        , HasHost r
        , HasProtocol r
-       , MonadError AppErr m
        , MonadIO m
        , MonadReader r m
        )
     => EmailAddress
     -> LoginToken
-    -> m HailgunSendResponse
+    -> m (Either EmailError HailgunSendResponse)
 sendAdminLoginEmail adminEmail loginToken = do
     protocol <- mProtocol
     host <- mHost
@@ -104,13 +109,12 @@ sendStoreLoginEmail
      . ( HasHailgunContext r
        , HasHost r
        , HasProtocol r
-       , MonadError AppErr m
        , MonadIO m
        , MonadReader r m
        )
     => EmailAddress
     -> LoginToken
-    -> m HailgunSendResponse
+    -> m (Either EmailError HailgunSendResponse)
 sendStoreLoginEmail storeEmail loginToken = do
     protocol <- mProtocol
     host <- mHost
@@ -141,30 +145,3 @@ login as an store:
 
 #{protocol}://#{host}/store/login/#{loginTokenText}
         |]
-
-sendRegistrationCompletedEmail
-    :: forall r m
-     . ( HasHailgunContext r
-       , MonadError AppErr m
-       , MonadIO m
-       , MonadReader r m
-       )
-    => EmailAddress -> m HailgunSendResponse
-sendRegistrationCompletedEmail = sendEmailGeneric . registrationCompleteMessage
-
-registrationCompleteMessage :: EmailAddress -> Either HailgunErrorMessage HailgunMessage
-registrationCompleteMessage companyEmail =
-    let subject = "test subject"
-        content = TextOnly "test content"
-        replyTo = "info@kucipong.com"
-        to = toByteString companyEmail
-        recipients = emptyMessageRecipients { recipientsTo = [ to ] }
-        attachements = []
-    in hailgunMessage subject content replyTo recipients attachements
-
-sendEmail'
-    :: MonadIO m
-    => HailgunContext
-    -> HailgunMessage
-    -> m (Either HailgunErrorResponse HailgunSendResponse)
-sendEmail' = (liftIO .) . sendEmail

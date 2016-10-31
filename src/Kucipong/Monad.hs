@@ -70,7 +70,7 @@ deriving instance
          MonadKucipongDb (KucipongT m)
 
 deriving instance
-         (MonadError AppErr m, MonadIO m, MonadReader Config m) =>
+         (MonadIO m, MonadReader Config m) =>
          MonadKucipongSendEmail (KucipongT m)
 
 -- | Unwrap the @m@ from 'KucipongT'.
