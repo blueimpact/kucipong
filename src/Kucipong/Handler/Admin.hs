@@ -21,6 +21,7 @@ import Kucipong.Db
        (DbSafeError(..), Key(..), LoginTokenExpirationTime(..),
         adminLoginTokenExpirationTime, adminLoginTokenLoginToken,
         storeEmailEmail, storeLoginTokenLoginToken)
+import Kucipong.Email (EmailError)
 import Kucipong.Form (AdminLoginForm(..), AdminStoreCreateForm(..))
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
@@ -58,7 +59,7 @@ loginGet = $(renderTemplateFromEnv "adminUser_login.html") mempty
 -- | Handler for sending an email to the admin that they can use to login.
 loginPost
   :: forall xs m.
-     (MonadIO m, MonadKucipongDb m, MonadKucipongSendEmail m)
+     (MonadIO m, MonadKucipongDb m, MonadKucipongSendEmail m, MonadLogger m)
   => ActionCtxT (HVect xs) m ()
 loginPost = do
   (AdminLoginForm email) <- getReqParamErr handleErr
@@ -66,15 +67,22 @@ loginPost = do
   (Entity adminKey _) <-
     fromMaybeM (handleErr "Could not login.") maybeAdminEntity
   (Entity _ adminLoginToken) <- dbCreateAdminMagicLoginToken adminKey
-  sendAdminLoginEmail email (adminLoginTokenLoginToken adminLoginToken)
+  maybe (pure ()) handleSendEmailFail =<<
+    sendAdminLoginEmail email (adminLoginTokenLoginToken adminLoginToken)
   $(renderTemplateFromEnv "adminUser_login.html") $
     fromPairs
       ["messages" .= ["We have sent you email with verification URL." :: Text]]
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
-    handleErr errMsg =
+    handleErr errMsg = do
+      $(logDebug) $ "got following error in admin loginPost handler: " <> errMsg
       $(renderTemplateFromEnv "adminUser_login.html") $
-      fromPairs ["errors" .= [errMsg]]
+        fromPairs ["errors" .= [errMsg]]
+
+    handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
+    handleSendEmailFail emailError = do
+      $(logDebug) $ "got email error in admin loginPost: " <> tshow emailError
+      handleErr "could not send email"
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
@@ -121,7 +129,7 @@ storeCreateGet = do
 
 storeCreatePost
   :: forall xs m.
-     (MonadIO m, MonadKucipongDb m, MonadKucipongSendEmail m)
+     (MonadIO m, MonadKucipongDb m, MonadKucipongSendEmail m, MonadLogger m)
   => ActionCtxT (HVect xs) m ()
 storeCreatePost = do
   (AdminStoreCreateForm storeEmailParam) <- getReqParamErr handleErr
@@ -129,21 +137,29 @@ storeCreatePost = do
   (Entity storeEmailKey storeEmail) <-
     fromEitherM handleCreateStoreFail eitherStoreEmailEntity
   (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeEmailKey
-  sendStoreLoginEmail
-    (storeEmailEmail storeEmail)
-    (storeLoginTokenLoginToken storeLoginToken)
+  maybe (pure ()) handleSendEmailFail =<<
+    sendStoreLoginEmail
+      (storeEmailEmail storeEmail)
+      (storeLoginTokenLoginToken storeLoginToken)
   redirect . renderRoute $ adminUrlPrefix <//> storeCreateR
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
-    handleErr errMsg =
+    handleErr errMsg = do
+      $(logDebug) $
+        "got following error in admin storeCreatePost handler: " <> errMsg
       $(renderTemplateFromEnv "adminUser_admin_store_create.html") $
-      fromPairs ["errors" .= [errMsg]]
+        fromPairs ["errors" .= [errMsg]]
 
     handleCreateStoreFail :: DbSafeError -> ActionCtxT (HVect xs) m a
     handleCreateStoreFail DbSafeUniquenessViolation =
-        handleErr "store with that email address already exists"
-    handleCreateStoreFail _ =
-        handleErr "problem with database"
+      handleErr "store with that email address already exists"
+    handleCreateStoreFail _ = handleErr "problem with database"
+
+    handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
+    handleSendEmailFail emailError = do
+      $(logDebug) $
+        "got email error in admin storeCreatePost: " <> tshow emailError
+      handleErr "could not send email"
 
 adminAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
@@ -168,6 +184,7 @@ adminComponent
      , MonadKucipongCookie m
      , MonadKucipongDb m
      , MonadKucipongSendEmail m
+     , MonadLogger m
      , MonadTime m
      )
   => SpockCtxT (HVect xs) m ()
