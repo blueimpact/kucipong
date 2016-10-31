@@ -4,7 +4,7 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromMaybeM)
+import Control.FromSum (fromEitherM, fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Aeson ((.=))
 import Data.HVect (HVect(..))
@@ -18,7 +18,7 @@ import Web.Spock
 import Web.Spock.Core (SpockCtxT, get, post, prehook)
 
 import Kucipong.Db
-       (Key(..), LoginTokenExpirationTime(..),
+       (DbSafeError(..), Key(..), LoginTokenExpirationTime(..),
         adminLoginTokenExpirationTime, adminLoginTokenLoginToken,
         storeEmailEmail, storeLoginTokenLoginToken)
 import Kucipong.Form (AdminLoginForm(..), AdminStoreCreateForm(..))
@@ -125,7 +125,9 @@ storeCreatePost
   => ActionCtxT (HVect xs) m ()
 storeCreatePost = do
   (AdminStoreCreateForm storeEmailParam) <- getReqParamErr handleErr
-  (Entity storeEmailKey storeEmail) <- dbCreateStoreEmail storeEmailParam
+  eitherStoreEmailEntity <- dbCreateStoreEmail storeEmailParam
+  (Entity storeEmailKey storeEmail) <-
+    fromEitherM handleCreateStoreFail eitherStoreEmailEntity
   (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeEmailKey
   sendStoreLoginEmail
     (storeEmailEmail storeEmail)
@@ -136,6 +138,12 @@ storeCreatePost = do
     handleErr errMsg =
       $(renderTemplateFromEnv "adminUser_admin_store_create.html") $
       fromPairs ["errors" .= [errMsg]]
+
+    handleCreateStoreFail :: DbSafeError -> ActionCtxT (HVect xs) m a
+    handleCreateStoreFail DbSafeUniquenessViolation =
+        handleErr "store with that email address already exists"
+    handleCreateStoreFail _ =
+        handleErr "problem with database"
 
 adminAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
