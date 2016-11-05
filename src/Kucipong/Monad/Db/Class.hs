@@ -5,7 +5,8 @@ module Kucipong.Monad.Db.Class where
 import Kucipong.Prelude
 
 import Control.Monad.Trans (MonadTrans)
-import Database.Persist (Entity)
+import Database.Persist.Sql
+       (Entity, PersistEntity, PersistEntityBackend, SqlBackend)
 import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
@@ -156,6 +157,23 @@ class Monad m => MonadKucipongDb m where
          )
       => LoginToken -> t n (Maybe (Entity StoreLoginToken))
   dbFindStoreLoginToken = lift . dbFindStoreLoginToken
+
+  -- ======= --
+  -- Generic --
+  -- ======= --
+  dbFindByKey
+    :: (PersistEntity record, PersistEntityBackend record ~ SqlBackend)
+    => Key record -> m (Maybe (Entity record))
+  default dbFindByKey
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistEntity record
+       , PersistEntityBackend record ~ SqlBackend
+       )
+    => Key record
+    -> t n (Maybe (Entity record))
+  dbFindByKey = lift . dbFindByKey
 
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)

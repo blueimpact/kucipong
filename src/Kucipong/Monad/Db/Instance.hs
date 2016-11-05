@@ -7,16 +7,17 @@ import Kucipong.Prelude
 
 import Control.Monad.Random (MonadRandom(..))
 import Control.Monad.Time (MonadTime(..))
-import Database.Persist
-       (Entity(..), (==.), (=.), get, insert, insertEntity, repsert,
-        selectFirst, updateGet)
+import Database.Persist.Sql
+       (BaseBackend, Entity(..), PersistEntity, PersistEntityBackend,
+        PersistStoreRead, SqlBackend, (==.), (=.), get, insert,
+        insertEntity, repsert, selectFirst, updateGet)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
        (Admin(..), AdminLoginToken(..), CreatedTime(..), DbSafeError(..),
         EntityField(..), Image, Key(..), LoginTokenExpirationTime(..),
         Store(..), StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
-        adminName, runDb, runDbCurrTime, runDbSafe)
+        runDb, runDbCurrTime, runDbSafe)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class (MonadKucipongDb(..))
 import Kucipong.Monad.Db.Trans (KucipongDbT(..))
@@ -198,27 +199,38 @@ instance ( MonadBaseControl IO m
       go :: m (Maybe (Entity StoreLoginToken))
       go = runDb $ selectFirst [StoreLoginTokenLoginToken ==. loginToken] []
 
-  -- dbUpsertStore :: EmailAddress -> Text -> KucipongDbT m (Entity Store)
-  -- dbUpsertStore email name = lift go
-  --   where
-  --     go :: m (Entity Store)
-  --     go = runDbCurrTime $ \currTime -> do
-  --         maybeExistingStoreVal <- get (StoreKey email)
-  --         case maybeExistingStoreVal of
-  --             Just existingStoreVal -> do
-  --                 -- store already exists.  update the name if it is different
-  --                 if (existingStoreVal ^. storeName /= name)
-  --                     then do
-  --                         newStoreVal <- updateGet (StoreKey email) [StoreName =. name]
-  --                         pure $ Entity (StoreKey email) newStoreVal
-  --                     else
-  --                         pure $ Entity (StoreKey email) existingStoreVal
-  --             Nothing -> do
-  --                 -- couldn't find an existing store, so we will create a new
-  --                 -- one
-  --                 let newStoreVal = Store email (CreatedTime currTime)
-  --                         (UpdatedTime currTime) Nothing name
-  --                         Nothing Nothing Nothing Nothing Nothing Nothing
-  --                         Nothing Nothing Nothing
-  --                 newStoreKey <- insert newStoreVal
-  --                 pure $ Entity newStoreKey newStoreVal
+  -- ======= --
+  -- Generic --
+  -- ======= --
+
+  dbFindByKey
+    :: forall record.
+       (PersistEntity record, PersistEntityBackend record ~ SqlBackend)
+    => Key record -> KucipongDbT m (Maybe (Entity record))
+  dbFindByKey key = lift go
+    where
+      go :: m (Maybe (Entity record))
+      go = runDb $ getEntity key
+
+
+-----------
+-- Store --
+-----------
+
+dbFindStoreByEmail
+  :: MonadKucipongDb m
+  => EmailAddress -> m (Maybe (Entity Store))
+dbFindStoreByEmail = dbFindByKey . StoreKey . StoreEmailKey
+
+-------------
+-- Helpers --
+-------------
+
+getEntity
+  :: ( MonadIO m
+     , PersistEntity record
+     , PersistEntityBackend record ~ BaseBackend backend
+     , PersistStoreRead backend
+     )
+  => Key record -> ReaderT backend m (Maybe (Entity record))
+getEntity key = fmap (Entity key) <$> get key
