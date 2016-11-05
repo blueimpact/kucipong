@@ -17,7 +17,7 @@ import Web.Spock.Core (SpockCtxT, get)
 
 import Kucipong.Db
        (Key(..), LoginTokenExpirationTime(..),
-        storeLoginTokenExpirationTime)
+        StoreLoginToken(storeLoginTokenExpirationTime))
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad (MonadKucipongCookie, MonadKucipongDb(..))
 import Kucipong.RenderTemplate (renderTemplateFromEnv)

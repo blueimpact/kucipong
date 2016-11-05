@@ -19,8 +19,10 @@ import Web.Spock.Core (SpockCtxT, get, post, prehook)
 
 import Kucipong.Db
        (DbSafeError(..), Key(..), LoginTokenExpirationTime(..),
-        adminLoginTokenExpirationTime, adminLoginTokenLoginToken,
-        storeEmailEmail, storeLoginTokenLoginToken)
+        AdminLoginToken(adminLoginTokenExpirationTime,
+                        adminLoginTokenLoginToken),
+        StoreEmail(storeEmailEmail),
+        StoreLoginToken(storeLoginTokenLoginToken))
 import Kucipong.Email (EmailError)
 import Kucipong.Form (AdminLoginForm(..), AdminStoreCreateForm(..))
 import Kucipong.LoginToken (LoginToken)
