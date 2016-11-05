@@ -4,7 +4,7 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromEitherM, fromMaybeM)
+import Control.FromSum (fromEitherM, fromMaybeM, fromMaybeOrM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Aeson ((.=))
 import Data.HVect (HVect(..))
@@ -21,14 +21,16 @@ import Kucipong.Db
        (DbSafeError(..), Key(..), LoginTokenExpirationTime(..),
         AdminLoginToken(adminLoginTokenExpirationTime,
                         adminLoginTokenLoginToken),
-        StoreEmail(storeEmailEmail),
+        Store(storeName), StoreEmail(storeEmailEmail),
         StoreLoginToken(storeLoginTokenLoginToken))
 import Kucipong.Email (EmailError)
-import Kucipong.Form (AdminLoginForm(..), AdminStoreCreateForm(..))
+import Kucipong.Form
+       (AdminLoginForm(..), AdminStoreCreateForm(..),
+        AdminStoreDeleteConfirmForm(..))
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
-        MonadKucipongSendEmail(..))
+        MonadKucipongSendEmail(..), dbFindStoreByEmail)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
@@ -48,8 +50,17 @@ loginR = "login"
 doLoginR :: Path '[LoginToken] 'Open
 doLoginR = loginR <//> var
 
+storeR :: Path '[] 'Open
+storeR = "store"
+
 storeCreateR :: Path '[] 'Open
-storeCreateR = "store" <//> "create"
+storeCreateR = storeR <//> "create"
+
+storeDeleteR :: Path '[] 'Open
+storeDeleteR = storeR <//> "delete"
+
+storeDeleteConfirmR :: Path '[] 'Open
+storeDeleteConfirmR = storeDeleteR <//> "confirm"
 
 -- | Handler for returning the admin login page.
 loginGet
@@ -163,6 +174,36 @@ storeCreatePost = do
         "got email error in admin storeCreatePost: " <> tshow emailError
       handleErr "could not send email"
 
+-- | Return the store create page for an admin.
+storeDeleteGet
+  :: forall xs m.
+     MonadIO m
+  => ActionCtxT (HVect xs) m ()
+storeDeleteGet =
+  $(renderTemplateFromEnv "adminUser_admin_store_delete.html") mempty
+
+-- | Return the store delete confirmation page for an admin.
+storeDeleteConfirmPost
+  :: forall xs m.
+     (MonadIO m, MonadKucipongDb m, MonadLogger m)
+  => ActionCtxT (HVect xs) m ()
+storeDeleteConfirmPost = do
+  (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
+  maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
+  (Entity _ store) <-
+    fromMaybeOrM maybeStoreEntity $
+    handleErr "Could not find a store with that email address"
+  $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html") $
+    fromPairs ["storeName" .= storeName store, "storeEmail" .= storeEmailParam]
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg = do
+      $(logDebug) $
+        "got following error in admin storeDeleteConfirmPost handler: " <>
+        errMsg
+      $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html") $
+        fromPairs ["errors" .= [errMsg]]
+
 adminAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
   => ActionCtxT (HVect xs) m (HVect ((Session Kucipong.Session.Admin) ': xs))
@@ -198,3 +239,5 @@ adminComponent = do
     get rootR storeCreateGet
     get storeCreateR storeCreateGet
     post storeCreateR storeCreatePost
+    get storeDeleteR storeDeleteGet
+    post storeDeleteConfirmR storeDeleteConfirmPost
