@@ -2254,7 +2254,7 @@ None.
 
 See the sample response.
 
-### GET store user delete confirm page
+### POST store user delete confirm page
 
 #### Sample request and response
 
