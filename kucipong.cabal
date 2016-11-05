@@ -110,6 +110,7 @@ library
                      , DeriveDataTypeable
                      , DeriveFunctor
                      , DeriveGeneric
+                     , DuplicateRecordFields
                      , EmptyDataDecls
                      , FlexibleContexts
                      , FlexibleInstances
@@ -192,6 +193,7 @@ executable kucipong-add-admin
                      , DeriveDataTypeable
                      , DeriveFunctor
                      , DeriveGeneric
+                     , DuplicateRecordFields
                      , EmptyDataDecls
                      , FlexibleContexts
                      , FlexibleInstances

@@ -21,6 +21,7 @@ ghcExtensions =
     , "-XDeriveDataTypeable"
     , "-XDeriveFunctor"
     , "-XDeriveGeneric"
+    , "-XDuplicateRecordFields"
     , "-XEmptyDataDecls"
     , "-XFlexibleContexts"
     , "-XFlexibleInstances"
