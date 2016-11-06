@@ -12,26 +12,26 @@ import Kucipong.Prelude
 import Web.FormUrlEncoded (FromForm)
 
 data AdminLoginForm = AdminLoginForm
-  { emailFormParam :: EmailAddress
+  { email :: EmailAddress
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminLoginForm
 
 data AdminStoreCreateForm = AdminStoreCreateForm
-  { storeEmailFormParam :: EmailAddress
+  { storeEmail :: EmailAddress
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreCreateForm
 
 data AdminStoreDeleteConfirmForm = AdminStoreDeleteConfirmForm
-  { storeEmailFormParam :: EmailAddress
+  { storeEmail :: EmailAddress
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreDeleteConfirmForm
 
 data AdminStoreDeleteForm = AdminStoreDeleteForm
-  { storeEmailFormParam :: EmailAddress
-  , storeNameFormParam :: Text
+  { storeEmail :: EmailAddress
+  , storeName :: Text
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreDeleteForm

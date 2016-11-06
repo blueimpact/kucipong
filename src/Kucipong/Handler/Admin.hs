@@ -22,12 +22,14 @@ import Kucipong.Db
        (DbSafeError(..), Key(..), LoginTokenExpirationTime(..),
         AdminLoginToken(adminLoginTokenExpirationTime,
                         adminLoginTokenLoginToken),
-        Store(storeName), StoreEmail(storeEmailEmail),
+        Store(Store, storeName), StoreEmail(storeEmailEmail),
         StoreLoginToken(storeLoginTokenLoginToken))
 import Kucipong.Email (EmailError)
 import Kucipong.Form
-       (AdminLoginForm(..), AdminStoreCreateForm(..),
-        AdminStoreDeleteForm(..), AdminStoreDeleteConfirmForm(..))
+       (AdminLoginForm(AdminLoginForm),
+        AdminStoreCreateForm(AdminStoreCreateForm),
+        AdminStoreDeleteForm(AdminStoreDeleteForm),
+        AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm))
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
@@ -192,11 +194,11 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ store) <-
+  (Entity _ Store{storeName}) <-
     fromMaybeOrM maybeStoreEntity $
     handleErr "Could not find a store with that email address"
   $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html") $
-    fromPairs ["storeName" .= storeName store, "storeEmail" .= storeEmailParam]
+    fromPairs ["storeName" .= storeName, "storeEmail" .= storeEmailParam]
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
