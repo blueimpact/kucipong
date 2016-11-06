@@ -16,6 +16,16 @@ import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
 
+-- | Result to return from a call to 'dbDeleteStoreIfNameMatches'.
+data StoreDeleteResult
+  = StoreDeleteSuccess
+  -- ^ Successfully deleted the store.
+  | StoreDeleteErrNameDoesNotMatch Store
+  -- ^ 'Store' name passed in does not match the name of the actual 'Store'.
+  | StoreDeleteErrDoesNotExist
+  -- ^ 'EmailAddress' passed in does not match an actual 'Store'.
+  deriving (Eq, Generic, Show, Typeable)
+
 -- | Type-class for monads that can perform Db actions.  For instance, querying
 -- the database for information or writing new information to the database.
 --
@@ -148,6 +158,21 @@ class Monad m => MonadKucipongDb m where
          )
       => Key StoreEmail -> t n (Entity StoreLoginToken)
   dbCreateStoreMagicLoginToken = lift . dbCreateStoreMagicLoginToken
+
+  dbDeleteStoreIfNameMatches
+    :: EmailAddress
+    -- ^ 'Key' for the 'Store'
+    -> Text
+    -- ^ Name of the 'Store'.
+    -> m StoreDeleteResult
+  default dbDeleteStoreIfNameMatches
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       )
+    => EmailAddress -> Text -> t n StoreDeleteResult
+  dbDeleteStoreIfNameMatches email name =
+    lift $ dbDeleteStoreIfNameMatches email name
 
   dbFindStoreLoginToken :: LoginToken -> m (Maybe (Entity StoreLoginToken))
   default dbFindStoreLoginToken

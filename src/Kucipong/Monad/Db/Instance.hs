@@ -10,16 +10,18 @@ import Control.Monad.Time (MonadTime(..))
 import Database.Persist.Sql
        (BaseBackend, Entity(..), PersistEntity, PersistEntityBackend,
         PersistStoreRead, SqlBackend, (==.), (=.), get, insert,
-        insertEntity, repsert, selectFirst, updateGet)
+        insertEntity, repsert, selectFirst, update, updateGet)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
-       (Admin(..), AdminLoginToken(..), CreatedTime(..), DbSafeError(..),
-        EntityField(..), Image, Key(..), LoginTokenExpirationTime(..),
-        Store(..), StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
-        runDb, runDbCurrTime, runDbSafe)
+       (Admin(..), AdminLoginToken(..), CreatedTime(..), DeletedTime(..),
+        DbSafeError(..), EntityField(..), Image, Key(..),
+        LoginTokenExpirationTime(..), Store(..), StoreEmail(..),
+        StoreLoginToken(..), UpdatedTime(..), emailToStoreKey, runDb,
+        runDbCurrTime, runDbSafe)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
-import Kucipong.Monad.Db.Class (MonadKucipongDb(..))
+import Kucipong.Monad.Db.Class
+       (MonadKucipongDb(..), StoreDeleteResult(..))
 import Kucipong.Monad.Db.Trans (KucipongDbT(..))
 import Kucipong.Persist (repsertEntity)
 import Kucipong.Util (addOneDay)
@@ -192,6 +194,25 @@ instance ( MonadBaseControl IO m
                 (LoginTokenExpirationTime plusOneDay)
         runDb $ repsert (StoreLoginTokenKey storeEmailKey) newStoreLoginTokenVal
         pure $ Entity (StoreLoginTokenKey storeEmailKey) newStoreLoginTokenVal
+
+  dbDeleteStoreIfNameMatches
+    :: EmailAddress
+    -> Text
+    -> KucipongDbT m StoreDeleteResult
+  dbDeleteStoreIfNameMatches email name = lift go
+    where
+      go :: m StoreDeleteResult
+      go =
+        runDbCurrTime $ \currTime -> do
+          let storeKey = emailToStoreKey email
+          maybeStore <- get storeKey
+          case maybeStore of
+            Just store
+              | storeName store == name -> do
+                update storeKey [StoreDeleted =. Just (DeletedTime currTime)]
+                pure StoreDeleteSuccess
+              | otherwise -> pure $ StoreDeleteErrNameDoesNotMatch store
+            Nothing -> pure StoreDeleteErrDoesNotExist
 
   dbFindStoreLoginToken :: LoginToken -> KucipongDbT m (Maybe (Entity StoreLoginToken))
   dbFindStoreLoginToken loginToken = lift go

@@ -28,3 +28,6 @@ share [ mkPersist sqlSettings { mpsGenerateLenses = False }
       , mkMigrate "migrateAll"
       ]
       kucipongEntityDefs
+
+emailToStoreKey :: EmailAddress -> Key Store
+emailToStoreKey = StoreKey . StoreEmailKey
