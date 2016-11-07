@@ -5,6 +5,7 @@
 module Kucipong.Db.Models
     ( module Kucipong.Db.Models
     , module Kucipong.Db.Models.Base
+    , EntityDateFields(..)
     , EntityField(..)
     , Key(..)
     , Unique
@@ -31,3 +32,22 @@ share [ mkPersist sqlSettings { mpsGenerateLenses = False }
 
 emailToStoreKey :: EmailAddress -> Key Store
 emailToStoreKey = StoreKey . StoreEmailKey
+
+-- | Type class for getting the 'EntityField' from a record responsible for the
+-- 'CreatedTime', 'DeletedTime', and 'UpdatedTime'.
+--
+-- This is used for writing generic methods for selecting and getting records
+-- that don't have a 'DeletedTime', and for automatically updating the
+-- 'UpdatedTime' when updating records.
+--
+-- The 'createdEntityField' is generally not used, but is included for
+-- completeness.
+class EntityDateFields record where
+  createdEntityField :: EntityField record CreatedTime
+  deletedEntityField :: EntityField record (Maybe DeletedTime)
+  updatedEntityField :: EntityField record UpdatedTime
+
+instance EntityDateFields Store where
+  createdEntityField = StoreCreated
+  deletedEntityField = StoreDeleted
+  updatedEntityField = StoreUpdated

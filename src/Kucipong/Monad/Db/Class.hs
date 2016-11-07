@@ -6,7 +6,7 @@ import Kucipong.Prelude
 
 import Control.Monad.Trans (MonadTrans)
 import Database.Persist.Sql
-       (Entity, PersistEntity, PersistEntityBackend, SqlBackend)
+       (Entity, Filter, PersistRecordBackend, SelectOpt, SqlBackend)
 import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
@@ -187,18 +187,40 @@ class Monad m => MonadKucipongDb m where
   -- Generic --
   -- ======= --
   dbFindByKey
-    :: (PersistEntity record, PersistEntityBackend record ~ SqlBackend)
+    :: (PersistRecordBackend record SqlBackend)
     => Key record -> m (Maybe (Entity record))
   default dbFindByKey
     :: ( MonadKucipongDb n
        , MonadTrans t
        , m ~ t n
-       , PersistEntity record
-       , PersistEntityBackend record ~ SqlBackend
+       , PersistRecordBackend record SqlBackend
        )
-    => Key record
-    -> t n (Maybe (Entity record))
+    => Key record -> t n (Maybe (Entity record))
   dbFindByKey = lift . dbFindByKey
+
+  dbSelectFirst
+    :: (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> [SelectOpt record] -> m (Maybe (Entity record))
+  default dbSelectFirst
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => [Filter record] -> [SelectOpt record] -> t n (Maybe (Entity record))
+  dbSelectFirst filters selectOpts = lift (dbSelectFirst filters selectOpts)
+
+  dbSelectList
+    :: (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> [SelectOpt record] -> m [Entity record]
+  default dbSelectList
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => [Filter record] -> [SelectOpt record] -> t n [Entity record]
+  dbSelectList filters selectOpts = lift (dbSelectList filters selectOpts)
 
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)

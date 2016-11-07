@@ -8,14 +8,15 @@ import Kucipong.Prelude
 import Control.Monad.Random (MonadRandom(..))
 import Control.Monad.Time (MonadTime(..))
 import Database.Persist.Sql
-       (BaseBackend, Entity(..), PersistEntity, PersistEntityBackend,
-        PersistStoreRead, SqlBackend, (==.), (=.), get, insert,
-        insertEntity, repsert, selectFirst, update, updateGet)
+       (Entity(..), Filter, PersistRecordBackend, PersistStoreRead,
+        SelectOpt, SqlBackend, (==.), (=.), get, insert, insertEntity,
+        repsert, selectFirst, selectList, update, updateGet)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
        (Admin(..), AdminLoginToken(..), CreatedTime(..), DeletedTime(..),
-        DbSafeError(..), EntityField(..), Image, Key(..),
+        DbSafeError(..), EntityField(..),
+        EntityDateFields(deletedEntityField), Image, Key(..),
         LoginTokenExpirationTime(..), Store(..), StoreEmail(..),
         StoreLoginToken(..), UpdatedTime(..), emailToStoreKey, runDb,
         runDbCurrTime, runDbSafe)
@@ -226,13 +227,60 @@ instance ( MonadBaseControl IO m
 
   dbFindByKey
     :: forall record.
-       (PersistEntity record, PersistEntityBackend record ~ SqlBackend)
+       (PersistRecordBackend record SqlBackend)
     => Key record -> KucipongDbT m (Maybe (Entity record))
   dbFindByKey key = lift go
     where
       go :: m (Maybe (Entity record))
       go = runDb $ getEntity key
 
+  dbSelectFirst
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => [Filter record]
+    -> [SelectOpt record]
+    -> KucipongDbT m (Maybe (Entity record))
+  dbSelectFirst filters selectOpts = lift go
+    where
+      go :: m (Maybe (Entity record))
+      go = runDb $ selectFirst filters selectOpts
+
+  dbSelectList
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> [SelectOpt record] -> KucipongDbT m [Entity record]
+  dbSelectList filters selectOpts = lift go
+    where
+      go :: m [Entity record]
+      go = runDb $ selectList filters selectOpts
+
+
+-- TODO: Make sure the places where we are selecting and getting and updating
+-- respect the logical deletions.
+
+-------------
+-- Generic --
+-------------
+
+dbSelectFirstNotDeleted
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => [Filter record] -> [SelectOpt record] -> m (Maybe (Entity record))
+dbSelectFirstNotDeleted filters selectOpts =
+  dbSelectFirst ((deletedEntityField ==. Nothing) : filters) selectOpts
+
+dbSelectListNotDeleted
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => [Filter record] -> [SelectOpt record] -> m [Entity record]
+dbSelectListNotDeleted filters selectOpts =
+  dbSelectList ((deletedEntityField ==. Nothing) : filters) selectOpts
 
 -----------
 -- Store --
@@ -249,8 +297,7 @@ dbFindStoreByEmail = dbFindByKey . StoreKey . StoreEmailKey
 
 getEntity
   :: ( MonadIO m
-     , PersistEntity record
-     , PersistEntityBackend record ~ BaseBackend backend
+     , PersistRecordBackend record backend
      , PersistStoreRead backend
      )
   => Key record -> ReaderT backend m (Maybe (Entity record))
