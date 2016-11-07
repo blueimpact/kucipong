@@ -47,22 +47,32 @@ class EntityDateFields record where
   deletedEntityField :: EntityField record (Maybe DeletedTime)
   updatedEntityField :: EntityField record UpdatedTime
 
+  getDeletedEntityFieldValue :: record -> Maybe DeletedTime
+
 instance EntityDateFields Admin where
   createdEntityField = AdminCreated
   deletedEntityField = AdminDeleted
   updatedEntityField = AdminUpdated
+
+  getDeletedEntityFieldValue = adminDeleted
 
 instance EntityDateFields AdminLoginToken where
   createdEntityField = AdminLoginTokenCreated
   deletedEntityField = AdminLoginTokenDeleted
   updatedEntityField = AdminLoginTokenUpdated
 
+  getDeletedEntityFieldValue = adminLoginTokenDeleted
+
 instance EntityDateFields Store where
   createdEntityField = StoreCreated
   deletedEntityField = StoreDeleted
   updatedEntityField = StoreUpdated
 
+  getDeletedEntityFieldValue = storeDeleted
+
 instance EntityDateFields StoreLoginToken where
   createdEntityField = StoreLoginTokenCreated
   deletedEntityField = StoreLoginTokenDeleted
   updatedEntityField = StoreLoginTokenUpdated
+
+  getDeletedEntityFieldValue = storeLoginTokenDeleted

@@ -16,10 +16,10 @@ import Kucipong.Config (Config)
 import Kucipong.Db
        (Admin(..), AdminLoginToken(..), CreatedTime(..), DeletedTime(..),
         DbSafeError(..), EntityField(..),
-        EntityDateFields(deletedEntityField), Image, Key(..),
-        LoginTokenExpirationTime(..), Store(..), StoreEmail(..),
-        StoreLoginToken(..), UpdatedTime(..), emailToStoreKey, runDb,
-        runDbCurrTime, runDbSafe)
+        EntityDateFields(deletedEntityField, getDeletedEntityFieldValue),
+        Image, Key(..), LoginTokenExpirationTime(..), Store(..),
+        StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
+        emailToStoreKey, runDb, runDbCurrTime, runDbSafe)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class
        (MonadKucipongDb(..), StoreDeleteResult(..))
@@ -250,6 +250,18 @@ instance ( MonadBaseControl IO m
 -------------
 -- Generic --
 -------------
+dbFindByKeyNotDeleted
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => Key record -> m (Maybe (Entity record))
+dbFindByKeyNotDeleted key = do
+  maybeEntity <- dbFindByKey key
+  pure $
+    maybeEntity >>= \(Entity _ value) ->
+      getDeletedEntityFieldValue value *> pure (Entity key value)
 
 dbSelectFirstNotDeleted
   :: forall m record.
@@ -288,7 +300,7 @@ dbFindAdminLoginToken loginToken =
 dbFindStoreByEmail
   :: MonadKucipongDb m
   => EmailAddress -> m (Maybe (Entity Store))
-dbFindStoreByEmail = dbFindByKey . StoreKey . StoreEmailKey
+dbFindStoreByEmail = dbFindByKeyNotDeleted . StoreKey . StoreEmailKey
 
 dbFindStoreLoginToken
   :: MonadKucipongDb m
