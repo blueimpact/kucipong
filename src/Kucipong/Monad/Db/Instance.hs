@@ -230,10 +230,6 @@ instance ( MonadBaseControl IO m
       go :: m [Entity record]
       go = runDb $ selectList filters selectOpts
 
-
--- TODO: Make sure the places where we are selecting and getting and updating
--- respect the logical deletions.
-
 -------------
 -- Generic --
 -------------
