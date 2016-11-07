@@ -19,7 +19,7 @@ import Kucipong.Db
         EntityDateFields(deletedEntityField, getDeletedEntityFieldValue),
         Image, Key(..), LoginTokenExpirationTime(..), Store(..),
         StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
-        emailToStoreKey, runDb, runDbCurrTime, runDbSafe)
+        emailToAdminKey, emailToStoreKey, runDb, runDbCurrTime, runDbSafe)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class
        (MonadKucipongDb(..), StoreDeleteResult(..))
@@ -73,19 +73,6 @@ instance ( MonadBaseControl IO m
                 randomLoginToken
                 (LoginTokenExpirationTime plusOneDay)
         runDb $ repsertEntity (AdminLoginTokenKey adminKey) newAdminLoginTokenVal
-
-
-  dbFindAdmin :: EmailAddress -> KucipongDbT m (Maybe (Entity Admin))
-  dbFindAdmin email = lift go
-    where
-      go :: m (Maybe (Entity Admin))
-      go = fmap (fmap createEntity) . runDb $ get adminKey
-
-      createEntity :: Admin -> Entity Admin
-      createEntity = Entity adminKey
-
-      adminKey :: Key Admin
-      adminKey = AdminKey email
 
   dbUpsertAdmin :: EmailAddress -> Text -> KucipongDbT m (Entity Admin)
   dbUpsertAdmin email name = lift go
@@ -250,6 +237,7 @@ instance ( MonadBaseControl IO m
 -------------
 -- Generic --
 -------------
+
 dbFindByKeyNotDeleted
   :: forall m record.
      ( EntityDateFields record
@@ -292,6 +280,11 @@ dbFindAdminLoginToken
   => LoginToken -> m (Maybe (Entity AdminLoginToken))
 dbFindAdminLoginToken loginToken =
   dbSelectFirstNotDeleted [AdminLoginTokenLoginToken ==. loginToken] []
+
+dbFindAdmin
+  :: MonadKucipongDb m
+  => EmailAddress -> m (Maybe (Entity Admin))
+dbFindAdmin = dbFindByKeyNotDeleted . emailToAdminKey
 
 -----------
 -- Store --

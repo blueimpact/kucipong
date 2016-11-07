@@ -58,15 +58,6 @@ class Monad m => MonadKucipongDb m where
       => Key Admin -> t n (Entity AdminLoginToken)
   dbCreateAdminMagicLoginToken = lift . dbCreateAdminMagicLoginToken
 
-  dbFindAdmin :: EmailAddress -> m (Maybe (Entity Admin))
-  default dbFindAdmin
-      :: ( MonadKucipongDb n
-         , MonadTrans t
-         , m ~ t n
-         )
-      => EmailAddress -> t n (Maybe (Entity Admin))
-  dbFindAdmin = lift . dbFindAdmin
-
   dbUpsertAdmin
       :: EmailAddress
       -> Text

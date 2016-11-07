@@ -33,7 +33,7 @@ import Kucipong.Form
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
-        MonadKucipongSendEmail(..), StoreDeleteResult(..),
+        MonadKucipongSendEmail(..), StoreDeleteResult(..), dbFindAdmin,
         dbFindAdminLoginToken, dbFindStoreByEmail)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Admin, Session(..))

@@ -30,6 +30,9 @@ share [ mkPersist sqlSettings { mpsGenerateLenses = False }
       ]
       kucipongEntityDefs
 
+emailToAdminKey :: EmailAddress -> Key Admin
+emailToAdminKey = AdminKey
+
 emailToStoreKey :: EmailAddress -> Key Store
 emailToStoreKey = StoreKey . StoreEmailKey
 
