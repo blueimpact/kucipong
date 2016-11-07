@@ -174,15 +174,6 @@ class Monad m => MonadKucipongDb m where
   dbDeleteStoreIfNameMatches email name =
     lift $ dbDeleteStoreIfNameMatches email name
 
-  dbFindStoreLoginToken :: LoginToken -> m (Maybe (Entity StoreLoginToken))
-  default dbFindStoreLoginToken
-      :: ( MonadKucipongDb n
-         , MonadTrans t
-         , m ~ t n
-         )
-      => LoginToken -> t n (Maybe (Entity StoreLoginToken))
-  dbFindStoreLoginToken = lift . dbFindStoreLoginToken
-
   -- ======= --
   -- Generic --
   -- ======= --

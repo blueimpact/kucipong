@@ -215,11 +215,6 @@ instance ( MonadBaseControl IO m
               | otherwise -> pure $ StoreDeleteErrNameDoesNotMatch store
             Nothing -> pure StoreDeleteErrDoesNotExist
 
-  dbFindStoreLoginToken :: LoginToken -> KucipongDbT m (Maybe (Entity StoreLoginToken))
-  dbFindStoreLoginToken loginToken = lift go
-    where
-      go :: m (Maybe (Entity StoreLoginToken))
-      go = runDb $ selectFirst [StoreLoginTokenLoginToken ==. loginToken] []
 
   -- ======= --
   -- Generic --
@@ -290,6 +285,12 @@ dbFindStoreByEmail
   :: MonadKucipongDb m
   => EmailAddress -> m (Maybe (Entity Store))
 dbFindStoreByEmail = dbFindByKey . StoreKey . StoreEmailKey
+
+dbFindStoreLoginToken
+  :: MonadKucipongDb m
+  => LoginToken -> m (Maybe (Entity StoreLoginToken))
+dbFindStoreLoginToken loginToken =
+  dbSelectFirstNotDeleted [StoreLoginTokenLoginToken ==. loginToken] []
 
 -------------
 -- Helpers --

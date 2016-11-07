@@ -51,3 +51,8 @@ instance EntityDateFields Store where
   createdEntityField = StoreCreated
   deletedEntityField = StoreDeleted
   updatedEntityField = StoreUpdated
+
+instance EntityDateFields StoreLoginToken where
+  createdEntityField = StoreLoginTokenCreated
+  deletedEntityField = StoreLoginTokenDeleted
+  updatedEntityField = StoreLoginTokenUpdated
