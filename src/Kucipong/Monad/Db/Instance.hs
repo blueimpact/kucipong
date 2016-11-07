@@ -74,12 +74,6 @@ instance ( MonadBaseControl IO m
                 (LoginTokenExpirationTime plusOneDay)
         runDb $ repsertEntity (AdminLoginTokenKey adminKey) newAdminLoginTokenVal
 
-  dbFindAdminLoginToken :: LoginToken
-                        -> KucipongDbT m (Maybe (Entity AdminLoginToken))
-  dbFindAdminLoginToken loginToken = lift go
-    where
-      go :: m (Maybe (Entity AdminLoginToken))
-      go = runDb $ selectFirst [AdminLoginTokenLoginToken ==. loginToken] []
 
   dbFindAdmin :: EmailAddress -> KucipongDbT m (Maybe (Entity Admin))
   dbFindAdmin email = lift go
@@ -276,6 +270,16 @@ dbSelectListNotDeleted
   => [Filter record] -> [SelectOpt record] -> m [Entity record]
 dbSelectListNotDeleted filters selectOpts =
   dbSelectList ((deletedEntityField ==. Nothing) : filters) selectOpts
+
+-----------
+-- Admin --
+-----------
+
+dbFindAdminLoginToken
+  :: MonadKucipongDb m
+  => LoginToken -> m (Maybe (Entity AdminLoginToken))
+dbFindAdminLoginToken loginToken =
+  dbSelectFirstNotDeleted [AdminLoginTokenLoginToken ==. loginToken] []
 
 -----------
 -- Store --

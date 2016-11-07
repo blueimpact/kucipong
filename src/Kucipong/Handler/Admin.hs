@@ -34,7 +34,7 @@ import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
         MonadKucipongSendEmail(..), StoreDeleteResult(..),
-        dbFindStoreByEmail)
+        dbFindAdminLoginToken, dbFindStoreByEmail)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
@@ -111,7 +111,7 @@ doLoginGet loginToken = do
   maybeAdminLoginTokenEntity <- dbFindAdminLoginToken loginToken
   (Entity (AdminLoginTokenKey (AdminKey adminEmail)) adminLoginToken) <-
     fromMaybeM noAdminLoginTokenError maybeAdminLoginTokenEntity
-    -- check date on admin login token
+  -- check date on admin login token
   now <- currentTime
   let (LoginTokenExpirationTime expirationTime) =
         adminLoginTokenExpirationTime adminLoginToken

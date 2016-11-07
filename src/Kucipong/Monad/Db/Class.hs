@@ -12,7 +12,6 @@ import Web.Spock (ActionCtxT)
 import Kucipong.Db
        (Admin, AdminLoginToken, DbSafeError, Image, Key, Store,
         StoreEmail, StoreLoginToken)
-import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
 
@@ -67,15 +66,6 @@ class Monad m => MonadKucipongDb m where
          )
       => EmailAddress -> t n (Maybe (Entity Admin))
   dbFindAdmin = lift . dbFindAdmin
-
-  dbFindAdminLoginToken :: LoginToken -> m (Maybe (Entity AdminLoginToken))
-  default dbFindAdminLoginToken
-      :: ( MonadKucipongDb n
-         , MonadTrans t
-         , m ~ t n
-         )
-      => LoginToken -> t n (Maybe (Entity AdminLoginToken))
-  dbFindAdminLoginToken = lift . dbFindAdminLoginToken
 
   dbUpsertAdmin
       :: EmailAddress

@@ -47,6 +47,16 @@ class EntityDateFields record where
   deletedEntityField :: EntityField record (Maybe DeletedTime)
   updatedEntityField :: EntityField record UpdatedTime
 
+instance EntityDateFields Admin where
+  createdEntityField = AdminCreated
+  deletedEntityField = AdminDeleted
+  updatedEntityField = AdminUpdated
+
+instance EntityDateFields AdminLoginToken where
+  createdEntityField = AdminLoginTokenCreated
+  deletedEntityField = AdminLoginTokenDeleted
+  updatedEntityField = AdminLoginTokenUpdated
+
 instance EntityDateFields Store where
   createdEntityField = StoreCreated
   deletedEntityField = StoreDeleted
