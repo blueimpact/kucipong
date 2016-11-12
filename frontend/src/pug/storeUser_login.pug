@@ -5,6 +5,8 @@ include _layout
     include _messageArea
     .store
       form#js-request-verification.loginSignboard(
+        action="/store/login"
+        method="POST"
         data-user-type="store"
       )
         .loginSignboard_titleArea
