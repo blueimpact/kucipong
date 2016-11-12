@@ -17,9 +17,10 @@ import Web.Spock.Core (SpockCtxT, get)
 
 import Kucipong.Db
        (Key(..), LoginTokenExpirationTime(..),
-        storeLoginTokenExpirationTime)
+        StoreLoginToken(storeLoginTokenExpirationTime))
 import Kucipong.LoginToken (LoginToken)
-import Kucipong.Monad (MonadKucipongCookie, MonadKucipongDb(..))
+import Kucipong.Monad
+       (MonadKucipongCookie, MonadKucipongDb(..), dbFindStoreLoginToken)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
 import Kucipong.Spock (getStoreCookie, setStoreCookie)
@@ -51,7 +52,7 @@ doLogin loginToken = do
   maybeStoreLoginTokenEntity <- dbFindStoreLoginToken loginToken
   (Entity (StoreLoginTokenKey (StoreEmailKey storeEmail)) storeLoginToken) <-
     fromMaybeM noStoreLoginTokenError maybeStoreLoginTokenEntity
-    -- check date on store login token
+  -- check date on store login token
   now <- currentTime
   let (LoginTokenExpirationTime expirationTime) =
         storeLoginTokenExpirationTime storeLoginToken

@@ -12,7 +12,7 @@ import Options.Applicative
 import Text.Email.Validate ( validateFromString )
 
 import Kucipong.Config ( createConfigFromEnv )
-import Kucipong.Db ( adminLoginTokenLoginToken )
+import Kucipong.Db ( AdminLoginToken(adminLoginTokenLoginToken) )
 import Kucipong.Monad
     ( MonadKucipongDb(..), MonadKucipongSendEmail(..), runKucipongM )
 
@@ -42,7 +42,7 @@ addAdmin email name = do
     (Entity _ adminLoginToken) <-
         fromEitherM handleCreateAdminLoginTokenError eitherAdminLoginToken
     let loginToken = adminLoginTokenLoginToken adminLoginToken
-    sendAdminLoginEmail email loginToken
+    void $ sendAdminLoginEmail email loginToken
     putStrLn $ "Created (or updated) admin with email " <> tshow email <>
         " and name \"" <> name <> "\".\nSent email with login url."
   where

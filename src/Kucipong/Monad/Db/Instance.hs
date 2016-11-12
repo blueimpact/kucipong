@@ -7,18 +7,22 @@ import Kucipong.Prelude
 
 import Control.Monad.Random (MonadRandom(..))
 import Control.Monad.Time (MonadTime(..))
-import Database.Persist
-       (Entity(..), (==.), (=.), get, insert, insertEntity, repsert,
-        selectFirst, updateGet)
+import Database.Persist.Sql
+       (Entity(..), Filter, PersistRecordBackend, PersistStoreRead,
+        SelectOpt, SqlBackend, (==.), (=.), get, insert, insertEntity,
+        repsert, selectFirst, selectList, update, updateGet)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
-       (Admin(..), AdminLoginToken(..), CreatedTime(..), DbSafeError(..),
-        EntityField(..), Image, Key(..), LoginTokenExpirationTime(..),
-        Store(..), StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
-        adminName, runDb, runDbCurrTime, runDbSafe)
+       (Admin(..), AdminLoginToken(..), CreatedTime(..), DeletedTime(..),
+        DbSafeError(..), EntityField(..),
+        EntityDateFields(deletedEntityField, getDeletedEntityFieldValue),
+        Image, Key(..), LoginTokenExpirationTime(..), Store(..),
+        StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
+        emailToAdminKey, emailToStoreKey, runDb, runDbCurrTime, runDbSafe)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
-import Kucipong.Monad.Db.Class (MonadKucipongDb(..))
+import Kucipong.Monad.Db.Class
+       (MonadKucipongDb(..), StoreDeleteResult(..))
 import Kucipong.Monad.Db.Trans (KucipongDbT(..))
 import Kucipong.Persist (repsertEntity)
 import Kucipong.Util (addOneDay)
@@ -69,25 +73,6 @@ instance ( MonadBaseControl IO m
                 randomLoginToken
                 (LoginTokenExpirationTime plusOneDay)
         runDb $ repsertEntity (AdminLoginTokenKey adminKey) newAdminLoginTokenVal
-
-  dbFindAdminLoginToken :: LoginToken
-                        -> KucipongDbT m (Maybe (Entity AdminLoginToken))
-  dbFindAdminLoginToken loginToken = lift go
-    where
-      go :: m (Maybe (Entity AdminLoginToken))
-      go = runDb $ selectFirst [AdminLoginTokenLoginToken ==. loginToken] []
-
-  dbFindAdmin :: EmailAddress -> KucipongDbT m (Maybe (Entity Admin))
-  dbFindAdmin email = lift go
-    where
-      go :: m (Maybe (Entity Admin))
-      go = fmap (fmap createEntity) . runDb $ get adminKey
-
-      createEntity :: Admin -> Entity Admin
-      createEntity = Entity adminKey
-
-      adminKey :: Key Admin
-      adminKey = AdminKey email
 
   dbUpsertAdmin :: EmailAddress -> Text -> KucipongDbT m (Entity Admin)
   dbUpsertAdmin email name = lift go
@@ -192,33 +177,134 @@ instance ( MonadBaseControl IO m
         runDb $ repsert (StoreLoginTokenKey storeEmailKey) newStoreLoginTokenVal
         pure $ Entity (StoreLoginTokenKey storeEmailKey) newStoreLoginTokenVal
 
-  dbFindStoreLoginToken :: LoginToken -> KucipongDbT m (Maybe (Entity StoreLoginToken))
-  dbFindStoreLoginToken loginToken = lift go
+  dbDeleteStoreIfNameMatches
+    :: EmailAddress
+    -> Text
+    -> KucipongDbT m StoreDeleteResult
+  dbDeleteStoreIfNameMatches email name = lift go
     where
-      go :: m (Maybe (Entity StoreLoginToken))
-      go = runDb $ selectFirst [StoreLoginTokenLoginToken ==. loginToken] []
+      go :: m StoreDeleteResult
+      go =
+        runDbCurrTime $ \currTime -> do
+          let storeKey = emailToStoreKey email
+          maybeStore <- get storeKey
+          case maybeStore of
+            Just store
+              | storeName store == name -> do
+                update storeKey [StoreDeleted =. Just (DeletedTime currTime)]
+                pure StoreDeleteSuccess
+              | otherwise -> pure $ StoreDeleteErrNameDoesNotMatch store
+            Nothing -> pure StoreDeleteErrDoesNotExist
 
-  -- dbUpsertStore :: EmailAddress -> Text -> KucipongDbT m (Entity Store)
-  -- dbUpsertStore email name = lift go
-  --   where
-  --     go :: m (Entity Store)
-  --     go = runDbCurrTime $ \currTime -> do
-  --         maybeExistingStoreVal <- get (StoreKey email)
-  --         case maybeExistingStoreVal of
-  --             Just existingStoreVal -> do
-  --                 -- store already exists.  update the name if it is different
-  --                 if (existingStoreVal ^. storeName /= name)
-  --                     then do
-  --                         newStoreVal <- updateGet (StoreKey email) [StoreName =. name]
-  --                         pure $ Entity (StoreKey email) newStoreVal
-  --                     else
-  --                         pure $ Entity (StoreKey email) existingStoreVal
-  --             Nothing -> do
-  --                 -- couldn't find an existing store, so we will create a new
-  --                 -- one
-  --                 let newStoreVal = Store email (CreatedTime currTime)
-  --                         (UpdatedTime currTime) Nothing name
-  --                         Nothing Nothing Nothing Nothing Nothing Nothing
-  --                         Nothing Nothing Nothing
-  --                 newStoreKey <- insert newStoreVal
-  --                 pure $ Entity newStoreKey newStoreVal
+
+  -- ======= --
+  -- Generic --
+  -- ======= --
+
+  dbFindByKey
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => Key record -> KucipongDbT m (Maybe (Entity record))
+  dbFindByKey key = lift go
+    where
+      go :: m (Maybe (Entity record))
+      go = runDb $ getEntity key
+
+  dbSelectFirst
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => [Filter record]
+    -> [SelectOpt record]
+    -> KucipongDbT m (Maybe (Entity record))
+  dbSelectFirst filters selectOpts = lift go
+    where
+      go :: m (Maybe (Entity record))
+      go = runDb $ selectFirst filters selectOpts
+
+  dbSelectList
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> [SelectOpt record] -> KucipongDbT m [Entity record]
+  dbSelectList filters selectOpts = lift go
+    where
+      go :: m [Entity record]
+      go = runDb $ selectList filters selectOpts
+
+-------------
+-- Generic --
+-------------
+
+dbFindByKeyNotDeleted
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => Key record -> m (Maybe (Entity record))
+dbFindByKeyNotDeleted key = do
+  maybeEntity <- dbFindByKey key
+  pure $
+    maybeEntity >>= \(Entity _ value) ->
+      getDeletedEntityFieldValue value *> pure (Entity key value)
+
+dbSelectFirstNotDeleted
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => [Filter record] -> [SelectOpt record] -> m (Maybe (Entity record))
+dbSelectFirstNotDeleted filters selectOpts =
+  dbSelectFirst ((deletedEntityField ==. Nothing) : filters) selectOpts
+
+dbSelectListNotDeleted
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => [Filter record] -> [SelectOpt record] -> m [Entity record]
+dbSelectListNotDeleted filters selectOpts =
+  dbSelectList ((deletedEntityField ==. Nothing) : filters) selectOpts
+
+-----------
+-- Admin --
+-----------
+
+dbFindAdminLoginToken
+  :: MonadKucipongDb m
+  => LoginToken -> m (Maybe (Entity AdminLoginToken))
+dbFindAdminLoginToken loginToken =
+  dbSelectFirstNotDeleted [AdminLoginTokenLoginToken ==. loginToken] []
+
+dbFindAdmin
+  :: MonadKucipongDb m
+  => EmailAddress -> m (Maybe (Entity Admin))
+dbFindAdmin = dbFindByKeyNotDeleted . emailToAdminKey
+
+-----------
+-- Store --
+-----------
+
+dbFindStoreByEmail
+  :: MonadKucipongDb m
+  => EmailAddress -> m (Maybe (Entity Store))
+dbFindStoreByEmail = dbFindByKeyNotDeleted . StoreKey . StoreEmailKey
+
+dbFindStoreLoginToken
+  :: MonadKucipongDb m
+  => LoginToken -> m (Maybe (Entity StoreLoginToken))
+dbFindStoreLoginToken loginToken =
+  dbSelectFirstNotDeleted [StoreLoginTokenLoginToken ==. loginToken] []
+
+-------------
+-- Helpers --
+-------------
+
+getEntity
+  :: ( MonadIO m
+     , PersistRecordBackend record backend
+     , PersistStoreRead backend
+     )
+  => Key record -> ReaderT backend m (Maybe (Entity record))
+getEntity key = fmap (Entity key) <$> get key

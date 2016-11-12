@@ -2254,7 +2254,7 @@ None.
 
 See the sample response.
 
-### GET store user delete confirm page
+### POST store user delete confirm page
 
 #### Sample request and response
 
@@ -2264,7 +2264,7 @@ Some user may bookmark or share this URI, so do not include version number in th
 ```bash
 $ curl -G "http://$domain/admin/store/delete/confirm" \
   -H "AUTH-TOKEN: ${token}" \
-  -data-urlencode "storeEmail=sample@example.com"
+  --data-urlencode "storeEmail=sample@example.com"
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -2366,8 +2366,8 @@ Some user may bookmark or share this URI, so do not include version number in th
 ```bash
 $ curl -X POST "http://$domain/admin/store/delete" \
   -H "AUTH-TOKEN: ${token}" \
-  -d "storeName=七輪焼き肉・安安" \
-  -d "storeId=3"
+  --data-urlencode "storeName=七輪焼き肉・安安" \
+  --data-urlencode "storeEmail=sample@example.com"
 
 (Same response as "GET store user create page")
 ```
@@ -2376,7 +2376,7 @@ $ curl -X POST "http://$domain/admin/store/delete" \
 
 ```haskell
 storeName :: Text
-storeId :: StoreId
+storeEmail :: Email
 ```
 
 Delete user only if the store name of the store id equals `storeName`.

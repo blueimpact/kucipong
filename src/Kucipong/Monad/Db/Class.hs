@@ -5,15 +5,25 @@ module Kucipong.Monad.Db.Class where
 import Kucipong.Prelude
 
 import Control.Monad.Trans (MonadTrans)
-import Database.Persist (Entity)
+import Database.Persist.Sql
+       (Entity, Filter, PersistRecordBackend, SelectOpt, SqlBackend)
 import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
        (Admin, AdminLoginToken, DbSafeError, Image, Key, Store,
         StoreEmail, StoreLoginToken)
-import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
+
+-- | Result to return from a call to 'dbDeleteStoreIfNameMatches'.
+data StoreDeleteResult
+  = StoreDeleteSuccess
+  -- ^ Successfully deleted the store.
+  | StoreDeleteErrNameDoesNotMatch Store
+  -- ^ 'Store' name passed in does not match the name of the actual 'Store'.
+  | StoreDeleteErrDoesNotExist
+  -- ^ 'EmailAddress' passed in does not match an actual 'Store'.
+  deriving (Eq, Generic, Show, Typeable)
 
 -- | Type-class for monads that can perform Db actions.  For instance, querying
 -- the database for information or writing new information to the database.
@@ -22,153 +32,167 @@ import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
 -- transformers that implement 'MonadTrans'.
 class Monad m => MonadKucipongDb m where
 
-    -- ===========
-    --  For Admin
-    -- ===========
+  -- ===========
+  --  For Admin
+  -- ===========
 
-    dbCreateAdmin
-        :: EmailAddress
-        -> Text
-        -- ^ Admin name
-        -> m (Entity Admin)
-    default dbCreateAdmin
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => EmailAddress -> Text -> t n (Entity Admin)
-    dbCreateAdmin = (lift .) . dbCreateAdmin
+  dbCreateAdmin
+      :: EmailAddress
+      -> Text
+      -- ^ Admin name
+      -> m (Entity Admin)
+  default dbCreateAdmin
+      :: ( MonadKucipongDb n
+         , MonadTrans t
+         , m ~ t n
+         )
+      => EmailAddress -> Text -> t n (Entity Admin)
+  dbCreateAdmin = (lift .) . dbCreateAdmin
 
-    dbCreateAdminMagicLoginToken :: Key Admin -> m (Entity AdminLoginToken)
-    default dbCreateAdminMagicLoginToken
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => Key Admin -> t n (Entity AdminLoginToken)
-    dbCreateAdminMagicLoginToken = lift . dbCreateAdminMagicLoginToken
+  dbCreateAdminMagicLoginToken :: Key Admin -> m (Entity AdminLoginToken)
+  default dbCreateAdminMagicLoginToken
+      :: ( MonadKucipongDb n
+         , MonadTrans t
+         , m ~ t n
+         )
+      => Key Admin -> t n (Entity AdminLoginToken)
+  dbCreateAdminMagicLoginToken = lift . dbCreateAdminMagicLoginToken
 
-    dbFindAdmin :: EmailAddress -> m (Maybe (Entity Admin))
-    default dbFindAdmin
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => EmailAddress -> t n (Maybe (Entity Admin))
-    dbFindAdmin = lift . dbFindAdmin
+  dbUpsertAdmin
+      :: EmailAddress
+      -> Text
+      -- ^ Admin name
+      -> m (Entity Admin)
+  default dbUpsertAdmin
+      :: ( MonadKucipongDb n
+         , MonadTrans t
+         , m ~ t n
+         )
+      => EmailAddress -> Text -> t n (Entity Admin)
+  dbUpsertAdmin = (lift .) . dbUpsertAdmin
 
-    dbFindAdminLoginToken :: LoginToken -> m (Maybe (Entity AdminLoginToken))
-    default dbFindAdminLoginToken
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => LoginToken -> t n (Maybe (Entity AdminLoginToken))
-    dbFindAdminLoginToken = lift . dbFindAdminLoginToken
+  -- ===========
+  --  For Store
+  -- ===========
 
-    dbUpsertAdmin
-        :: EmailAddress
-        -> Text
-        -- ^ Admin name
-        -> m (Entity Admin)
-    default dbUpsertAdmin
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => EmailAddress -> Text -> t n (Entity Admin)
-    dbUpsertAdmin = (lift .) . dbUpsertAdmin
+  dbCreateStore
+      :: Key StoreEmail
+      -- ^ 'Key' for the 'StoreEmail'
+      -> Text
+      -- ^ 'Store' name
+      -> Text
+      -- ^ 'Store' category
+      -> Text
+      -- ^ 'Store' category detail
+      -> Maybe Image
+      -- ^ 'Image' for the 'Store'
+      -> Maybe Text
+      -- ^ Sales Point for the 'Store'
+      -> Maybe Text
+      -- ^ Address for the 'Store'
+      -> Maybe Text
+      -- ^ Phone number for the 'Store'
+      -> Maybe Text
+      -- ^ Business hours for the 'Store'
+      -> Maybe Text
+      -- ^ Regular holiday for the 'Store'
+      -> Maybe Text
+      -- ^ url for the 'Store'
+      -> m (Entity Store)
+  default dbCreateStore
+      :: ( MonadKucipongDb n
+         , MonadTrans t
+         , m ~ t n
+         )
+      => Key StoreEmail -> Text -> Text -> Text -> Maybe Image
+      -> Maybe Text -> Maybe Text -> Maybe Text -> Maybe Text
+      -> Maybe Text -> Maybe Text -> t n (Entity Store)
+  dbCreateStore email name category catdet image salesPoint address phoneNumber
+          businessHours regularHoliday url = lift $
+      dbCreateStore
+          email
+          name
+          category
+          catdet
+          image
+          salesPoint
+          address
+          phoneNumber
+          businessHours
+          regularHoliday
+          url
 
-    -- ===========
-    --  For Store
-    -- ===========
+  dbCreateStoreEmail :: EmailAddress -> m (Either DbSafeError (Entity StoreEmail))
+  default dbCreateStoreEmail
+      :: ( MonadKucipongDb n
+         , MonadTrans t
+         , m ~ t n
+         )
+      => EmailAddress -> t n (Either DbSafeError (Entity StoreEmail))
+  dbCreateStoreEmail = lift . dbCreateStoreEmail
 
-    dbCreateStore
-        :: Key StoreEmail
-        -- ^ 'Key' for the 'StoreEmail'
-        -> Text
-        -- ^ 'Store' name
-        -> Text
-        -- ^ 'Store' category
-        -> Text
-        -- ^ 'Store' category detail
-        -> Maybe Image
-        -- ^ 'Image' for the 'Store'
-        -> Maybe Text
-        -- ^ Sales Point for the 'Store'
-        -> Maybe Text
-        -- ^ Address for the 'Store'
-        -> Maybe Text
-        -- ^ Phone number for the 'Store'
-        -> Maybe Text
-        -- ^ Business hours for the 'Store'
-        -> Maybe Text
-        -- ^ Regular holiday for the 'Store'
-        -> Maybe Text
-        -- ^ url for the 'Store'
-        -> m (Entity Store)
-    default dbCreateStore
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => Key StoreEmail -> Text -> Text -> Text -> Maybe Image
-        -> Maybe Text -> Maybe Text -> Maybe Text -> Maybe Text
-        -> Maybe Text -> Maybe Text -> t n (Entity Store)
-    dbCreateStore email name category catdet image salesPoint address phoneNumber
-            businessHours regularHoliday url = lift $
-        dbCreateStore
-            email
-            name
-            category
-            catdet
-            image
-            salesPoint
-            address
-            phoneNumber
-            businessHours
-            regularHoliday
-            url
+  dbCreateStoreMagicLoginToken :: Key StoreEmail -> m (Entity StoreLoginToken)
+  default dbCreateStoreMagicLoginToken
+      :: ( MonadKucipongDb n
+         , MonadTrans t
+         , m ~ t n
+         )
+      => Key StoreEmail -> t n (Entity StoreLoginToken)
+  dbCreateStoreMagicLoginToken = lift . dbCreateStoreMagicLoginToken
 
-    dbCreateStoreEmail :: EmailAddress -> m (Either DbSafeError (Entity StoreEmail))
-    default dbCreateStoreEmail
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => EmailAddress -> t n (Either DbSafeError (Entity StoreEmail))
-    dbCreateStoreEmail = lift . dbCreateStoreEmail
+  dbDeleteStoreIfNameMatches
+    :: EmailAddress
+    -- ^ 'Key' for the 'Store'
+    -> Text
+    -- ^ Name of the 'Store'.
+    -> m StoreDeleteResult
+  default dbDeleteStoreIfNameMatches
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       )
+    => EmailAddress -> Text -> t n StoreDeleteResult
+  dbDeleteStoreIfNameMatches email name =
+    lift $ dbDeleteStoreIfNameMatches email name
 
-    dbCreateStoreMagicLoginToken :: Key StoreEmail -> m (Entity StoreLoginToken)
-    default dbCreateStoreMagicLoginToken
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => Key StoreEmail -> t n (Entity StoreLoginToken)
-    dbCreateStoreMagicLoginToken = lift . dbCreateStoreMagicLoginToken
+  -- ======= --
+  -- Generic --
+  -- ======= --
+  dbFindByKey
+    :: (PersistRecordBackend record SqlBackend)
+    => Key record -> m (Maybe (Entity record))
+  default dbFindByKey
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => Key record -> t n (Maybe (Entity record))
+  dbFindByKey = lift . dbFindByKey
 
-    dbFindStoreLoginToken :: LoginToken -> m (Maybe (Entity StoreLoginToken))
-    default dbFindStoreLoginToken
-        :: ( MonadKucipongDb n
-           , MonadTrans t
-           , m ~ t n
-           )
-        => LoginToken -> t n (Maybe (Entity StoreLoginToken))
-    dbFindStoreLoginToken = lift . dbFindStoreLoginToken
+  dbSelectFirst
+    :: (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> [SelectOpt record] -> m (Maybe (Entity record))
+  default dbSelectFirst
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => [Filter record] -> [SelectOpt record] -> t n (Maybe (Entity record))
+  dbSelectFirst filters selectOpts = lift (dbSelectFirst filters selectOpts)
 
-    -- dbUpsertStore
-    --     :: EmailAddress
-    --     -> Text
-    --     -- ^ Store name
-    --     -> m (Entity Store)
-    -- default dbUpsertStore
-    --     :: ( MonadKucipongDb n
-    --        , MonadTrans t
-    --        , m ~ t n
-    --        )
-    --     => EmailAddress -> Text -> t n (Entity Store)
-    -- dbUpsertStore = (lift .) . dbUpsertStore
+  dbSelectList
+    :: (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> [SelectOpt record] -> m [Entity record]
+  default dbSelectList
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => [Filter record] -> [SelectOpt record] -> t n [Entity record]
+  dbSelectList filters selectOpts = lift (dbSelectList filters selectOpts)
 
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
