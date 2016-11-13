@@ -12,8 +12,8 @@ import Database.Persist (Entity(..))
 import Text.EDE (fromPairs)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, (<//>), getContext, root, redirect, renderRoute,
-        var)
+       (ActionCtxT, Path, (<//>), getContext, prehook, root,
+        redirect, renderRoute, var)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
@@ -28,7 +28,9 @@ import Kucipong.Monad
         MonadKucipongSendEmail(..), dbFindStoreByEmail, dbFindStoreLoginToken)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
-import Kucipong.Spock (getReqParamErr, getStoreCookie, setStoreCookie)
+import Kucipong.Spock
+       (ContainsStoreSession, getReqParamErr, getStoreCookie,
+        getStoreEmail, setStoreCookie)
 
 -- | Url prefix for all of the following 'Path's.
 storeUrlPrefix :: Path '[] 'Open
@@ -42,6 +44,9 @@ loginR = "login"
 
 doLoginR :: Path '[LoginToken] 'Open
 doLoginR = loginR <//> var
+
+editR :: Path '[] 'Open
+editR = "edit"
 
 -- | Handler for returning the store login page.
 loginGet
@@ -105,6 +110,21 @@ doLogin loginToken = do
     tokenExpiredError :: ActionCtxT ctx m a
     tokenExpiredError = redirect . renderRoute $ storeUrlPrefix <//> loginR
 
+storeGet
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+  => ActionCtxT (HVect xs) m ()
+storeGet = do
+  (StoreSession email) <- getStoreEmail
+  maybeStore <- dbFindStoreByEmail email
+  store <- fromMaybeM handleNoStoreError maybeStore
+  $(renderTemplateFromEnv "storeUser_store.html") $
+    fromPairs ["store" .= store]
+  where
+    handleNoStoreError :: ActionCtxT (HVect xs) m a
+    handleNoStoreError =
+      redirect . renderRoute $ storeUrlPrefix <//> editR
+
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
   => ActionCtxT (HVect xs) m (HVect ((Session Kucipong.Session.Store) ': xs))
@@ -130,5 +150,5 @@ storeComponent = do
   get doLoginR doLogin
   get loginR loginGet
   post loginR loginPost
-    -- prehook storeAuthHook $
-    --     get ("store" <//> "something") someAction
+  prehook storeAuthHook $
+    get rootR storeGet

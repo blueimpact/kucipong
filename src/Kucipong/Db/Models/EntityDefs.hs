@@ -41,7 +41,7 @@ kucipongEntityDefs = [persistLowerCase|
         deriving Show
         deriving Typeable
 
-    Store
+    Store json
         storeEmail              StoreEmailId
         created                 CreatedTime
         updated                 UpdatedTime
