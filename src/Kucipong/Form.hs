@@ -35,3 +35,9 @@ data AdminStoreDeleteForm = AdminStoreDeleteForm
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreDeleteForm
+
+data StoreLoginForm = StoreLoginForm
+  { email :: EmailAddress
+  } deriving (Data, Eq, Generic, Show, Typeable)
+
+instance FromForm StoreLoginForm
