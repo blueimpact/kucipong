@@ -21,11 +21,13 @@ import Kucipong.Db
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken))
 import Kucipong.Email (EmailError)
-import Kucipong.Form (StoreLoginForm(StoreLoginForm))
+import Kucipong.Form
+       (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
-        MonadKucipongSendEmail(..), dbFindStoreByEmail, dbFindStoreLoginToken)
+        MonadKucipongSendEmail(..), dbFindStoreByEmail,
+        dbFindStoreLoginToken, dbUpsertStore)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
 import Kucipong.Spock
@@ -164,6 +166,42 @@ storeEditGet = do
       , "url" .= (maybeStore >>= storeUrl)
       ]
 
+storeEditPost
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+  => ActionCtxT (HVect xs) m ()
+storeEditPost = do
+  (StoreSession email) <- getStoreEmail
+  StoreEditForm { name
+                , businessCategory
+                , salesPoint
+                , address
+                , phoneNumber
+                , businessHours
+                , regularHoliday
+                , url
+                } <- getReqParamErr handleErr
+  void $
+    dbUpsertStore
+      email
+      name
+      businessCategory
+      ""
+      Nothing
+      salesPoint
+      address
+      phoneNumber
+      businessHours
+      regularHoliday
+      url
+  redirect . renderRoute $ storeUrlPrefix
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg = do
+      $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
+      $(renderTemplateFromEnv "storeUser_store_edit.html") $
+        fromPairs ["errors" .= [errMsg]]
+
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
   => ActionCtxT (HVect xs) m (HVect ((Session Kucipong.Session.Store) ': xs))
@@ -192,3 +230,4 @@ storeComponent = do
   prehook storeAuthHook $ do
     get rootR storeGet
     get editR storeEditGet
+    post editR storeEditPost
