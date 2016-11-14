@@ -129,15 +129,15 @@ storeGet = do
         } <- fromMaybeM handleNoStoreError maybeStore
   $(renderTemplateFromEnv "storeUser_store.html") $
     fromPairs
-      [ "storeName" .= storeName
-      , "storeBusinessCategory" .= storeBusinessCategory
-      , "storeBusinessCategoryDetail" .= storeBusinessCategoryDetail
-      , "storeSalesPoint" .= storeSalesPoint
-      , "storeAddress" .= storeAddress
-      , "storePhoneNumber" .= storePhoneNumber
-      , "storeBusinessHours" .= storeBusinessHours
-      , "storeRegularHoliday" .= storeRegularHoliday
-      , "storeUrl" .= storeUrl
+      [ "name" .= storeName
+      , "businessCategory" .= storeBusinessCategory
+      , "businessCategoryDetail" .= storeBusinessCategoryDetail
+      , "salesPoint" .= storeSalesPoint
+      , "address" .= storeAddress
+      , "phoneNumber" .= storePhoneNumber
+      , "businessHours" .= storeBusinessHours
+      , "regularHoliday" .= storeRegularHoliday
+      , "url" .= storeUrl
       ]
   where
     handleNoStoreError :: ActionCtxT (HVect xs) m a
@@ -153,15 +153,15 @@ storeEditGet = do
   maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
   $(renderTemplateFromEnv "storeUser_store_edit.html") $
     fromPairs
-      [ "storeName" .= (storeName <$> maybeStore)
-      , "storeBusinessCategory" .= (storeBusinessCategory <$> maybeStore)
-      , "storeBusinessCategoryDetail" .= (storeBusinessCategoryDetail <$> maybeStore)
-      , "storeSalesPoint" .= (maybeStore >>= storeSalesPoint)
-      , "storeAddress" .= (maybeStore >>= storeAddress)
-      , "storePhoneNumber" .= (maybeStore >>= storePhoneNumber)
-      , "storeBusinessHours" .= (maybeStore >>= storeBusinessHours)
-      , "storeRegularHoliday" .= (maybeStore >>= storeRegularHoliday)
-      , "storeUrl" .= (maybeStore >>= storeUrl)
+      [ "name" .= (storeName <$> maybeStore)
+      , "businessCategory" .= (storeBusinessCategory <$> maybeStore)
+      , "businessCategoryDetail" .= (storeBusinessCategoryDetail <$> maybeStore)
+      , "salesPoint" .= (maybeStore >>= storeSalesPoint)
+      , "address" .= (maybeStore >>= storeAddress)
+      , "phoneNumber" .= (maybeStore >>= storePhoneNumber)
+      , "businessHours" .= (maybeStore >>= storeBusinessHours)
+      , "regularHoliday" .= (maybeStore >>= storeRegularHoliday)
+      , "url" .= (maybeStore >>= storeUrl)
       ]
 
 storeAuthHook

@@ -8,14 +8,14 @@ include _layout
         a.btn.outerBtn(href="/store/edit") 店舗情報編集
       header.storeHeader
         .annotatedImageGroup
-          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="{{ storeName }}")
+          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="{{ name }}")
           span.annotatedImageGroup-annotation 画像は一例です
         .highlightedBlock
           h2.highlightedBlock.storeHeader-title
-            | {{ storeName }}
+            | {{ name }}
       .storeBody
         .storeBody_description
-          p {{ storeSalesPoint }}
+          p {{ salesPoint }}
         .storeBody_couponBtn
           a.btn.defaultBtn(href="/store/coupon/create") クーポン一覧
         .storeBody_info
@@ -27,35 +27,35 @@ include _layout
               .storeBody_info_body_row-header
                 | カテゴリ
               .storeBody_info_body_row-body
-                | {{ storeBusinessCategory }}
+                | {{ businessCategory }}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の特徴
               .storeBody_info_body_row-body.simpleTagWrapper
                 .simpleTag
-                  | {{ storeBusinessCategoryDetail }}
+                  | {{ businessCategoryDetail }}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 住所
               .storeBody_info_body_row-body
                 .storeBody_info_body_row-body-address
-                  | {{ storeAddress }}
+                  | {{ address }}
                 .storeBody_info_body_row-body-map(data-latitude="41.40243" data-longitude="2.17551")
                   iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 電話番号
               .storeBody_info_body_row-body
-                | {{ storePhoneNumber }}
+                | {{ phoneNumber }}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 営業時間
               .storeBody_info_body_row-body
-                p {{ storeBusinessHours }}
+                p {{ businessHours }}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 定休日
               .storeBody_info_body_row-body
-                | {{ storeRegularHoliday }}
+                | {{ regularHoliday }}
             .storeBody_info_body_btnRow
-              a.btn.outerBtn(href="{{ storeUrl }}") オフィシャルサイト
+              a.btn.outerBtn(href="{{ url }}") オフィシャルサイト
