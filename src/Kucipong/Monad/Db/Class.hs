@@ -194,6 +194,22 @@ class Monad m => MonadKucipongDb m where
     => [Filter record] -> [SelectOpt record] -> t n [Entity record]
   dbSelectList filters selectOpts = lift (dbSelectList filters selectOpts)
 
+  dbUpsert
+    :: (PersistRecordBackend record SqlBackend)
+    => Key record
+    -> (UTCTime -> Maybe record -> record)
+    -> m (Entity record)
+  default dbUpsert
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => Key record
+    -> (UTCTime -> Maybe record -> record)
+    -> t n (Entity record)
+  dbUpsert key recordCreator = lift (dbUpsert key recordCreator)
+
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
 instance MonadKucipongDb m => MonadKucipongDb (IdentityT m)

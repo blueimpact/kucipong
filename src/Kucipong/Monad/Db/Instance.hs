@@ -15,11 +15,11 @@ import Database.Persist.Sql
 import Kucipong.Config (Config)
 import Kucipong.Db
        (Admin(..), AdminLoginToken(..), CreatedTime(..), DeletedTime(..),
-        DbSafeError(..), EntityField(..),
-        EntityDateFields(deletedEntityField, getDeletedEntityFieldValue),
-        Image, Key(..), LoginTokenExpirationTime(..), Store(..),
-        StoreEmail(..), StoreLoginToken(..), UpdatedTime(..),
-        emailToAdminKey, emailToStoreKey, runDb, runDbCurrTime, runDbSafe)
+        DbSafeError(..), EntityField(..), EntityDateFields(..), Image,
+        Key(..), LoginTokenExpirationTime(..), Store(..), StoreEmail(..),
+        StoreLoginToken(..), UpdatedTime(..), emailToAdminKey,
+        emailToStoreEmailKey, emailToStoreKey, runDb, runDbCurrTime,
+        runDbSafe)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class
        (MonadKucipongDb(..), StoreDeleteResult(..))
@@ -230,6 +230,21 @@ instance ( MonadBaseControl IO m
       go :: m [Entity record]
       go = runDb $ selectList filters selectOpts
 
+  dbUpsert
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => Key record
+    -> (UTCTime -> Maybe record -> record)
+    -> KucipongDbT m (Entity record)
+  dbUpsert key recordCreator = lift go
+    where
+      go :: m (Entity record)
+      go =
+        runDbCurrTime $ \currTime -> do
+          maybeVal <- get key
+          let newRecord = recordCreator currTime maybeVal
+          repsertEntity key newRecord
+
 -------------
 -- Generic --
 -------------
@@ -267,6 +282,25 @@ dbSelectListNotDeleted
 dbSelectListNotDeleted filters selectOpts =
   dbSelectList ((deletedEntityField ==. Nothing) : filters) selectOpts
 
+dbUpsertWithTime
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => Key record
+  -> (CreatedTime -> UpdatedTime -> Maybe DeletedTime -> record)
+  -> m (Entity record)
+dbUpsertWithTime key recordCreator =
+  dbUpsert key $ \currTime ->
+    \case
+      Nothing ->
+        recordCreator (CreatedTime currTime) (UpdatedTime currTime) Nothing
+      Just record ->
+        let createdTime = getCreatedEntityFieldValue record
+            deletedTime = getDeletedEntityFieldValue record
+        in recordCreator createdTime (UpdatedTime currTime) deletedTime
+
 -----------
 -- Admin --
 -----------
@@ -296,6 +330,38 @@ dbFindStoreLoginToken
   => LoginToken -> m (Maybe (Entity StoreLoginToken))
 dbFindStoreLoginToken loginToken =
   dbSelectFirstNotDeleted [StoreLoginTokenLoginToken ==. loginToken] []
+
+dbUpsertStore
+  :: MonadKucipongDb m
+  => EmailAddress
+  -> Text
+  -> Text
+  -> Text
+  -> Maybe Image
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Text
+  -> m (Entity Store)
+dbUpsertStore email name businessCategory businessCategoryDetail image salesPoint address phoneNumber businessHours regularHoliday url =
+  dbUpsertWithTime (emailToStoreKey email) $ \createdTime updatedTime deletedTime ->
+    Store
+      (emailToStoreEmailKey email)
+      createdTime
+      updatedTime
+      deletedTime
+      name
+      businessCategory
+      businessCategoryDetail
+      image
+      salesPoint
+      address
+      phoneNumber
+      businessHours
+      regularHoliday
+      url
 
 -------------
 -- Helpers --
