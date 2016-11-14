@@ -144,6 +144,26 @@ storeGet = do
     handleNoStoreError =
       redirect . renderRoute $ storeUrlPrefix <//> editR
 
+storeEditGet
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+  => ActionCtxT (HVect xs) m ()
+storeEditGet = do
+  (StoreSession email) <- getStoreEmail
+  maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+  $(renderTemplateFromEnv "storeUser_store.html") $
+    fromPairs
+      [ "storeName" .= (storeName <$> maybeStore)
+      , "storeBusinessCategory" .= (storeBusinessCategory <$> maybeStore)
+      , "storeBusinessCategoryDetail" .= (storeBusinessCategoryDetail <$> maybeStore)
+      , "storeSalesPoint" .= (maybeStore >>= storeSalesPoint)
+      , "storeAddress" .= (maybeStore >>= storeAddress)
+      , "storePhoneNumber" .= (maybeStore >>= storePhoneNumber)
+      , "storeBusinessHours" .= (maybeStore >>= storeBusinessHours)
+      , "storeRegularHoliday" .= (maybeStore >>= storeRegularHoliday)
+      , "storeUrl" .= (maybeStore >>= storeUrl)
+      ]
+
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
   => ActionCtxT (HVect xs) m (HVect ((Session Kucipong.Session.Store) ': xs))
@@ -169,5 +189,6 @@ storeComponent = do
   get doLoginR doLogin
   get loginR loginGet
   post loginR loginPost
-  prehook storeAuthHook $
+  prehook storeAuthHook $ do
     get rootR storeGet
+    get editR storeEditGet

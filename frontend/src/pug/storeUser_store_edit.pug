@@ -15,7 +15,7 @@ include _layout
               .storeBody_info_body_row-body
                 input#storeName(
                   name="storeName" type="text"
-                  value="七輪焼肉・安安"
+                  value="{{ storeName }}"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -23,7 +23,7 @@ include _layout
               .storeBody_info_body_row-body
                 select#storeCategory(
                   name="storeCategory"
-                  value="0"
+                  value="{{ storeBusinessCategory }}"
                 )
                   option(value="0") グルメ
                   option(value="1") ファッション
@@ -68,7 +68,7 @@ include _layout
                   name="storeDescription"
                   type="text"
                 )
-                  | 七輪焼き肉・安安は、美味しい焼肉を...
+                  | {% if storeSalesPoint %}{{ storeSalesPoint }}{% endif %}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 住所
@@ -76,7 +76,7 @@ include _layout
                 .storeBody_info_body_row-body-address
                   input#storeAddress(
                     name="storeAddress" type="text"
-                    value="渋谷区桜丘町2-12 渋谷亀八ビル4F"
+                    value="{% if storeAddress %}{{ storeAddress }}{% endif %}"
                   )
                 .storeBody_info_body_row-body-map(data-latitude="41.40243" data-longitude="2.17551")
                   iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
@@ -86,7 +86,7 @@ include _layout
               .storeBody_info_body_row-body
                 input#storePhoneNumber(
                   name="storePhoneNumber" type="text"
-                  value="03-3464-0722"
+                  value="{% if storePhoneNumber %}{{ storePhoneNumber }}{% endif %}"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -95,8 +95,7 @@ include _layout
                 textarea#storeHours(
                   name="storeHours" type="text"
                 )
-                  | 月〜木 17:00〜翌4:30
-                  | 金土日祝・祝前 16:00〜翌4:30
+                  | {% if storeBusinessHours %}{{ storeBusinessHours }}{% endif %}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 定休日
@@ -104,14 +103,14 @@ include _layout
                 textarea#storeCloseOn(
                   name="storeCloseOn" type="text"
                 )
-                  | 元旦のみ
+                  | {% if storeRegularHoliday %}{{ storeRegularHoliday }}{% endif %}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | オフィシャルサイト
               .storeBody_info_body_row-body
                 input#storeURL(
                   name="storeURL" type="url"
-                  value="http://www.fuji-tatsu.co.jp/"
+                  value="{% if storeUrl %}{{ storeUrl }}{% endif %}"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
