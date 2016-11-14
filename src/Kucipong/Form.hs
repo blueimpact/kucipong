@@ -11,33 +11,56 @@ import Kucipong.Prelude
 
 import Web.FormUrlEncoded (FromForm)
 
+-----------
+-- Admin --
+-----------
+
 data AdminLoginForm = AdminLoginForm
-  { email :: EmailAddress
+  { email :: !EmailAddress
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminLoginForm
 
 data AdminStoreCreateForm = AdminStoreCreateForm
-  { storeEmail :: EmailAddress
+  { storeEmail :: !EmailAddress
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreCreateForm
 
 data AdminStoreDeleteConfirmForm = AdminStoreDeleteConfirmForm
-  { storeEmail :: EmailAddress
+  { storeEmail :: !EmailAddress
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreDeleteConfirmForm
 
 data AdminStoreDeleteForm = AdminStoreDeleteForm
-  { storeEmail :: EmailAddress
-  , storeName :: Text
+  { storeEmail :: !EmailAddress
+  , storeName :: !Text
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm AdminStoreDeleteForm
 
+-----------
+-- Store --
+-----------
+
 data StoreLoginForm = StoreLoginForm
-  { email :: EmailAddress
+  { email :: !EmailAddress
   } deriving (Data, Eq, Generic, Show, Typeable)
 
 instance FromForm StoreLoginForm
+
+data StoreEditForm = StoreEditForm
+  { name :: !Text
+  , businessCategory :: !Text
+  -- , businessCategoryDetail :: !Text
+  -- , image :: !(Maybe Image)
+  , salesPoint :: !(Maybe Text)
+  , address :: !(Maybe Text)
+  , phoneNumber :: !(Maybe Text)
+  , businessHours :: !(Maybe Text)
+  , regularHoliday :: !(Maybe Text)
+  , url :: !(Maybe Text)
+  } deriving (Data, Eq, Generic, Show, Typeable)
+
+instance FromForm StoreEditForm
