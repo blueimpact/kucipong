@@ -17,7 +17,7 @@ import Web.Spock
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
-       (Key(..), LoginTokenExpirationTime(..),
+       (Key(..), LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken))
 import Kucipong.Email (EmailError)
@@ -116,10 +116,29 @@ storeGet
   => ActionCtxT (HVect xs) m ()
 storeGet = do
   (StoreSession email) <- getStoreEmail
-  maybeStore <- dbFindStoreByEmail email
-  store <- fromMaybeM handleNoStoreError maybeStore
+  maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+  Store { storeName
+        , storeSalesPoint
+        , storeBusinessCategory
+        , storeBusinessCategoryDetail
+        , storeAddress
+        , storePhoneNumber
+        , storeBusinessHours
+        , storeRegularHoliday
+        , storeUrl
+        } <- fromMaybeM handleNoStoreError maybeStore
   $(renderTemplateFromEnv "storeUser_store.html") $
-    fromPairs ["store" .= store]
+    fromPairs
+      [ "storeName" .= storeName
+      , "storeBusinessCategory" .= storeBusinessCategory
+      , "storeBusinessCategoryDetail" .= storeBusinessCategoryDetail
+      , "storeSalesPoint" .= storeSalesPoint
+      , "storeAddress" .= storeAddress
+      , "storePhoneNumber" .= storePhoneNumber
+      , "storeBusinessHours" .= storeBusinessHours
+      , "storeRegularHoliday" .= storeRegularHoliday
+      , "storeUrl" .= storeUrl
+      ]
   where
     handleNoStoreError :: ActionCtxT (HVect xs) m a
     handleNoStoreError =
