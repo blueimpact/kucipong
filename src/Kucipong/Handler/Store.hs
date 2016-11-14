@@ -151,7 +151,7 @@ storeEditGet
 storeEditGet = do
   (StoreSession email) <- getStoreEmail
   maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
-  $(renderTemplateFromEnv "storeUser_store.html") $
+  $(renderTemplateFromEnv "storeUser_store_edit.html") $
     fromPairs
       [ "storeName" .= (storeName <$> maybeStore)
       , "storeBusinessCategory" .= (storeBusinessCategory <$> maybeStore)

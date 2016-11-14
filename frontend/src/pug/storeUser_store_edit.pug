@@ -15,7 +15,7 @@ include _layout
               .storeBody_info_body_row-body
                 input#storeName(
                   name="storeName" type="text"
-                  value="{{ storeName }}"
+                  value="{% if storeName %}{{ storeName }}{% endif %}"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -23,7 +23,7 @@ include _layout
               .storeBody_info_body_row-body
                 select#storeCategory(
                   name="storeCategory"
-                  value="{{ storeBusinessCategory }}"
+                  value="{% if storeBusinessCategory %}{{ storeBusinessCategory }}{% endif %}"
                 )
                   option(value="0") グルメ
                   option(value="1") ファッション
