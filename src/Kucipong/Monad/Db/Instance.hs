@@ -260,7 +260,11 @@ dbFindByKeyNotDeleted key = do
   maybeEntity <- dbFindByKey key
   pure $
     maybeEntity >>= \(Entity _ value) ->
-      getDeletedEntityFieldValue value *> pure (Entity key value)
+      case getDeletedEntityFieldValue value of
+        -- If this entity is not deleted, then just return the entity.
+        Nothing -> pure (Entity key value)
+        -- If this entity is deleted, then return Nothing.
+        Just _ -> Nothing
 
 dbSelectFirstNotDeleted
   :: forall m record.
