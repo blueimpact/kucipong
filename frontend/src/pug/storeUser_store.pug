@@ -32,8 +32,10 @@ include _layout
               .storeBody_info_body_row-header
                 | 店舗の特徴
               .storeBody_info_body_row-body.simpleTagWrapper
+                | {% for businessCategoryDetail in businessCategoryDetails %}
                 .simpleTag
-                  | {{ businessCategoryDetail }}
+                  | {{ businessCategoryDetail.value }}
+                | {% endfor %}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 住所
@@ -51,7 +53,10 @@ include _layout
               .storeBody_info_body_row-header
                 | 営業時間
               .storeBody_info_body_row-body
-                p {{ businessHours }}
+                | {% for businessHourLine in businessHourLines %}
+                p
+                  | {{ businessHourLine.value }}
+                | {% endfor %}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 定休日

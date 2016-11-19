@@ -6,7 +6,7 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
-import Data.Aeson ((.=))
+import Data.Aeson (Value(..), (.=))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Text.EDE (fromPairs)
@@ -114,15 +114,18 @@ doLogin loginToken = do
 
 storeGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
   => ActionCtxT (HVect xs) m ()
 storeGet = do
   (StoreSession email) <- getStoreEmail
+  $(logDebug) $ "email: " <> tshow email
+  maybeStoreEntity <- dbFindStoreByEmail email
+  $(logDebug) $ "maybeStoreEntity: " <> tshow maybeStoreEntity
   maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
   Store { storeName
         , storeSalesPoint
         , storeBusinessCategory
-        , storeBusinessCategoryDetail
+        , storeBusinessCategoryDetails
         , storeAddress
         , storePhoneNumber
         , storeBusinessHours
@@ -133,11 +136,11 @@ storeGet = do
     fromPairs
       [ "name" .= storeName
       , "businessCategory" .= storeBusinessCategory
-      , "businessCategoryDetail" .= storeBusinessCategoryDetail
+      , "businessCategoryDetails" .= storeBusinessCategoryDetails
       , "salesPoint" .= storeSalesPoint
       , "address" .= storeAddress
       , "phoneNumber" .= storePhoneNumber
-      , "businessHours" .= storeBusinessHours
+      , "businessHourLines" .= fromMaybe [] (fmap lines storeBusinessHours)
       , "regularHoliday" .= storeRegularHoliday
       , "url" .= storeUrl
       ]
@@ -148,7 +151,7 @@ storeGet = do
 
 storeEditGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
   => ActionCtxT (HVect xs) m ()
 storeEditGet = do
   (StoreSession email) <- getStoreEmail
@@ -157,11 +160,11 @@ storeEditGet = do
     fromPairs
       [ "name" .= (storeName <$> maybeStore)
       , "businessCategory" .= (storeBusinessCategory <$> maybeStore)
-      , "businessCategoryDetail" .= (storeBusinessCategoryDetail <$> maybeStore)
+      , "businessCategoryDetails" .= (storeBusinessCategoryDetails <$> maybeStore)
       , "salesPoint" .= (maybeStore >>= storeSalesPoint)
       , "address" .= (maybeStore >>= storeAddress)
       , "phoneNumber" .= (maybeStore >>= storePhoneNumber)
-      , "businessHours" .= (maybeStore >>= storeBusinessHours)
+      , "businessHourLines" .= maybe [] lines (maybeStore >>= storeBusinessHours)
       , "regularHoliday" .= (maybeStore >>= storeRegularHoliday)
       , "url" .= (maybeStore >>= storeUrl)
       ]
@@ -174,6 +177,7 @@ storeEditPost = do
   (StoreSession email) <- getStoreEmail
   StoreEditForm { name
                 , businessCategory
+                , businessCategoryDetails
                 , salesPoint
                 , address
                 , phoneNumber
@@ -186,7 +190,7 @@ storeEditPost = do
       email
       name
       businessCategory
-      ""
+      businessCategoryDetails
       Nothing
       salesPoint
       address

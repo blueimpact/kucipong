@@ -82,7 +82,7 @@ class Monad m => MonadKucipongDb m where
       -- ^ 'Store' name
       -> Text
       -- ^ 'Store' category
-      -> Text
+      -> [Text]
       -- ^ 'Store' category detail
       -> Maybe Image
       -- ^ 'Image' for the 'Store'
@@ -104,7 +104,7 @@ class Monad m => MonadKucipongDb m where
          , MonadTrans t
          , m ~ t n
          )
-      => Key StoreEmail -> Text -> Text -> Text -> Maybe Image
+      => Key StoreEmail -> Text -> Text -> [Text] -> Maybe Image
       -> Maybe Text -> Maybe Text -> Maybe Text -> Maybe Text
       -> Maybe Text -> Maybe Text -> t n (Entity Store)
   dbCreateStore email name category catdet image salesPoint address phoneNumber

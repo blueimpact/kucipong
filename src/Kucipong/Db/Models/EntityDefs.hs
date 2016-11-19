@@ -48,7 +48,7 @@ kucipongEntityDefs = [persistLowerCase|
         deleted                 DeletedTime Maybe
         name                    Text
         businessCategory        Text
-        businessCategoryDetail  Text
+        businessCategoryDetails [Text]
         image                   Image Maybe
         salesPoint              Text Maybe
         address                 Text Maybe

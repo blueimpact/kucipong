@@ -95,7 +95,11 @@ include _layout
                 textarea#storeBusinessHours(
                   name="businessHours" type="text"
                 )
-                  | {% if businessHours %}{{ businessHours }}{% endif %}
+                  |{% if businessHourLines %}
+                  |{% for businessHourLine in businessHourLines %}
+                  |{{ businessHourLine.value }}
+                  |{% endfor %}
+                  |{% endif %}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 定休日

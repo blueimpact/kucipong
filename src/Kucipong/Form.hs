@@ -53,7 +53,7 @@ instance FromForm StoreLoginForm
 data StoreEditForm = StoreEditForm
   { name :: !Text
   , businessCategory :: !Text
-  -- , businessCategoryDetail :: !Text
+  , businessCategoryDetails :: ![Text]
   -- , image :: !(Maybe Image)
   , salesPoint :: !(Maybe Text)
   , address :: !(Maybe Text)

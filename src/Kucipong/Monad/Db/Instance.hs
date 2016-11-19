@@ -112,7 +112,7 @@ instance ( MonadBaseControl IO m
       -- ^ 'Store' name
     -> Text
       -- ^ 'Store' category
-    -> Text
+    -> [Text]
       -- ^ 'Store' category detail
     -> Maybe Image
       -- ^ 'Image' for the 'Store'
@@ -129,7 +129,7 @@ instance ( MonadBaseControl IO m
     -> Maybe Text
       -- ^ url for the 'Store'
     -> KucipongDbT m (Entity Store)
-  dbCreateStore storeEmailKey name category catdet image salesPoint address phoneNumber
+  dbCreateStore storeEmailKey name category catdets image salesPoint address phoneNumber
           businessHours regularHoliday url = lift go
     where
       go :: m (Entity Store)
@@ -137,7 +137,7 @@ instance ( MonadBaseControl IO m
           currTime <- currentTime
           let store =
                   Store storeEmailKey (CreatedTime currTime)
-                      (UpdatedTime currTime) Nothing name category catdet
+                      (UpdatedTime currTime) Nothing name category catdets
                       image salesPoint address phoneNumber businessHours
                       regularHoliday url
           runDb $ repsertEntity (StoreKey storeEmailKey) store
@@ -340,7 +340,7 @@ dbUpsertStore
   => EmailAddress
   -> Text
   -> Text
-  -> Text
+  -> [Text]
   -> Maybe Image
   -> Maybe Text
   -> Maybe Text
@@ -349,7 +349,7 @@ dbUpsertStore
   -> Maybe Text
   -> Maybe Text
   -> m (Entity Store)
-dbUpsertStore email name businessCategory businessCategoryDetail image salesPoint address phoneNumber businessHours regularHoliday url =
+dbUpsertStore email name businessCategory businessCategoryDetails image salesPoint address phoneNumber businessHours regularHoliday url =
   dbUpsertWithTime (emailToStoreKey email) $ \createdTime updatedTime deletedTime ->
     Store
       (emailToStoreEmailKey email)
@@ -358,7 +358,7 @@ dbUpsertStore email name businessCategory businessCategoryDetail image salesPoin
       deletedTime
       name
       businessCategory
-      businessCategoryDetail
+      businessCategoryDetails
       image
       salesPoint
       address
