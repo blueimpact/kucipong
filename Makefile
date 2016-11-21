@@ -1,4 +1,4 @@
-.PHONY: build build-frontend build-server clean clean-frontend clean-server dump-th ghci haddock haddock-server hlint lint release repl run test watch watch-tests watch-test
+.PHONY: build build-frontend build-server clean clean-frontend clean-server dump-th ghci haddock haddock-server hlint lint release repl run run-server test watch watch-tests watch-test
 all: build
 
 build-frontend:
@@ -54,6 +54,9 @@ release:
 	stack exec -- yesod keter
 	scp kucipong.keter kucipong:
 	ssh -t kucipong 'sudo cp kucipong.keter /var/www/keter/incoming/'
+
+run-server: build-server
+	stack exec -- kucipong Development
 
 run: build
 	stack exec -- kucipong Development
