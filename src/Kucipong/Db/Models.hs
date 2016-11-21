@@ -36,6 +36,10 @@ emailToAdminKey = AdminKey
 emailToStoreKey :: EmailAddress -> Key Store
 emailToStoreKey = StoreKey . StoreEmailKey
 
+emailToStoreEmailKey :: EmailAddress -> Key StoreEmail
+emailToStoreEmailKey = StoreEmailKey
+
+
 -- | Type class for getting the 'EntityField' from a record responsible for the
 -- 'CreatedTime', 'DeletedTime', and 'UpdatedTime'.
 --
@@ -50,32 +54,42 @@ class EntityDateFields record where
   deletedEntityField :: EntityField record (Maybe DeletedTime)
   updatedEntityField :: EntityField record UpdatedTime
 
+  getCreatedEntityFieldValue :: record -> CreatedTime
   getDeletedEntityFieldValue :: record -> Maybe DeletedTime
+  getUpdatedEntityFieldValue :: record -> UpdatedTime
 
 instance EntityDateFields Admin where
   createdEntityField = AdminCreated
   deletedEntityField = AdminDeleted
   updatedEntityField = AdminUpdated
 
+  getCreatedEntityFieldValue = adminCreated
   getDeletedEntityFieldValue = adminDeleted
+  getUpdatedEntityFieldValue = adminUpdated
 
 instance EntityDateFields AdminLoginToken where
   createdEntityField = AdminLoginTokenCreated
   deletedEntityField = AdminLoginTokenDeleted
   updatedEntityField = AdminLoginTokenUpdated
 
+  getCreatedEntityFieldValue = adminLoginTokenCreated
   getDeletedEntityFieldValue = adminLoginTokenDeleted
+  getUpdatedEntityFieldValue = adminLoginTokenUpdated
 
 instance EntityDateFields Store where
   createdEntityField = StoreCreated
   deletedEntityField = StoreDeleted
   updatedEntityField = StoreUpdated
 
+  getCreatedEntityFieldValue = storeCreated
   getDeletedEntityFieldValue = storeDeleted
+  getUpdatedEntityFieldValue = storeUpdated
 
 instance EntityDateFields StoreLoginToken where
   createdEntityField = StoreLoginTokenCreated
   deletedEntityField = StoreLoginTokenDeleted
   updatedEntityField = StoreLoginTokenUpdated
 
+  getCreatedEntityFieldValue = storeLoginTokenCreated
   getDeletedEntityFieldValue = storeLoginTokenDeleted
+  getUpdatedEntityFieldValue = storeLoginTokenUpdated

@@ -6,29 +6,33 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
-import Data.Aeson ((.=))
+import Data.Aeson (Value(..), (.=))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Text.EDE (fromPairs)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, (<//>), getContext, root, redirect, renderRoute,
-        var)
+       (ActionCtxT, Path, (<//>), getContext, prehook, root,
+        redirect, renderRoute, var)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
-       (Key(..), LoginTokenExpirationTime(..),
+       (Key(..), LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken))
 import Kucipong.Email (EmailError)
-import Kucipong.Form (StoreLoginForm(StoreLoginForm))
+import Kucipong.Form
+       (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
-        MonadKucipongSendEmail(..), dbFindStoreByEmail, dbFindStoreLoginToken)
+        MonadKucipongSendEmail(..), dbFindStoreByEmail,
+        dbFindStoreLoginToken, dbUpsertStore)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
-import Kucipong.Spock (getReqParamErr, getStoreCookie, setStoreCookie)
+import Kucipong.Spock
+       (ContainsStoreSession, getReqParamErr, getStoreCookie,
+        getStoreEmail, setStoreCookie)
 
 -- | Url prefix for all of the following 'Path's.
 storeUrlPrefix :: Path '[] 'Open
@@ -42,6 +46,9 @@ loginR = "login"
 
 doLoginR :: Path '[LoginToken] 'Open
 doLoginR = loginR <//> var
+
+editR :: Path '[] 'Open
+editR = "edit"
 
 -- | Handler for returning the store login page.
 loginGet
@@ -105,6 +112,100 @@ doLogin loginToken = do
     tokenExpiredError :: ActionCtxT ctx m a
     tokenExpiredError = redirect . renderRoute $ storeUrlPrefix <//> loginR
 
+storeGet
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+  => ActionCtxT (HVect xs) m ()
+storeGet = do
+  (StoreSession email) <- getStoreEmail
+  $(logDebug) $ "email: " <> tshow email
+  maybeStoreEntity <- dbFindStoreByEmail email
+  $(logDebug) $ "maybeStoreEntity: " <> tshow maybeStoreEntity
+  maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+  Store { storeName
+        , storeSalesPoint
+        , storeBusinessCategory
+        , storeBusinessCategoryDetails
+        , storeAddress
+        , storePhoneNumber
+        , storeBusinessHours
+        , storeRegularHoliday
+        , storeUrl
+        } <- fromMaybeM handleNoStoreError maybeStore
+  $(renderTemplateFromEnv "storeUser_store.html") $
+    fromPairs
+      [ "name" .= storeName
+      , "businessCategory" .= storeBusinessCategory
+      , "businessCategoryDetails" .= storeBusinessCategoryDetails
+      , "salesPoint" .= storeSalesPoint
+      , "address" .= storeAddress
+      , "phoneNumber" .= storePhoneNumber
+      , "businessHourLines" .= fromMaybe [] (fmap lines storeBusinessHours)
+      , "regularHoliday" .= storeRegularHoliday
+      , "url" .= storeUrl
+      ]
+  where
+    handleNoStoreError :: ActionCtxT (HVect xs) m a
+    handleNoStoreError =
+      redirect . renderRoute $ storeUrlPrefix <//> editR
+
+storeEditGet
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+  => ActionCtxT (HVect xs) m ()
+storeEditGet = do
+  (StoreSession email) <- getStoreEmail
+  maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+  $(renderTemplateFromEnv "storeUser_store_edit.html") $
+    fromPairs
+      [ "name" .= (storeName <$> maybeStore)
+      , "businessCategory" .= (storeBusinessCategory <$> maybeStore)
+      , "businessCategoryDetails" .= (storeBusinessCategoryDetails <$> maybeStore)
+      , "salesPoint" .= (maybeStore >>= storeSalesPoint)
+      , "address" .= (maybeStore >>= storeAddress)
+      , "phoneNumber" .= (maybeStore >>= storePhoneNumber)
+      , "businessHourLines" .= maybe [] lines (maybeStore >>= storeBusinessHours)
+      , "regularHoliday" .= (maybeStore >>= storeRegularHoliday)
+      , "url" .= (maybeStore >>= storeUrl)
+      ]
+
+storeEditPost
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+  => ActionCtxT (HVect xs) m ()
+storeEditPost = do
+  (StoreSession email) <- getStoreEmail
+  StoreEditForm { name
+                , businessCategory
+                , businessCategoryDetails
+                , salesPoint
+                , address
+                , phoneNumber
+                , businessHours
+                , regularHoliday
+                , url
+                } <- getReqParamErr handleErr
+  void $
+    dbUpsertStore
+      email
+      name
+      businessCategory
+      businessCategoryDetails
+      Nothing
+      salesPoint
+      address
+      phoneNumber
+      businessHours
+      regularHoliday
+      url
+  redirect . renderRoute $ storeUrlPrefix
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg = do
+      $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
+      $(renderTemplateFromEnv "storeUser_store_edit.html") $
+        fromPairs ["errors" .= [errMsg]]
+
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
   => ActionCtxT (HVect xs) m (HVect ((Session Kucipong.Session.Store) ': xs))
@@ -130,5 +231,7 @@ storeComponent = do
   get doLoginR doLogin
   get loginR loginGet
   post loginR loginPost
-    -- prehook storeAuthHook $
-    --     get ("store" <//> "something") someAction
+  prehook storeAuthHook $ do
+    get rootR storeGet
+    get editR storeEditGet
+    post editR storeEditPost

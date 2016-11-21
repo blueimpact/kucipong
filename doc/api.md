@@ -1224,14 +1224,14 @@ store :: Store  -- Data representing the store logging in
           <label for="storeName" class="card_row_header">
             店舗名
           </label>
-          <input id="storeName" name="storeName" type="text" class="card_input"
+          <input id="storeName" name="name" type="text" class="card_input"
             value="#{storeName store}">
         </div>
         <div class="card_row">
           <label for="storeCategory" class="card_row_header">
             カテゴリ
           </label>
-          <select id="storeCategory" name="storeCategory" class="card_input" value="#{storeCategory store}">
+          <select id="storeCategory" name="businessCategory" class="card_input" value="#{storeCategory store}">
             #{{ for category in storeCategoryList }}
             <option value="#{category}">#{showStoreCategoryJa category}</option>
             #{{ endfor }}
@@ -1260,7 +1260,7 @@ store :: Store  -- Data representing the store logging in
           <label for="storeDescription" class="card_row_header">
             店舗の説明
           </label>
-          <textarea id="storeDescription" name="storeDescription" type="text" class="card_input">
+          <textarea id="storeDescription" name="salesPoint" type="text" class="card_input">
             #{storeDescription store}
           </textarea>
         </div>
@@ -1268,7 +1268,7 @@ store :: Store  -- Data representing the store logging in
           <label for="storeAddress" class="card_row_header">
             住所
           </label>
-          <input id="storeAddress" name="storeAddress" type="text" class="card_input"
+          <input id="storeAddress" name="address" type="text" class="card_input"
             value="#{storeAddress store}">
         </div>
         <div class="card_row">
@@ -1287,35 +1287,35 @@ store :: Store  -- Data representing the store logging in
           <label for="storePhoneNumber" class="card_row_header">
             電話番号
           </label>
-          <input id="storePhoneNumber" name="storePhoneNumber" type="text" class="card_input"
+          <input id="storePhoneNumber" name="phoneNumber" type="text" class="card_input"
             value="#{storePhoneNumber store}">
         </div>
         <div class="card_row">
           <label for="storeHours" class="card_row_header">
             営業時間
           </label>
-          <input id="storeHours" name="storeHours" type="text" class="card_input"
+          <input id="storeHours" name="businessHours" type="text" class="card_input"
             value="#{storeHours store}">
         </div>
         <div class="card_row">
           <label for="storeCloseOn" class="card_row_header">
             定休日
           </label>
-          <input id="storeCloseOn" name="storeCloseOn" type="text" class="card_input"
+          <input id="storeCloseOn" name="regularHoliday" type="text" class="card_input"
             value="#{storeCloseOn store}">
         </div>
         <div class="card_row">
           <label for="storeURL" class="card_row_header">
             オフィシャルサイト
           </label>
-          <input id="storeURL" name="storeURL" type="text" class="card_input"
+          <input id="storeURL" name="url" type="text" class="card_input"
             value="#{storeURL store}">
         </div>
         <div class="card_row">
           <label for="storeImage" class="card_row_header">
             店舗イメージ画像
           </label>
-          <input id="storeImage" name="storeImage" type="file" class="card_input">
+          <input id="storeImage" name="image" type="file" class="card_input">
         </div>
         <div class="card_row submit_row">
           <button type="submit" class="btn outerBtn">この内容で店舗情報を更新する</button>
@@ -1336,20 +1336,20 @@ Some user may bookmark or share this URI and search engine also crawl this page,
 ```bash
 $ curl -X POST "http://$domain/store/edit" \
   -H "AUTH-TOKEN: ${token}" \
-  -F "storeName=七輪焼き肉・安安 \
-  -F "storeCategory=0 \
-  -F "storeLatitude=41.40243 \
-  -F "storeLongitude=2.17551 \
-  -F "storeTags0=on \
-  -F "storeTags1=on \
-  -F "storeTags3=on \
-  -F "storeDescription=七輪焼き肉・安安は、美味しい焼肉を... \
-  -F "storeImage=http://s3.amasonaws.com/foo/baz \
-  -F "storeAddress=渋谷区桜丘町2-12 渋谷亀八ビル4F \
-  -F "storePhoneNumber=03-3464-0722 \
-  -F "storeHours=月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30 \
-  -F "storeCloseOn=元旦のみ \
-  -F "storeURL=url=http://www.fuji-tatsu.co.jp
+  -F "name=七輪焼き肉・安安" \
+  -F "businessCategory=0" \
+  -F "latitude=41.40243" \
+  -F "longitude=2.17551" \
+  -F "tags0=on" \
+  -F "tags1=on" \
+  -F "tags3=on" \
+  -F "salesPoint=七輪焼き肉・安安は、美味しい焼肉を..." \
+  -F "image=http://s3.amasonaws.com/foo/baz" \
+  -F "address=渋谷区桜丘町2-12 渋谷亀八ビル4F" \
+  -F "phoneNumber=03-3464-0722" \
+  -F "businessHours=月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30" \
+  -F "regularHoliday=元旦のみ" \
+  -F "url=http://www.fuji-tatsu.co.jp"
 
 (Same response as "GET my store information")
 
