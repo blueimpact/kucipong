@@ -6,14 +6,15 @@ module Kucipong.Config
 import Kucipong.Prelude
 
 import Control.FromSum (fromEitherM)
-import Control.Lens (Lens', lens)
+import Control.Lens (Lens', lens, set)
 import Control.Monad.Logger (runStdoutLoggingT)
 import Data.ByteString.Base64 (decode)
 import Database.Persist.Postgresql (ConnectionPool)
 import Database.PostgreSQL.Simple (ConnectInfo(..))
 import Mail.Hailgun (HailgunContext(..))
 import Network.AWS
-       (AccessKey, Credentials(FromKeys), Env, Region(Tokyo), SecretKey, newEnv)
+       (AccessKey, Credentials(FromKeys), Env, LogLevel(Debug),
+        Region(Tokyo), SecretKey, envLogger, newEnv, newLogger)
 import qualified Network.AWS as AWS
 import Network.HTTP.Client (Manager, newManager)
 import Network.HTTP.Client.Conduit (HasHttpManager(..))
@@ -25,6 +26,7 @@ import Network.Wai.Middleware.RequestLogger
 import System.ReadEnvVar (lookupEnvDef, readEnvVarDef)
 import Web.ClientSession (Key, initKey)
 
+import Kucipong.Aws (HasS3ImageBucketName(..), S3ImageBucketName(..))
 import Kucipong.Db
        (DbPoolConnNum, DbPoolConnTimeout, HasDbPool(..), makePool)
 import Kucipong.Email (HasHailgunContext(..))
@@ -44,6 +46,7 @@ data Config = Config
   , configPool :: ConnectionPool
   , configPort :: Port
   , configProtocol :: Text
+  , configS3ImageBucketName :: S3ImageBucketName
   , configSessionKey :: Key
   }
 
@@ -79,6 +82,10 @@ instance HasPort Config where
 instance HasProtocol Config where
   getProtocol :: Config -> Text
   getProtocol = configProtocol
+
+instance HasS3ImageBucketName Config where
+  getS3ImageBucketName :: Config -> S3ImageBucketName
+  getS3ImageBucketName = configS3ImageBucketName
 
 instance HasSessionKey Config where
   getSessionKey :: Config -> Key
@@ -145,6 +152,8 @@ createConfigFromEnv = do
     lookupEnvDef "KUCIPONG_AWS_ACCESS_KEY" "todo-fake-aws-access-key"
   awsSecretKey <-
     lookupEnvDef "KUCIPONG_AWS_SECRET_KEY" "todo-fake-aws-secret-key"
+  awsS3ImageBucketName <-
+    lookupEnvDef "KUCIPONG_S3_IMAGE_BUCKET_NAME" "kucipong-images-dev"
   createConfigFromValues
     env
     port
@@ -162,6 +171,7 @@ createConfigFromEnv = do
     protocol
     awsAccessKey
     awsSecretKey
+    awsS3ImageBucketName
 
 type DbHost = String
 type DbPort = Word16
@@ -189,8 +199,11 @@ createConfigFromValues
   -> Protocol
   -> AccessKey
   -> SecretKey
+  -> S3ImageBucketName
   -> IO Config
-createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName sessionKey host protocol awsAccessKey awsSecretKey = do
+createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
+    dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName sessionKey host
+    protocol awsAccessKey awsSecretKey s3ImageBucketName = do
   httpManager <- newManager tlsManagerSettings
   let hailgunContext =
         HailgunContext
@@ -199,6 +212,12 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConn
         , hailgunProxy = Nothing
         }
   awsEnv <- newEnv Tokyo (FromKeys awsAccessKey awsSecretKey)
+  awsEnvPlusLogger <-
+    case env of
+      Development -> do
+        awsLogger <- newLogger Debug stdout
+        pure $ set envLogger awsLogger awsEnv
+      _ -> pure awsEnv
   let dbConnInfo =
         ConnectInfo
         { connectHost = dbHost
@@ -210,7 +229,7 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConn
   pool <- runStdoutLoggingT $ makePool dbConnInfo dbConnTimeout dbConnNum
   pure
     Config
-    { configAwsEnv = awsEnv
+    { configAwsEnv = awsEnvPlusLogger
     , configEnv = env
     , configHailgunContext = hailgunContext
     , configHost = host
@@ -218,5 +237,6 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConn
     , configPool = pool
     , configPort = port
     , configProtocol = protocol
+    , configS3ImageBucketName = s3ImageBucketName
     , configSessionKey = sessionKey
     }
