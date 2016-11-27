@@ -6,11 +6,15 @@ module Kucipong.Config
 import Kucipong.Prelude
 
 import Control.FromSum (fromEitherM)
+import Control.Lens (Lens', lens)
 import Control.Monad.Logger (runStdoutLoggingT)
 import Data.ByteString.Base64 (decode)
 import Database.Persist.Postgresql (ConnectionPool)
 import Database.PostgreSQL.Simple (ConnectInfo(..))
 import Mail.Hailgun (HailgunContext(..))
+import Network.AWS
+       (AccessKey, Credentials(FromKeys), Env, Region(Tokyo), SecretKey, newEnv)
+import qualified Network.AWS as AWS
 import Network.HTTP.Client (Manager, newManager)
 import Network.HTTP.Client.Conduit (HasHttpManager(..))
 import Network.HTTP.Conduit (tlsManagerSettings)
@@ -46,6 +50,11 @@ data Config = Config
 instance HasDbPool Config where
     getDbPool :: Config -> ConnectionPool
     getDbPool = configPool
+
+instance AWS.HasEnv Config where
+  environment :: Lens' Config Env
+  environment =
+    lens configAwsEnv (\config newAwsEnv -> config {configAwsEnv = newAwsEnv})
 
 instance HasEnv Config where
   getEnv :: Config -> Environment
@@ -132,6 +141,10 @@ createConfigFromEnv = do
   sessionKey <- initKucipongSessionKey sessionKeyRaw
   host <- lookupEnvDef "KUCIPONG_HOST" "localhost:8101"
   protocol <- lookupEnvDef "KUCIPONG_PROTOCOL" "http"
+  awsAccessKey <-
+    lookupEnvDef "KUCIPONG_AWS_ACCESS_KEY" "todo-fake-aws-access-key"
+  awsSecretKey <-
+    lookupEnvDef "KUCIPONG_AWS_SECRET_KEY" "todo-fake-aws-secret-key"
   createConfigFromValues
     env
     port
@@ -147,6 +160,8 @@ createConfigFromEnv = do
     sessionKey
     host
     protocol
+    awsAccessKey
+    awsSecretKey
 
 type DbHost = String
 type DbPort = Word16
@@ -172,8 +187,10 @@ createConfigFromValues
   -> Key
   -> Host
   -> Protocol
+  -> AccessKey
+  -> SecretKey
   -> IO Config
-createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName sessionKey host protocol = do
+createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName sessionKey host protocol awsAccessKey awsSecretKey = do
   httpManager <- newManager tlsManagerSettings
   let hailgunContext =
         HailgunContext
@@ -181,6 +198,7 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConn
         , hailgunApiKey = hailgunContextApiKey
         , hailgunProxy = Nothing
         }
+  awsEnv <- newEnv Tokyo (FromKeys awsAccessKey awsSecretKey)
   let dbConnInfo =
         ConnectInfo
         { connectHost = dbHost
@@ -192,11 +210,12 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey dbConn
   pool <- runStdoutLoggingT $ makePool dbConnInfo dbConnTimeout dbConnNum
   pure
     Config
-    { configPool = pool
+    { configAwsEnv = awsEnv
     , configEnv = env
     , configHailgunContext = hailgunContext
-    , configHttpManager = httpManager
     , configHost = host
+    , configHttpManager = httpManager
+    , configPool = pool
     , configPort = port
     , configProtocol = protocol
     , configSessionKey = sessionKey

@@ -4,8 +4,6 @@
 
 ## What is Kucipong?
 
-TODO
-
 Only [Japanese version](doc/api.md) now.
 
 ## Steps to install postgres
@@ -60,20 +58,43 @@ Follow instructions [here](https://github.com/commercialhaskell/stack#how-to-ins
 $ make build
 ```
 
-### Run on command line
+## Run
+
+### Set environment variables
+
+In order to run the web server or the command-line-interface, the user must set
+three environment variables, `KUCIPONG_MAILGUN_DOMAIN`,
+`KUCIPONG_MAILGUN_APIKEY`, `KUCIPONG_AWS_ACCESS_KEY`, and
+`KUCIPONG_AWS_SECRET_KEY`.
+
+`KUCIPONG_MAILGUN_DOMAIN` and `KUCIPONG_MAILGUN_APIKEY` can be found by logging
+on to the [Mailgun Dashboard](https://mailgun.com/app/dashboard).  If you are
+running the web server or cli while doing development, you can probably use the
+default `KUCIPONG_MAILGUN_DOMAIN` (which is
+`sandboxfaf3e17ba66f42a5ac5cd36e8a71ad97.mailgun.org`).  You need to find the
+api-key for this domain on the Mailgun Dashboard.
+
+`KUCIPONG_AWS_ACCESS_KEY` and `KUCIPONG_AWS_SECRET_KEY` can be found by
+creating an AWS account to access S3.
+
+```sh
+$ export \
+  KUCIPONG_MAILGUN_DOMAIN="sandboxfaf3e17ba66f42a5ac5cd36e8a71ad97.mailgun.org" \
+  KUCIPONG_MAILGUN_APIKEY="key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
+  KUCIPONG_AWS_ACCESS_KEY="someaccesskey" \
+  KUCIPONG_AWS_SECRET_KEY="somesecretkey"
+```
+
+Other environment variables can be found in `src/Kucipong/Config.hs`.
+
+### Run web server
 
 ```sh
 $ make run
 ```
 
-### Other make target
+### Add admin user (CLI)
 
-Look in the `Makefile` for other targets to run.
-
-## Add Admin User
-
-A new admin user can be added from the command line like the following.  The
-`KUCIPONG_MAILGUN_APIKEY` can be found by logging on to the mailgun website.
 This sends an email to the user so they can login as an admin.
 
 ```bash
@@ -103,3 +124,7 @@ This admin cookie can be used to access login-protected urls:
 ```bash
 $ curl --cookie "adminEmail=wv6kyV14ZoF5tMlVLrBP%2FgPLkvEFKog2Lvu%2F8PY4zt4tWbQwbki7hG3Mn83Zilr6LTGWdphD4mnDL96RvMbcxWj1rZbhfQ%3D%3D" 'http://localhost:8101/admin/store/create'
 ```
+
+## Other make targets
+
+Look in the `Makefile` for other targets to run.
