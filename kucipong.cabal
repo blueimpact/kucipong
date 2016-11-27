@@ -69,6 +69,7 @@ library
                      , Glob
                      , hailgun
                      , HTTP
+                     , heterocephalus
                      , http-api-data
                      , http-client
                      , http-conduit

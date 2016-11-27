@@ -14,6 +14,7 @@ extra-deps:
     - http-api-data-0.3.1
     # This should be available in lts-7.3.
     - from-sum-0.1.2.0
+    - heterocephalus-1.0.1.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}
