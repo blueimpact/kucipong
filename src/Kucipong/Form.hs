@@ -54,7 +54,6 @@ data StoreEditForm = StoreEditForm
   { name :: !Text
   , businessCategory :: !Text
   , businessCategoryDetails :: ![Text]
-  -- , image :: !(Maybe Image)
   , salesPoint :: !(Maybe Text)
   , address :: !(Maybe Text)
   , phoneNumber :: !(Maybe Text)
