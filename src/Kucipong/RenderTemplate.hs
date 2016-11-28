@@ -41,13 +41,18 @@ renderTemplateFromEnv filename = renderer `appE` body
     -- This is the full path of the template file.
     fullFilePath :: FilePath
     fullFilePath = templateDirectory </> filename
+
+    body :: Q Exp
     body =
       compileHtmlFileWithDefault
         fullFilePath
         [("errors", [|empty :: [Text]|]), ("messages", [|empty :: [Text]|])]
+
+    renderer :: Q Exp
     renderer = [|html . toStrict . renderMarkup|]
 
--- | Deprecated.
+{-# DEPRECATED renderTemplateFromEnv' "Don't use renderTemplateFromEnv'.  Use renderTemplateFromEnv instead." #-}
+
 renderTemplateFromEnv' :: String -> Q Exp
 renderTemplateFromEnv' filename = do
     addDependentFile fullFilePath
