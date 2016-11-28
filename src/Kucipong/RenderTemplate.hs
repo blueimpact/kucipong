@@ -31,8 +31,8 @@ unsafeFromRight (Right a) = a
 unsafeFromRight (Left err) = error $
     "Called unsafeFromRight, but we got a left with this value: " <> show err
 
-renderTemplateFromEnv :: String -> Q Exp
-renderTemplateFromEnv filename = do
+renderTemplateFromEnv' :: String -> Q Exp
+renderTemplateFromEnv' filename = do
     addDependentFile fullFilePath
     eitherRawTemplate <- liftIO . try $ readFile fullFilePath
     rawTemplate <- fromEitherM handleTemplateFileRead eitherRawTemplate
