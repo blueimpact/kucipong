@@ -136,8 +136,7 @@ storeCreateGet
      (ContainsAdminSession n xs, MonadIO m)
   => ActionCtxT (HVect xs) m ()
 storeCreateGet = do
-  (AdminSession email) <- getAdminEmail
-  let adminEmail = email
+  _ <- getAdminEmail
   $(renderTemplateFromEnv "adminUser_admin_store_create.html")
 
 storeCreatePost
@@ -190,11 +189,9 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ Store{storeName}) <-
+  (Entity _ Store{storeName = storeName_}) <-
     fromMaybeOrM maybeStoreEntity $
     handleErr "Could not find a store with that email address"
-  let storeName = storeName
-      storeEmail = storeEmailParam
   $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -202,7 +199,7 @@ storeDeleteConfirmPost = do
       $(logDebug) $
         "got following error in admin storeDeleteConfirmPost handler: " <> errMsg
       let errors = [errMsg]
-      $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
+      $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
 storeDeletePost
   :: forall xs m.
@@ -221,8 +218,7 @@ storeDeletePost = do
       "\" does not exist"
     StoreDeleteErrNameDoesNotMatch realStore ->
       let
-        storeName' = storeName realStore
-        storeEmail = storeEmailParam
+        storeName_ = storeName realStore
         errors =
           [ "Store name \"" <> storeNameParam <>
             "\" does not match the real store name \"" <>
