@@ -134,7 +134,7 @@ storeGet = do
   let
     name = storeName
     businessCategory = storeBusinessCategory
-    -- businessCategoryDetails = storeBusinessCategoryDetails
+    businessCategoryDetails = storeBusinessCategoryDetails
     salesPoint = storeSalesPoint
     address = storeAddress
     phoneNumber = storePhoneNumber
