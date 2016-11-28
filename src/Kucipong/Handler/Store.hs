@@ -28,7 +28,7 @@ import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
         MonadKucipongSendEmail(..), dbFindStoreByEmail,
         dbFindStoreLoginToken, dbUpsertStore)
-import Kucipong.RenderTemplate (renderTemplateFromEnv')
+import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
 import Kucipong.Spock
        (ContainsStoreSession, getReqParamErr, getStoreCookie,
@@ -55,7 +55,7 @@ loginGet
   :: forall ctx m.
      (MonadIO m)
   => ActionCtxT ctx m ()
-loginGet = $(renderTemplateFromEnv' "storeUser_login.html") $ fromPairs []
+loginGet = $(renderTemplateFromEnv "storeUser_login.html")
 
 -- | Handler for sending an email to the store owner that they can use to
 -- login.
@@ -73,15 +73,14 @@ loginPost = do
   (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeEmailKey
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail email (storeLoginTokenLoginToken storeLoginToken)
-  $(renderTemplateFromEnv' "storeUser_login.html") $
-    fromPairs
-      ["messages" .= ["We have sent you an email with verification URL." :: Text]]
+  let messages = ["We have sent you an email with verification URL." :: Text]
+  $(renderTemplateFromEnv "storeUser_login.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $ "got following error in store loginPost handler: " <> errMsg
-      $(renderTemplateFromEnv' "storeUser_login.html") $
-        fromPairs ["errors" .= [errMsg]]
+      let errors = [errMsg]
+      $(renderTemplateFromEnv "storeUser_login.html")
 
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
@@ -132,18 +131,17 @@ storeGet = do
         , storeRegularHoliday
         , storeUrl
         } <- fromMaybeM handleNoStoreError maybeStore
-  $(renderTemplateFromEnv' "storeUser_store.html") $
-    fromPairs
-      [ "name" .= storeName
-      , "businessCategory" .= storeBusinessCategory
-      , "businessCategoryDetails" .= storeBusinessCategoryDetails
-      , "salesPoint" .= storeSalesPoint
-      , "address" .= storeAddress
-      , "phoneNumber" .= storePhoneNumber
-      , "businessHourLines" .= fromMaybe [] (fmap lines storeBusinessHours)
-      , "regularHoliday" .= storeRegularHoliday
-      , "url" .= storeUrl
-      ]
+  let
+    name = storeName
+    businessCategory = storeBusinessCategory
+    -- businessCategoryDetails = storeBusinessCategoryDetails
+    salesPoint = storeSalesPoint
+    address = storeAddress
+    phoneNumber = storePhoneNumber
+    businessHourLines = fromMaybe [] (fmap lines storeBusinessHours)
+    regularHoliday = storeRegularHoliday
+    url = storeUrl
+  $(renderTemplateFromEnv "storeUser_store.html")
   where
     handleNoStoreError :: ActionCtxT (HVect xs) m a
     handleNoStoreError =
@@ -156,18 +154,17 @@ storeEditGet
 storeEditGet = do
   (StoreSession email) <- getStoreEmail
   maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
-  $(renderTemplateFromEnv' "storeUser_store_edit.html") $
-    fromPairs
-      [ "name" .= (storeName <$> maybeStore)
-      , "businessCategory" .= (storeBusinessCategory <$> maybeStore)
-      , "businessCategoryDetails" .= (storeBusinessCategoryDetails <$> maybeStore)
-      , "salesPoint" .= (maybeStore >>= storeSalesPoint)
-      , "address" .= (maybeStore >>= storeAddress)
-      , "phoneNumber" .= (maybeStore >>= storePhoneNumber)
-      , "businessHourLines" .= maybe [] lines (maybeStore >>= storeBusinessHours)
-      , "regularHoliday" .= (maybeStore >>= storeRegularHoliday)
-      , "url" .= (maybeStore >>= storeUrl)
-      ]
+  let
+    name = (storeName <$> maybeStore)
+    businessCategory = (storeBusinessCategory <$> maybeStore)
+    -- businessCategoryDetails = (storeBusinessCategoryDetails <$> maybeStore)
+    salesPoint = (maybeStore >>= storeSalesPoint)
+    address = (maybeStore >>= storeAddress)
+    phoneNumber = (maybeStore >>= storePhoneNumber)
+    businessHourLines = maybe [] lines (maybeStore >>= storeBusinessHours)
+    regularHoliday = (maybeStore >>= storeRegularHoliday)
+    url = (maybeStore >>= storeUrl)
+  $(renderTemplateFromEnv "storeUser_store_edit.html")
 
 storeEditPost
   :: forall xs n m.
@@ -214,11 +211,22 @@ storeEditPost = do
       url
   redirect . renderRoute $ storeUrlPrefix
   where
+    -- TODO: put previous input texts
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
-      $(renderTemplateFromEnv' "storeUser_store_edit.html") $
-        fromPairs ["errors" .= [errMsg]]
+      let
+        errors = [errMsg]
+        name = Nothing :: Maybe Text
+        businessCategory = Nothing :: Maybe Text
+        -- businessCategoryDetails = [] :: [Text]
+        salesPoint = Nothing :: Maybe Text
+        address = Nothing :: Maybe Text
+        phoneNumber = Nothing :: Maybe Text
+        businessHourLines = [] :: [Text]
+        regularHoliday = Nothing :: Maybe Text
+        url = Nothing :: Maybe Text
+      $(renderTemplateFromEnv "storeUser_store_edit.html")
 
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
