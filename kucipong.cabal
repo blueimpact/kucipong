@@ -65,7 +65,6 @@ library
                      , blaze-markup
                      , classy-prelude
                      , clientsession
-                     , ede
                      , emailaddress
                      , envelope
                      , from-sum

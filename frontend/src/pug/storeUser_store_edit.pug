@@ -2,6 +2,7 @@ include _layout
   body#main.wrapper
     include _storeHeader
       | 店舗情報 編集
+    include _messageArea
     form.store(enctype="multipart/form-data" method="POST")
       .storeBody
         .storeBody_info
@@ -15,7 +16,7 @@ include _layout
               .storeBody_info_body_row-body
                 input#storeName(
                   name="name" type="text"
-                  value="{% if name %}{{ name }}{% endif %}"
+                  value="\#{ fromMaybe mempty name }"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -23,7 +24,7 @@ include _layout
               .storeBody_info_body_row-body
                 select#storeBusinessCategory(
                   name="businessCategory"
-                  value="{% if businessCategory %}{{ businessCategory }}{% endif %}"
+                  value="\#{ fromMaybe mempty businessCategory }"
                 )
                   option(value="0") グルメ
                   option(value="1") ファッション
@@ -68,7 +69,7 @@ include _layout
                   name="salesPoint"
                   type="text"
                 )
-                  | {% if salesPoint %}{{ salesPoint }}{% endif %}
+                  | \#{ fromMaybe mempty salesPoint }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 住所
@@ -76,7 +77,7 @@ include _layout
                 .storeBody_info_body_row-body-address
                   input#storeAddress(
                     name="address" type="text"
-                    value="{% if address %}{{ address }}{% endif %}"
+                    value="\#{ fromMaybe mempty address }"
                   )
                 .storeBody_info_body_row-body-map(data-latitude="41.40243" data-longitude="2.17551")
                   iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
@@ -86,7 +87,7 @@ include _layout
               .storeBody_info_body_row-body
                 input#storePhoneNumber(
                   name="phoneNumber" type="text"
-                  value="{% if phoneNumber %}{{ phoneNumber }}{% endif %}"
+                  value="\#{ fromMaybe mempty phoneNumber }"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -95,11 +96,9 @@ include _layout
                 textarea#storeBusinessHours(
                   name="businessHours" type="text"
                 )
-                  |{% if businessHourLines %}
-                  |{% for businessHourLine in businessHourLines %}
-                  |{{ businessHourLine.value }}
-                  |{% endfor %}
-                  |{% endif %}
+                  | %{ forall businessHourLine <- businessHourLines }
+                  | \#{ businessHourLine }
+                  | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 定休日
@@ -107,14 +106,14 @@ include _layout
                 textarea#storeRegularHoliday(
                   name="regularHoliday" type="text"
                 )
-                  | {% if regularHoliday %}{{ regularHoliday }}{% endif %}
+                  | \#{ fromMaybe mempty regularHoliday }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | オフィシャルサイト
               .storeBody_info_body_row-body
                 input#storeUrl(
                   name="url" type="url"
-                  value="{% if url %}{{ url }}{% endif %}"
+                  value="\#{ fromMaybe mempty url }"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header

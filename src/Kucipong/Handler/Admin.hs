@@ -6,11 +6,9 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromEitherM, fromMaybeM, fromMaybeOrM)
 import Control.Monad.Time (MonadTime(..))
-import Data.Aeson ((.=))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
-import Text.EDE (fromPairs)
 import Text.Email.Validate (toText)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
@@ -35,7 +33,7 @@ import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
         MonadKucipongSendEmail(..), StoreDeleteResult(..), dbFindAdmin,
         dbFindAdminLoginToken, dbFindStoreByEmail)
-import Kucipong.RenderTemplate (renderTemplateFromEnv, renderTemplateFromEnv')
+import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
        (ContainsAdminSession, getAdminCookie, getAdminEmail,
@@ -136,9 +134,8 @@ storeCreateGet
      (ContainsAdminSession n xs, MonadIO m)
   => ActionCtxT (HVect xs) m ()
 storeCreateGet = do
-  (AdminSession email) <- getAdminEmail
-  $(renderTemplateFromEnv' "adminUser_admin_store_create.html") $
-    fromPairs ["adminEmail" .= email]
+  _ <- getAdminEmail
+  $(renderTemplateFromEnv "adminUser_admin_store_create.html")
 
 storeCreatePost
   :: forall xs m.
@@ -160,8 +157,8 @@ storeCreatePost = do
     handleErr errMsg = do
       $(logDebug) $
         "got following error in admin storeCreatePost handler: " <> errMsg
-      $(renderTemplateFromEnv' "adminUser_admin_store_create.html") $
-        fromPairs ["errors" .= [errMsg]]
+      let errors = [errMsg]
+      $(renderTemplateFromEnv "adminUser_admin_store_create.html")
 
     handleCreateStoreFail :: DbSafeError -> ActionCtxT (HVect xs) m a
     handleCreateStoreFail DbSafeUniquenessViolation =
@@ -180,7 +177,7 @@ storeDeleteGet
      MonadIO m
   => ActionCtxT (HVect xs) m ()
 storeDeleteGet =
-  $(renderTemplateFromEnv' "adminUser_admin_store_delete.html") mempty
+  $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
 -- | Return the store delete confirmation page for an admin.
 storeDeleteConfirmPost
@@ -190,18 +187,17 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ Store{storeName}) <-
+  (Entity _ Store{storeName = storeName_}) <-
     fromMaybeOrM maybeStoreEntity $
     handleErr "Could not find a store with that email address"
-  $(renderTemplateFromEnv' "adminUser_admin_store_delete_confirm.html") $
-    fromPairs ["storeName" .= storeName, "storeEmail" .= storeEmailParam]
+  $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $
         "got following error in admin storeDeleteConfirmPost handler: " <> errMsg
-      $(renderTemplateFromEnv' "adminUser_admin_store_delete_confirm.html") $
-        fromPairs ["errors" .= [errMsg]]
+      let errors = [errMsg]
+      $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
 storeDeletePost
   :: forall xs m.
@@ -213,31 +209,30 @@ storeDeletePost = do
   deleteStoreResult <- dbDeleteStoreIfNameMatches storeEmailParam storeNameParam
   case deleteStoreResult of
     StoreDeleteSuccess ->
-      $(renderTemplateFromEnv' "adminUser_admin_store_create.html") $
-      fromPairs ["messages" .= ["Successfully deleted store." :: Text]]
+      let messages = ["Successfully deleted store." :: Text]
+      in $(renderTemplateFromEnv "adminUser_admin_store_create.html")
     StoreDeleteErrDoesNotExist ->
       handleErr $ "Store with email address of \"" <> toText storeEmailParam <>
       "\" does not exist"
     StoreDeleteErrNameDoesNotMatch realStore ->
-      $(renderTemplateFromEnv' "adminUser_admin_store_delete_confirm.html") $
-      fromPairs
-        [ "storeName" .= storeName realStore
-        , "storeEmail" .= storeEmailParam
-        , "errors" .=
+      let
+        storeName_ = storeName realStore
+        errors =
           [ "Store name \"" <> storeNameParam <>
             "\" does not match the real store name \"" <>
             storeName realStore <>
             "\""
           ]
-        ]
+      in
+        $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $
         "got following error in admin storeDeletePost handler: " <>
         errMsg
-      $(renderTemplateFromEnv' "adminUser_admin_store_delete.html") $
-        fromPairs ["errors" .= [errMsg]]
+      let errors = [errMsg]
+      $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
 adminAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
