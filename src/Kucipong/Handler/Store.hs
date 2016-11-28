@@ -12,7 +12,7 @@ import Database.Persist (Entity(..))
 import Text.EDE (fromPairs)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, (<//>), getContext, prehook, root,
+       (ActionCtxT, Path, UploadedFile(..), (<//>), files, getContext, prehook, root,
         redirect, renderRoute, var)
 import Web.Spock.Core (SpockCtxT, get, post)
 
@@ -185,6 +185,20 @@ storeEditPost = do
                 , regularHoliday
                 , url
                 } <- getReqParamErr handleErr
+  filesHashMap <- files
+  let maybeUploadedFile = lookup "image" filesHashMap
+  case maybeUploadedFile of
+    Just uploadedFile -> do
+      let originalFileName = uf_name uploadedFile
+          contentType = uf_contentType uploadedFile
+          tempLocation = uf_tempLocation uploadedFile
+      $(logDebug) $ "image original filename: " <> originalFileName
+      $(logDebug) $ "image content type: " <> contentType
+      $(logDebug) $ "image temporary location: " <> pack tempLocation
+      -- upload the file to S3 here:
+      -- s3UploadFile originalFileName contentType tempLocation
+      pure ()
+    Nothing -> handleErr "could not find the image"
   void $
     dbUpsertStore
       email

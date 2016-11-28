@@ -16,6 +16,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Kucipong
+                     , Kucipong.Aws
                      , Kucipong.Config
                      , Kucipong.Db
                      , Kucipong.Db.Models
@@ -58,6 +59,8 @@ library
                      , Kucipong.Util
   build-depends:       base >= 4.7 && < 5
                      , aeson
+                     , amazonka
+                     , amazonka-s3
                      , base64-bytestring
                      , blaze-markup
                      , classy-prelude
@@ -91,6 +94,7 @@ library
                      , read-env-var
                      , reroute
                      , resource-pool
+                     , resourcet
                      , shakespeare
                      , Spock
                      , Spock-core
