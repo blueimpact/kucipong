@@ -35,7 +35,7 @@ import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
         MonadKucipongSendEmail(..), StoreDeleteResult(..), dbFindAdmin,
         dbFindAdminLoginToken, dbFindStoreByEmail)
-import Kucipong.RenderTemplate (renderTemplateFromEnv')
+import Kucipong.RenderTemplate (renderTemplateFromEnv, renderTemplateFromEnv')
 import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
        (ContainsAdminSession, getAdminCookie, getAdminEmail,
@@ -71,7 +71,7 @@ loginGet
   :: forall ctx m.
      (MonadIO m)
   => ActionCtxT ctx m ()
-loginGet = $(renderTemplateFromEnv' "adminUser_login.html") mempty
+loginGet = $(renderTemplateFromEnv "adminUser_login.html")
 
 -- | Handler for sending an email to the admin that they can use to login.
 loginPost
@@ -86,15 +86,15 @@ loginPost = do
   (Entity _ adminLoginToken) <- dbCreateAdminMagicLoginToken adminKey
   maybe (pure ()) handleSendEmailFail =<<
     sendAdminLoginEmail email (adminLoginTokenLoginToken adminLoginToken)
-  $(renderTemplateFromEnv' "adminUser_login.html") $
-    fromPairs
-      ["messages" .= ["We have sent you email with verification URL." :: Text]]
+  let
+    messages = ["We have sent you email with verification URL." :: Text]
+  $(renderTemplateFromEnv "adminUser_login.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $ "got following error in admin loginPost handler: " <> errMsg
-      $(renderTemplateFromEnv' "adminUser_login.html") $
-        fromPairs ["errors" .= [errMsg]]
+      let errors = [errMsg]
+      $(renderTemplateFromEnv "adminUser_login.html")
 
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
@@ -122,17 +122,13 @@ doLoginGet loginToken = do
     noAdminLoginTokenError :: ActionCtxT ctx m a
     noAdminLoginTokenError = do
       setStatus forbidden403
-      $(renderTemplateFromEnv' "adminUser_login.html") $
-        fromPairs
-          ["errors" .= ["Failed to log in X(\nPlease try again." :: Text]]
+      let errors = ["Failed to log in X(\nPlease try again." :: Text]
+      $(renderTemplateFromEnv "adminUser_login.html")
     tokenExpiredError :: ActionCtxT ctx m a
     tokenExpiredError = do
       setStatus forbidden403
-      $(renderTemplateFromEnv' "adminUser_login.html") $
-        fromPairs
-          [ "errors" .=
-            ["This log in URL has been expired X(\nPlease try again." :: Text]
-          ]
+      let errors = ["This log in URL has been expired X(\nPlease try again." :: Text]
+      $(renderTemplateFromEnv "adminUser_login.html")
 
 -- | Return the store create page for an admin.
 storeCreateGet
@@ -250,12 +246,10 @@ adminAuthHook = do
   maybeAdminSession <- getAdminCookie
   case maybeAdminSession of
     Nothing ->
-      $(renderTemplateFromEnv' "adminUser_login.html") $
-      fromPairs
-        [ "errors" .=
-          [ "Need to be logged in as admin in order to access this page." :: Text
-          ]
-        ]
+      let
+        errors = [ "Need to be logged in as admin in order to access this page." :: Text ]
+      in
+        $(renderTemplateFromEnv "adminUser_login.html")
     Just adminSession -> do
       oldCtx <- getContext
       return $ adminSession :&: oldCtx

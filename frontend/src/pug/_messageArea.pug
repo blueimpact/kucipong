@@ -1,0 +1,11 @@
+.messageArea
+  .messageGroup
+    | %{ forall error <- errors }
+    .messageBody-error
+      | \#{ error }
+    | %{ endforall }
+
+    | %{ forall message <- messages }
+    .messageBody
+      | \#{ message }
+    | %{ endforall }
