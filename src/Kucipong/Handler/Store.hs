@@ -189,10 +189,12 @@ storeEditPost = do
   let maybeUploadedFile = lookup "image" filesHashMap
   case maybeUploadedFile of
     Just uploadedFile -> do
-      -- [Debug] uploadedFile: UploadedFile {uf_name = "yakiniku.jpg", uf_contentType = "image/jpeg", uf_tempLocation = "/tmp/webenc1804289383846930886.buf"}
       let originalFileName = uf_name uploadedFile
           contentType = uf_contentType uploadedFile
           tempLocation = uf_tempLocation uploadedFile
+      $(logDebug) $ "image original filename: " <> originalFileName
+      $(logDebug) $ "image content type: " <> contentType
+      $(logDebug) $ "image temporary location: " <> pack tempLocation
       -- upload the file to S3 here:
       -- s3UploadFile originalFileName contentType tempLocation
       pure ()

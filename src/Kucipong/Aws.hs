@@ -52,9 +52,12 @@ createS3ImageBucket awsRegion awsEnv s3ImageBucketName = do
   eitherCreateBucketResp <-
     runResourceT . runAWS awsEnv . trying _Error $ send createBucketReq
   case eitherCreateBucketResp of
-      Right createBucketResp -> pure ()
-      Left errorResp ->
+      Right createBucketResp -> do
+        putStrLn $ "createBucket resp from aws: " <> tshow createBucketResp
+        pure ()
+      Left errorResp -> do
         -- TODO: throw an error here if we are not able to create the bucket on S3.
+        putStrLn $ "error resp from aws: " <> tshow errorResp
         pure ()
 
 s3ImageBucketNameToBucketName :: S3ImageBucketName -> BucketName
