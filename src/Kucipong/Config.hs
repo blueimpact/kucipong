@@ -5,7 +5,7 @@ module Kucipong.Config
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromEitherM)
+import Control.FromSum (fromEitherM, fromEitherOrM)
 import Control.Lens (Lens', lens, set)
 import Control.Monad.Logger (runStdoutLoggingT)
 import Data.ByteString.Base64 (decode)
@@ -13,9 +13,10 @@ import Database.Persist.Postgresql (ConnectionPool)
 import Database.PostgreSQL.Simple (ConnectInfo(..))
 import Mail.Hailgun (HailgunContext(..))
 import Network.AWS
-       (AccessKey, Credentials(FromKeys), Env, LogLevel(Debug),
-        Region(Tokyo), SecretKey, envLogger, newEnv, newLogger)
+       (AccessKey, Credentials(FromKeys), Env, LogLevel(Debug), Region,
+        SecretKey, envLogger, newEnv, newLogger)
 import qualified Network.AWS as AWS
+import Network.AWS.Data (fromText)
 import Network.HTTP.Client (Manager, newManager)
 import Network.HTTP.Client.Conduit (HasHttpManager(..))
 import Network.HTTP.Conduit (tlsManagerSettings)
@@ -26,7 +27,8 @@ import Network.Wai.Middleware.RequestLogger
 import System.ReadEnvVar (lookupEnvDef, readEnvVarDef)
 import Web.ClientSession (Key, initKey)
 
-import Kucipong.Aws (HasS3ImageBucketName(..), S3ImageBucketName(..))
+import Kucipong.Aws
+       (HasAwsRegion(..), HasS3ImageBucketName(..), S3ImageBucketName(..))
 import Kucipong.Db
        (DbPoolConnNum, DbPoolConnTimeout, HasDbPool(..), makePool)
 import Kucipong.Email (HasHailgunContext(..))
@@ -39,6 +41,7 @@ import Kucipong.Session (HasSessionKey(..))
 -- throughout a request.
 data Config = Config
   { configAwsEnv :: Env
+  , configAwsRegion :: Region
   , configEnv :: Environment
   , configHailgunContext :: HailgunContext
   , configHost :: Text
@@ -50,9 +53,13 @@ data Config = Config
   , configSessionKey :: Key
   }
 
+instance HasAwsRegion Config where
+  getAwsRegion :: Config -> Region
+  getAwsRegion = configAwsRegion
+
 instance HasDbPool Config where
-    getDbPool :: Config -> ConnectionPool
-    getDbPool = configPool
+  getDbPool :: Config -> ConnectionPool
+  getDbPool = configPool
 
 instance AWS.HasEnv Config where
   environment :: Lens' Config Env
@@ -148,6 +155,9 @@ createConfigFromEnv = do
   sessionKey <- initKucipongSessionKey sessionKeyRaw
   host <- lookupEnvDef "KUCIPONG_HOST" "localhost:8101"
   protocol <- lookupEnvDef "KUCIPONG_PROTOCOL" "http"
+  eitherAwsRegion <- fromText <$> lookupEnvDef "KUCIPONG_AWS_REGION" "ap-northeast-1"
+  awsRegion <- fromEitherOrM eitherAwsRegion $ \err ->
+    error $ "Couldn't convert the region string into an actual region: " <> err
   awsAccessKey <-
     lookupEnvDef "KUCIPONG_AWS_ACCESS_KEY" "todo-fake-aws-access-key"
   awsSecretKey <-
@@ -169,6 +179,7 @@ createConfigFromEnv = do
     sessionKey
     host
     protocol
+    awsRegion
     awsAccessKey
     awsSecretKey
     awsS3ImageBucketName
@@ -197,13 +208,14 @@ createConfigFromValues
   -> Key
   -> Host
   -> Protocol
+  -> Region
   -> AccessKey
   -> SecretKey
   -> S3ImageBucketName
   -> IO Config
 createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
     dbConnNum dbConnTimeout dbHost dbPort dbUser dbPass dbName sessionKey host
-    protocol awsAccessKey awsSecretKey s3ImageBucketName = do
+    protocol awsRegion awsAccessKey awsSecretKey s3ImageBucketName = do
   httpManager <- newManager tlsManagerSettings
   let hailgunContext =
         HailgunContext
@@ -211,7 +223,7 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
         , hailgunApiKey = hailgunContextApiKey
         , hailgunProxy = Nothing
         }
-  awsEnv <- newEnv Tokyo (FromKeys awsAccessKey awsSecretKey)
+  awsEnv <- newEnv awsRegion (FromKeys awsAccessKey awsSecretKey)
   awsEnvPlusLogger <-
     case env of
       Development -> do
@@ -230,6 +242,7 @@ createConfigFromValues env port hailgunContextDomain hailgunContextApiKey
   pure
     Config
     { configAwsEnv = awsEnvPlusLogger
+    , configAwsRegion = awsRegion
     , configEnv = env
     , configHailgunContext = hailgunContext
     , configHost = host

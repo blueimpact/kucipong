@@ -5,18 +5,20 @@ Helper functions for working with S3.
 -}
 
 module Kucipong.Aws
-    ( S3ImageBucketName(..)
+    ( HasAwsRegion(..)
+    , S3ImageBucketName(..)
     , HasS3ImageBucketName(..)
     , createS3ImageBucket
     ) where
 
 import Kucipong.Prelude
 
-import Control.Lens (Prism', (&), _Just, set)
+import Control.Exception.Lens (trying)
+import Control.Lens ((&), set)
 import Control.Monad.Trans.Resource (runResourceT)
-import Network.AWS (Env, Region(..), runAWS, send)
+import Network.AWS (Env, Region(..), _Error, runAWS, send)
 import Network.AWS.S3
-       (BucketName(..), CreateBucket, LocationConstraint(..),
+       (BucketName(..), LocationConstraint(..),
         cbCreateBucketConfiguration, cbcLocationConstraint, createBucket,
         createBucketConfiguration)
 
@@ -31,20 +33,29 @@ instance HasS3ImageBucketName S3ImageBucketName where
   getS3ImageBucketName :: S3ImageBucketName -> S3ImageBucketName
   getS3ImageBucketName = id
 
-createS3ImageBucket :: Env -> S3ImageBucketName -> IO ()
-createS3ImageBucket awsEnv s3ImageBucketName = do
+class HasAwsRegion r where
+  getAwsRegion :: r -> Region
+
+instance HasAwsRegion Region where
+  getAwsRegion :: Region -> Region
+  getAwsRegion = id
+
+createS3ImageBucket :: Region -> Env -> S3ImageBucketName -> IO ()
+createS3ImageBucket awsRegion awsEnv s3ImageBucketName = do
   let bucketName = s3ImageBucketNameToBucketName s3ImageBucketName
       bucketConf =
         createBucketConfiguration &
-        set cbcLocationConstraint (Just (LocationConstraint Tokyo))
+        set cbcLocationConstraint (Just (LocationConstraint awsRegion))
       createBucketReq =
         createBucket bucketName &
         set cbCreateBucketConfiguration (Just bucketConf)
-  createBucketResp <- runResourceT . runAWS awsEnv $ send createBucketReq
-  print "resp:"
-  print createBucketResp
-  print "(end resp)"
-  pure ()
+  eitherCreateBucketResp <-
+    runResourceT . runAWS awsEnv . trying _Error $ send createBucketReq
+  case eitherCreateBucketResp of
+      Right createBucketResp -> pure ()
+      Left errorResp ->
+        -- TODO: throw an error here if we are not able to create the bucket on S3.
+        pure ()
 
 s3ImageBucketNameToBucketName :: S3ImageBucketName -> BucketName
 s3ImageBucketNameToBucketName = BucketName . unS3ImageBucketName
