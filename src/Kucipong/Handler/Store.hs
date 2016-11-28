@@ -6,7 +6,7 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
-import Data.Aeson (Value(..), (.=))
+import Data.Aeson ((.=))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Text.EDE (fromPairs)
@@ -151,7 +151,7 @@ storeGet = do
 
 storeEditGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
   => ActionCtxT (HVect xs) m ()
 storeEditGet = do
   (StoreSession email) <- getStoreEmail
