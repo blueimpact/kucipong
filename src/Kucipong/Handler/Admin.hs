@@ -6,11 +6,9 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromEitherM, fromMaybeM, fromMaybeOrM)
 import Control.Monad.Time (MonadTime(..))
-import Data.Aeson ((.=))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
-import Text.EDE (fromPairs)
 import Text.Email.Validate (toText)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
