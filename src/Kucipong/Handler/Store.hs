@@ -6,10 +6,8 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
-import Data.Aeson ((.=))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
-import Text.EDE (fromPairs)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
        (ActionCtxT, Path, UploadedFile(..), (<//>), files, getContext, prehook, root,
