@@ -5,15 +5,17 @@ module Kucipong.RenderTemplate where
 
 import           Kucipong.Prelude           hiding (try)
 
+import           Text.Blaze.Renderer.Text   (renderMarkup)
 import           Control.Exception          (try)
 import           Control.FromSum            (fromEitherM)
 import           Data.Aeson                 (Object, (.=))
 import qualified Data.HashMap.Strict        as HashMap
-import           Language.Haskell.TH        (Exp, Q)
+import           Language.Haskell.TH        (Exp, Q, appE)
 import           Language.Haskell.TH.Syntax (addDependentFile)
 import           Network.HTTP.Types         (internalServerError500)
 import           Text.EDE                   (eitherParse, eitherRenderWith, fromPairs)
 import           Text.EDE.Filters           (Term, (@:))
+import           Text.Heterocephalus        (compileHtmlFileWithDefault)
 import           Web.Spock                  (html, setStatus)
 
 -- | Add empty @errors@ and @messages@ keys/values to an object if they don't
@@ -31,8 +33,28 @@ unsafeFromRight (Right a) = a
 unsafeFromRight (Left err) = error $
     "Called unsafeFromRight, but we got a left with this value: " <> show err
 
+-- | Render a template file with adding empty @errors@ and @messages@ keys/values
+-- if they don't already exist in scope.
 renderTemplateFromEnv :: String -> Q Exp
-renderTemplateFromEnv filename = do
+renderTemplateFromEnv filename = renderer `appE` body
+  where
+    -- This is the full path of the template file.
+    fullFilePath :: FilePath
+    fullFilePath = templateDirectory </> filename
+
+    body :: Q Exp
+    body =
+      compileHtmlFileWithDefault
+        fullFilePath
+        [("errors", [|empty :: [Text]|]), ("messages", [|empty :: [Text]|])]
+
+    renderer :: Q Exp
+    renderer = [|html . toStrict . renderMarkup|]
+
+{-# DEPRECATED renderTemplateFromEnv' "Don't use renderTemplateFromEnv'.  Use renderTemplateFromEnv instead." #-}
+
+renderTemplateFromEnv' :: String -> Q Exp
+renderTemplateFromEnv' filename = do
     addDependentFile fullFilePath
     eitherRawTemplate <- liftIO . try $ readFile fullFilePath
     rawTemplate <- fromEitherM handleTemplateFileRead eitherRawTemplate

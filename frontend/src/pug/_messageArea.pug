@@ -1,11 +1,11 @@
 .messageArea
   .messageGroup
-    | {% for error in errors %}
+    | %{ forall error <- errors }
     .messageBody-error
-      | {{ error.value | escape }}
-    | {% endfor %}
+      | \#{ error }
+    | %{ endforall }
 
-    | {% for message in messages %}
+    | %{ forall message <- messages }
     .messageBody
-      | {{ message.value | escape }}
-    | {% endfor %}
+      | \#{ message }
+    | %{ endforall }

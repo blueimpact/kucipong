@@ -6,7 +6,7 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
-import Data.Aeson (Value(..), (.=))
+import Data.Aeson ((.=))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Text.EDE (fromPairs)
@@ -28,7 +28,7 @@ import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
         MonadKucipongSendEmail(..), dbFindStoreByEmail,
         dbFindStoreLoginToken, dbUpsertStore)
-import Kucipong.RenderTemplate (renderTemplateFromEnv)
+import Kucipong.RenderTemplate (renderTemplateFromEnv')
 import Kucipong.Session (Store, Session(..))
 import Kucipong.Spock
        (ContainsStoreSession, getReqParamErr, getStoreCookie,
@@ -55,7 +55,7 @@ loginGet
   :: forall ctx m.
      (MonadIO m)
   => ActionCtxT ctx m ()
-loginGet = $(renderTemplateFromEnv "storeUser_login.html") $ fromPairs []
+loginGet = $(renderTemplateFromEnv' "storeUser_login.html") $ fromPairs []
 
 -- | Handler for sending an email to the store owner that they can use to
 -- login.
@@ -73,14 +73,14 @@ loginPost = do
   (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeEmailKey
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail email (storeLoginTokenLoginToken storeLoginToken)
-  $(renderTemplateFromEnv "storeUser_login.html") $
+  $(renderTemplateFromEnv' "storeUser_login.html") $
     fromPairs
       ["messages" .= ["We have sent you an email with verification URL." :: Text]]
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $ "got following error in store loginPost handler: " <> errMsg
-      $(renderTemplateFromEnv "storeUser_login.html") $
+      $(renderTemplateFromEnv' "storeUser_login.html") $
         fromPairs ["errors" .= [errMsg]]
 
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
@@ -132,7 +132,7 @@ storeGet = do
         , storeRegularHoliday
         , storeUrl
         } <- fromMaybeM handleNoStoreError maybeStore
-  $(renderTemplateFromEnv "storeUser_store.html") $
+  $(renderTemplateFromEnv' "storeUser_store.html") $
     fromPairs
       [ "name" .= storeName
       , "businessCategory" .= storeBusinessCategory
@@ -151,12 +151,12 @@ storeGet = do
 
 storeEditGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
   => ActionCtxT (HVect xs) m ()
 storeEditGet = do
   (StoreSession email) <- getStoreEmail
   maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
-  $(renderTemplateFromEnv "storeUser_store_edit.html") $
+  $(renderTemplateFromEnv' "storeUser_store_edit.html") $
     fromPairs
       [ "name" .= (storeName <$> maybeStore)
       , "businessCategory" .= (storeBusinessCategory <$> maybeStore)
@@ -203,7 +203,7 @@ storeEditPost = do
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
-      $(renderTemplateFromEnv "storeUser_store_edit.html") $
+      $(renderTemplateFromEnv' "storeUser_store_edit.html") $
         fromPairs ["errors" .= [errMsg]]
 
 storeAuthHook

@@ -59,6 +59,7 @@ library
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , base64-bytestring
+                     , blaze-markup
                      , classy-prelude
                      , clientsession
                      , ede
@@ -69,6 +70,7 @@ library
                      , Glob
                      , hailgun
                      , HTTP
+                     , heterocephalus
                      , http-api-data
                      , http-client
                      , http-conduit
