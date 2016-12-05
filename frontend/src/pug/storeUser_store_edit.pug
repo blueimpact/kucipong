@@ -24,43 +24,28 @@ include _layout
               .storeBody_info_body_row-body
                 select#storeBusinessCategory(
                   name="businessCategory"
-                  value="\#{ fromMaybe mempty businessCategory }"
                 )
-                  option(value="0") グルメ
-                  option(value="1") ファッション
-                  option(value="2") ガジェット
-                  option(value="3") 旅行
-                  option(value="4") 美容
+                  option(value="" disabled)
+                  | %{ forall category <- allBusinessCategories }
+                  option(value="\#{key category}" #{isSelected businessCategory category}) \#{label category}
+                  | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の特徴
-              .storeBody_info_body_row-body.checkboxGroup
+              | %{ forall category <- allBusinessCategories }
+              .storeBody_info_body_row-body.checkboxGroup(data-subcategory-of="\#{key category}")
+                | %{ forall categoryDetail <- mappend (allBusinessCategoryDetails (Just category)) (allBusinessCategoryDetails Nothing) }
                 .checkboxWrapper
-                  input.checkbox#storeTags0(
-                    type="checkbox" name="storeTags0"
-                    checked
+                  input.checkbox(
+                    id="storeTags\#{key categoryDetail}"
+                    type="checkbox" name="businessCategoryDetails"
+                    value="\#{key categoryDetail}"
+                    #{isChecked businessCategoryDetails categoryDetail}
                   )
-                  label.checkboxLabel(for="storeTags0")
-                    | 焼き肉
-                .checkboxWrapper
-                  input.checkbox#storeTags1(
-                    type="checkbox" name="storeTags1"
-                  )
-                  label.checkboxLabel(for="storeTags1")
-                    | 日本食
-                .checkboxWrapper
-                  input.checkbox#storeTags2(
-                    type="checkbox" name="storeTags2"
-                  )
-                  label.checkboxLabel(for="storeTags2")
-                    | 寿司
-                .checkboxWrapper
-                  input.checkbox#storeTags3(
-                    type="checkbox" name="storeTags3"
-                    checked
-                  )
-                  label.checkboxLabel(for="storeTags3")
-                    | 広々とした店内
+                  label.checkboxLabel(for="storeTags\#{key categoryDetail}")
+                    | \#{label categoryDetail}
+                | %{ endforall }
+              | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の説明
