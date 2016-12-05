@@ -8,7 +8,7 @@ include _layout
         .signboard_titleArea
           .signboard_titleArea-title
             | 店舗ユーザの作成
-        form.signboard_body(method="POST")
+        form.signboard_body(method="POST" target="/admin/store/create")
           .labeledRow
             label.labeledRow-header(for="storeEmail")
               | 追加する店舗ユーザのメールアドレス
