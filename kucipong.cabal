@@ -34,6 +34,10 @@ library
                      , Kucipong.Handler.Static
                      , Kucipong.Handler.Static.TH
                      , Kucipong.Host
+                     , Kucipong.I18n
+                     , Kucipong.I18n.Class
+                     , Kucipong.I18n.Instance
+                     , Kucipong.I18n.Types
                      , Kucipong.LoginToken
                      , Kucipong.Monad
                      , Kucipong.Monad.Cookie

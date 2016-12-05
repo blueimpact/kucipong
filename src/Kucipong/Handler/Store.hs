@@ -18,6 +18,7 @@ import Kucipong.Db
        (Key(..), LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken))
+import Kucipong.Db (BusinessCategory(..), BusinessCategoryDetail(..))
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
@@ -155,7 +156,7 @@ storeEditGet = do
   let
     name = (storeName <$> maybeStore)
     businessCategory = (storeBusinessCategory <$> maybeStore)
-    -- businessCategoryDetails = (storeBusinessCategoryDetails <$> maybeStore)
+    businessCategoryDetails = concat (storeBusinessCategoryDetails <$> maybeStore)
     salesPoint = (maybeStore >>= storeSalesPoint)
     address = (maybeStore >>= storeAddress)
     phoneNumber = (maybeStore >>= storePhoneNumber)
@@ -216,8 +217,8 @@ storeEditPost = do
       let
         errors = [errMsg]
         name = Nothing :: Maybe Text
-        businessCategory = Nothing :: Maybe Text
-        -- businessCategoryDetails = [] :: [Text]
+        businessCategory = Nothing :: Maybe BusinessCategory
+        businessCategoryDetails = [] :: [BusinessCategoryDetail]
         salesPoint = Nothing :: Maybe Text
         address = Nothing :: Maybe Text
         phoneNumber = Nothing :: Maybe Text
@@ -255,3 +256,14 @@ storeComponent = do
     get rootR storeGet
     get editR storeEditGet
     post editR storeEditPost
+
+allBusinessCategories :: [BusinessCategory]
+allBusinessCategories = [minBound .. maxBound]
+
+allBusinessCategoryDetails :: Maybe BusinessCategory -> [BusinessCategoryDetail]
+allBusinessCategoryDetails (Just Gourmet) = map GourmetDetail [minBound .. maxBound]
+allBusinessCategoryDetails (Just Fashion) = map FashionDetail [minBound .. maxBound]
+allBusinessCategoryDetails (Just Gadget) = map GadgetDetail [minBound .. maxBound]
+allBusinessCategoryDetails (Just Traveling) = map TravelingDetail [minBound .. maxBound]
+allBusinessCategoryDetails (Just Beauty) = map BeautyDetail [minBound .. maxBound]
+allBusinessCategoryDetails Nothing = map CommonDetail [minBound .. maxBound]

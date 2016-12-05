@@ -10,7 +10,8 @@ import Database.Persist.Sql
 import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
-       (Admin, AdminLoginToken, DbSafeError, Image, Key, Store,
+       (Admin, AdminLoginToken, BusinessCategory(..),
+        BusinessCategoryDetail(..), DbSafeError, Image, Key, Store,
         StoreEmail, StoreLoginToken)
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
@@ -80,9 +81,9 @@ class Monad m => MonadKucipongDb m where
       -- ^ 'Key' for the 'StoreEmail'
       -> Text
       -- ^ 'Store' name
-      -> Text
+      -> BusinessCategory
       -- ^ 'Store' category
-      -> [Text]
+      -> [BusinessCategoryDetail]
       -- ^ 'Store' category detail
       -> Maybe Image
       -- ^ 'Image' for the 'Store'
@@ -104,7 +105,7 @@ class Monad m => MonadKucipongDb m where
          , MonadTrans t
          , m ~ t n
          )
-      => Key StoreEmail -> Text -> Text -> [Text] -> Maybe Image
+      => Key StoreEmail -> Text -> BusinessCategory -> [BusinessCategoryDetail] -> Maybe Image
       -> Maybe Text -> Maybe Text -> Maybe Text -> Maybe Text
       -> Maybe Text -> Maybe Text -> t n (Entity Store)
   dbCreateStore email name category catdet image salesPoint address phoneNumber

@@ -105,7 +105,7 @@ const commonConfig = {
       filename: 'storeUser_store.html',
     }),
     new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
+      chunks: ['storeUser', 'storeUser_store_edit'],
       template: 'src/pug/storeUser_store_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_edit.html',
@@ -195,6 +195,10 @@ if (TARGET_ENV === 'development') {
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/storeUser.js' )
       ],
+      "storeUser_store_edit": [
+        'webpack-dev-server/client?http://localhost:8080',
+        path.join( __dirname, 'src/js/storeUser_store_edit.js' )
+      ],
       adminUser: [
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/adminUser.js' )
@@ -247,6 +251,10 @@ if (TARGET_ENV === 'production') {
       ],
       storeUser: [
         path.join( __dirname, 'src/storeUser.js' )
+      ],
+      "storeUser_store_edit": [
+        'webpack-dev-server/client?http://localhost:8080',
+        path.join( __dirname, 'src/js/storeUser_store_edit.js' )
       ],
       adminUser: [
         path.join( __dirname, 'src/adminUser.js' )

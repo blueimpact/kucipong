@@ -11,6 +11,9 @@ import Kucipong.Prelude
 
 import Web.FormUrlEncoded (FromForm)
 
+import Kucipong.Db (BusinessCategory(..), BusinessCategoryDetail(..))
+
+
 -----------
 -- Admin --
 -----------
@@ -52,8 +55,8 @@ instance FromForm StoreLoginForm
 
 data StoreEditForm = StoreEditForm
   { name :: !Text
-  , businessCategory :: !Text
-  , businessCategoryDetails :: ![Text]
+  , businessCategory :: !BusinessCategory
+  , businessCategoryDetails :: ![BusinessCategoryDetail]
   , salesPoint :: !(Maybe Text)
   , address :: !(Maybe Text)
   , phoneNumber :: !(Maybe Text)
