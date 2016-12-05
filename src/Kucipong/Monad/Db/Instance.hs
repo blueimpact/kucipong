@@ -14,7 +14,8 @@ import Database.Persist.Sql
 
 import Kucipong.Config (Config)
 import Kucipong.Db
-       (Admin(..), AdminLoginToken(..), CreatedTime(..), DeletedTime(..),
+       (Admin(..), AdminLoginToken(..), BusinessCategory(..),
+        BusinessCategoryDetail(..), CreatedTime(..), DeletedTime(..),
         DbSafeError(..), EntityField(..), EntityDateFields(..), Image,
         Key(..), LoginTokenExpirationTime(..), Store(..), StoreEmail(..),
         StoreLoginToken(..), UpdatedTime(..), emailToAdminKey,
@@ -110,9 +111,9 @@ instance ( MonadBaseControl IO m
       -- ^ 'Key' for the 'StoreEmail'
     -> Text
       -- ^ 'Store' name
-    -> Text
+    -> BusinessCategory
       -- ^ 'Store' category
-    -> [Text]
+    -> [BusinessCategoryDetail]
       -- ^ 'Store' category detail
     -> Maybe Image
       -- ^ 'Image' for the 'Store'
@@ -339,8 +340,8 @@ dbUpsertStore
   :: MonadKucipongDb m
   => EmailAddress
   -> Text
-  -> Text
-  -> [Text]
+  -> BusinessCategory
+  -> [BusinessCategoryDetail]
   -> Maybe Image
   -> Maybe Text
   -> Maybe Text

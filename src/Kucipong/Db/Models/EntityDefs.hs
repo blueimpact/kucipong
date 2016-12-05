@@ -8,8 +8,8 @@ import Database.Persist ( EntityDef )
 import Database.Persist.TH ( persistLowerCase )
 
 import Kucipong.Db.Models.Base
-    ( CouponType, CreatedTime, DeletedTime, Image, LoginTokenExpirationTime
-    , Percent, Price, UpdatedTime )
+       (BusinessCategory, CouponType, CreatedTime, DeletedTime, Image,
+        LoginTokenExpirationTime, Percent, Price, UpdatedTime)
 import Kucipong.LoginToken ( LoginToken )
 
 kucipongEntityDefs :: [EntityDef]
@@ -47,8 +47,8 @@ kucipongEntityDefs = [persistLowerCase|
         updated                 UpdatedTime
         deleted                 DeletedTime Maybe
         name                    Text
-        businessCategory        Text
-        businessCategoryDetails [Text]
+        businessCategory        BusinessCategory
+        businessCategoryDetails [BusinessCategoryDetail]
         image                   Image Maybe
         salesPoint              Text Maybe
         address                 Text Maybe
