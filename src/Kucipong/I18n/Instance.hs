@@ -1,4 +1,3 @@
-{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Kucipong.I18n.Instance where
