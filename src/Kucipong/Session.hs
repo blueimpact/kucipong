@@ -15,7 +15,7 @@ module Kucipong.Session
 
 import Kucipong.Prelude
 
-import "emailaddress" Text.Email.Validate ( emailAddress, toByteString )
+import Text.EmailAddress ( emailAddress, toByteString )
 import Web.ClientSession ( Key, decrypt, encryptIO )
 
 class HasSessionKey r where

@@ -34,7 +34,6 @@ ghcExtensions =
     , "-XNoImplicitPrelude"
     , "-XNoMonomorphismRestriction"
     , "-XOverloadedStrings"
-    , "-XPackageImports"
     , "-XPolyKinds"
     , "-XRankNTypes"
     , "-XRecordWildCards"

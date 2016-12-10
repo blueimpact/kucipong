@@ -12,7 +12,7 @@ import Control.Monad.Trans.Identity as X ( IdentityT(..), runIdentityT )
 import Data.Data as X ( Data )
 import Data.Proxy as X ( Proxy(Proxy) )
 import Data.Word as X ( Word16 )
-import "emailaddress" Text.Email.Validate as X ( EmailAddress )
+import Text.EmailAddress as X ( EmailAddress )
 
 -- Orphan instances
 

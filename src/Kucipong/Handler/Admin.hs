@@ -9,7 +9,7 @@ import Control.Monad.Time (MonadTime(..))
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
-import Text.Email.Validate (toText)
+import Text.EmailAddress (toText)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
        (ActionCtxT, Path, (<//>), getContext, redirect, renderRoute,
