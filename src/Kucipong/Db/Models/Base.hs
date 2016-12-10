@@ -4,9 +4,11 @@ module Kucipong.Db.Models.Base where
 
 import Kucipong.Prelude
 
+import Control.FromSum (fromMaybeOrM)
 import Data.Aeson ( FromJSON, ToJSON, Value, parseJSON, toJSON )
 import Data.Aeson.TH (defaultOptions, deriveJSON)
 import Data.Aeson.Types (parseMaybe, typeMismatch)
+import Data.Kind (Constraint)
 import Database.Persist ( PersistField(..), PersistValue )
 import Database.Persist.Sql ( PersistFieldSql(..), SqlType )
 import Database.Persist.TH (derivePersistField)
@@ -125,10 +127,33 @@ derivePersistField "BusinessCategory"
 deriveJSON defaultOptions ''BusinessCategory
 
 instance FromHttpApiData BusinessCategory where
-  parseUrlPiece a = case readMay a of
-    Nothing -> Left $ "Tried to convert \"" <> a
-      <> "\" to business category, but failed."
-    Just x -> pure x
+  parseUrlPiece = businessCategoryFromText
+
+-- | Read a 'BusinessCategory' from 'Text'.  Return 'Nothing' if the
+-- 'BusinessCategory' cannot be read.
+--
+-- Use 'readMay' internally.
+--
+-- >>> readBusinessCategory "Gourmet"
+-- Just Gourmet
+-- >>> readBusinessCategory "foobar"
+-- Nothing
+readBusinessCategory :: Text -> Maybe BusinessCategory
+readBusinessCategory = readMay
+
+-- | Create a 'BusinessCategory' from a 'Text'.  Return a 'Left' with an error
+-- message if the 'Text' can't be turned into a 'BusinessCategory'.
+--
+-- Use 'readBusinessCategory' internally.
+--
+-- >>> businessCategoryFromText "Gourmet"
+-- Right Gourmet
+-- >>> Data.Either.isLeft $ businessCategoryFromText "foobar"
+-- True
+businessCategoryFromText :: Text -> Either Text BusinessCategory
+businessCategoryFromText a =
+  fromMaybeOrM (readBusinessCategory a) . Left $
+  "Tried to convert \"" <> a <> "\" to a business category, but failed."
 
 ----------------------------
 -- BusinessCategoryDetail --
@@ -241,26 +266,194 @@ data BusinessCategoryDetail
 
 instance Show BusinessCategoryDetail where
   show :: BusinessCategoryDetail -> String
-  show (GourmetDetail a) = show a
-  show (FashionDetail a) = show a
-  show (GadgetDetail a) = show a
-  show (TravelingDetail a) = show a
-  show (BeautyDetail a) = show a
-  show (CommonDetail a) = show a
+  show = foldAllBusinessCategoryDetail (Proxy :: Proxy Show) show
+
+class ToBusinessCategoryDetail a where
+  toBusinessCategoryDetail :: a -> BusinessCategoryDetail
+
+instance ToBusinessCategoryDetail BusinessCategoryDetail where
+  toBusinessCategoryDetail :: BusinessCategoryDetail -> BusinessCategoryDetail
+  toBusinessCategoryDetail = id
+
+instance ToBusinessCategoryDetail GourmetDetail where
+  toBusinessCategoryDetail :: GourmetDetail -> BusinessCategoryDetail
+  toBusinessCategoryDetail = GourmetDetail
+
+instance ToBusinessCategoryDetail FashionDetail where
+  toBusinessCategoryDetail :: FashionDetail -> BusinessCategoryDetail
+  toBusinessCategoryDetail = FashionDetail
+
+instance ToBusinessCategoryDetail GadgetDetail where
+  toBusinessCategoryDetail :: GadgetDetail -> BusinessCategoryDetail
+  toBusinessCategoryDetail = GadgetDetail
+
+instance ToBusinessCategoryDetail TravelingDetail where
+  toBusinessCategoryDetail :: TravelingDetail -> BusinessCategoryDetail
+  toBusinessCategoryDetail = TravelingDetail
+
+instance ToBusinessCategoryDetail BeautyDetail where
+  toBusinessCategoryDetail :: BeautyDetail -> BusinessCategoryDetail
+  toBusinessCategoryDetail = BeautyDetail
+
+instance ToBusinessCategoryDetail CommonDetail where
+  toBusinessCategoryDetail :: CommonDetail -> BusinessCategoryDetail
+  toBusinessCategoryDetail = CommonDetail
+
+-- | Church-style fold for 'BusinessCategoryDetail'.
+--
+-- >>> let businessCategoryDetail = GourmetDetail GourmetSushi
+-- >>> foldBusinessCategoryDetail show show show show show show businessCategoryDetail
+-- "GourmetSushi"
+foldBusinessCategoryDetail
+  :: (GourmetDetail -> a)
+  -> (FashionDetail -> a)
+  -> (GadgetDetail -> a)
+  -> (TravelingDetail -> a)
+  -> (BeautyDetail -> a)
+  -> (CommonDetail -> a)
+  -> BusinessCategoryDetail
+  -> a
+foldBusinessCategoryDetail f _ _ _ _ _ (GourmetDetail a) = f a
+foldBusinessCategoryDetail _ f _ _ _ _ (FashionDetail a) = f a
+foldBusinessCategoryDetail _ _ f _ _ _ (GadgetDetail a) = f a
+foldBusinessCategoryDetail _ _ _ f _ _ (TravelingDetail a) = f a
+foldBusinessCategoryDetail _ _ _ _ f _ (BeautyDetail a) = f a
+foldBusinessCategoryDetail _ _ _ _ _ f (CommonDetail a) = f a
+
+-- | This function allows you to pass a single function to apply to a
+-- 'BusinessCategoryDetail', as long as 'GourmetDetail', 'FashionDetail',
+-- 'GadgetDetail', 'TravelingDetail', 'BeautyDetail', and 'CommonDetail' all
+-- implement the same typeclass.
+--
+-- This is useful for implementing the 'show' function.
+--
+-- >>> let showProxy = Proxy :: Proxy Show
+-- >>> foldAllBusinessCategoryDetail showProxy show (GourmetDetail GourmetSushi)
+-- "GourmetSushi"
+foldAllBusinessCategoryDetail
+  :: forall (c :: * -> Constraint) a proxy.
+     ( c GourmetDetail
+     , c FashionDetail
+     , c GadgetDetail
+     , c TravelingDetail
+     , c BeautyDetail
+     , c CommonDetail
+     )
+  => proxy c -> (forall x . c x => x -> a) -> BusinessCategoryDetail -> a
+foldAllBusinessCategoryDetail _ f = foldBusinessCategoryDetail f f f f f f
+
+-- | Unfold for 'BusinessCategoryDetail'.
+--
+-- >>> let combiner = (<|>) :: Maybe z -> Maybe z -> Maybe z
+-- >>> let f = readMay :: Read x => Text -> Maybe x
+-- >>> unfoldBusinessCategoryDetail combiner f f f f f f "CommonPoliteService"
+-- Just CommonPoliteService
+-- >>> unfoldBusinessCategoryDetail combiner f f f f f f "foobar"
+-- Nothing
+unfoldBusinessCategoryDetail
+  :: Functor f
+  => (f BusinessCategoryDetail -> f BusinessCategoryDetail -> f BusinessCategoryDetail)
+  -- ^ Combining function
+  -> (a -> f GourmetDetail)
+  -> (a -> f FashionDetail)
+  -> (a -> f GadgetDetail)
+  -> (a -> f TravelingDetail)
+  -> (a -> f BeautyDetail)
+  -> (a -> f CommonDetail)
+  -> a
+  -- ^ seed
+  -> f BusinessCategoryDetail
+unfoldBusinessCategoryDetail combiner gourmetF fashionF gadgetF travelingF beautyF commonF a =
+  fmap toBusinessCategoryDetail (gourmetF a) `combiner`
+  fmap toBusinessCategoryDetail (fashionF a) `combiner`
+  fmap toBusinessCategoryDetail (gadgetF a) `combiner`
+  fmap toBusinessCategoryDetail (travelingF a) `combiner`
+  fmap toBusinessCategoryDetail (beautyF a) `combiner`
+  fmap toBusinessCategoryDetail (commonF a)
+
+-- | Just like 'unfoldBusinessCategoryDetail', but use '(<|>)' as the combining
+-- function.
+--
+-- >>> let f = readMay :: Read x => Text -> Maybe x
+-- >>> unfoldBusinessCategoryDetailAlt f f f f f f "BeautySpa"
+-- Just BeautySpa
+-- >>> unfoldBusinessCategoryDetailAlt f f f f f f "foobar"
+-- Nothing
+unfoldBusinessCategoryDetailAlt
+  :: Alternative f
+  => (a -> f GourmetDetail)
+  -> (a -> f FashionDetail)
+  -> (a -> f GadgetDetail)
+  -> (a -> f TravelingDetail)
+  -> (a -> f BeautyDetail)
+  -> (a -> f CommonDetail)
+  -> a
+  -> f BusinessCategoryDetail
+unfoldBusinessCategoryDetailAlt = unfoldBusinessCategoryDetail (<|>)
+
+-- | Similar to 'foldAllBusinessCategoryDetail'.
+--
+-- Helpful to use with functions like 'readMay'.
+--
+-- >>> let combiner = (<|>) :: Maybe z -> Maybe z -> Maybe z
+-- >>> let readProxy = Proxy :: Proxy Read
+-- >>> let f = readMay :: Read x => Text -> Maybe x
+-- >>> unfoldAllBusinessCategoryDetail readProxy combiner f "TravelingAsia"
+-- Just TravelingAsia
+-- >>> unfoldAllBusinessCategoryDetail readProxy combiner f "foobar"
+-- Nothing
+unfoldAllBusinessCategoryDetail
+  :: forall (c :: * -> Constraint) a f proxy.
+     ( c GourmetDetail
+     , c FashionDetail
+     , c GadgetDetail
+     , c TravelingDetail
+     , c BeautyDetail
+     , c CommonDetail
+     , Functor f
+     )
+  => proxy c
+  -> (f BusinessCategoryDetail -> f BusinessCategoryDetail -> f BusinessCategoryDetail)
+  -> (forall x. c x => a -> f x)
+  -> a
+  -> f BusinessCategoryDetail
+unfoldAllBusinessCategoryDetail _ combiner f =
+  unfoldBusinessCategoryDetail combiner f f f f f f
+
+-- | See 'unfoldAllBusinessCategoryDetail' and
+-- 'unfoldBusinessCategoryDetailAll'.
+--
+-- Helpful to use with functions like 'readMay'.
+
+-- >>> let readProxy = Proxy :: Proxy Read
+-- >>> let f = readMay :: Read x => Text -> Maybe x
+-- >>> unfoldAllBusinessCategoryDetail readProxy f "GadgetPC"
+-- Just GourmetSushi
+-- >>> unfoldAllBusinessCategoryDetail readProxy f "foobar"
+-- Nothing
+unfoldAllBusinessCategoryDetailAlt
+  :: forall (c :: * -> Constraint) a f proxy.
+     ( c GourmetDetail
+     , c FashionDetail
+     , c GadgetDetail
+     , c TravelingDetail
+     , c BeautyDetail
+     , c CommonDetail
+     , Alternative f
+     )
+  => proxy c
+  -> (forall x. c x => a -> f x)
+  -> a
+  -> f BusinessCategoryDetail
+unfoldAllBusinessCategoryDetailAlt _ f = unfoldBusinessCategoryDetailAlt f f f f f f
 
 businessCategoryDetailFromText :: Text -> Either Text BusinessCategoryDetail
-businessCategoryDetailFromText a = case mDetail of
-  Nothing -> Left $ "Tried to convert \"" <> a
-    <> "\" to business category detail, but failed."
-  Just x -> pure x
- where
-  mDetail =
-    (GourmetDetail <$> readMay a) <|>
-    (FashionDetail <$> readMay a) <|>
-    (GadgetDetail <$> readMay a) <|>
-    (TravelingDetail <$> readMay a) <|>
-    (BeautyDetail <$> readMay a) <|>
-    (CommonDetail <$> readMay a)
+businessCategoryDetailFromText a =
+  fromMaybeOrM mDetail . Left $
+  "Tried to convert \"" <> a <> "\" to business category detail, but failed."
+  where
+    mDetail :: Maybe BusinessCategoryDetail
+    mDetail = unfoldAllBusinessCategoryDetailAlt (Proxy :: Proxy Read) readMay a
 
 instance PersistField BusinessCategoryDetail where
     toPersistValue :: BusinessCategoryDetail -> PersistValue
@@ -275,30 +468,22 @@ instance PersistFieldSql BusinessCategoryDetail where
 
 instance ToJSON BusinessCategoryDetail where
   toJSON :: BusinessCategoryDetail -> Value
-  toJSON (GourmetDetail a) = toJSON a
-  toJSON (FashionDetail a) = toJSON a
-  toJSON (GadgetDetail a) = toJSON a
-  toJSON (TravelingDetail a) = toJSON a
-  toJSON (BeautyDetail a) = toJSON a
-  toJSON (CommonDetail a) = toJSON a
+  toJSON = foldAllBusinessCategoryDetail (Proxy :: Proxy ToJSON) toJSON
 
 instance FromJSON BusinessCategoryDetail where
   parseJSON x =
-    case mdetail of
-      Nothing ->
-        typeMismatch
-          ("Tried to convert \"" <> show x <>
-           "\" to business category detail, but failed.")
-          x
-      Just detail -> pure detail
+    fromMaybeOrM mdetail $
+    typeMismatch
+      ("Tried to convert \"" <> show x <>
+       "\" to business category detail, but failed.")
+      x
     where
+      mdetail :: Maybe BusinessCategoryDetail
       mdetail =
-        (GourmetDetail <$> parseMaybe parseJSON x) <|>
-        (FashionDetail <$> parseMaybe parseJSON x) <|>
-        (GadgetDetail <$> parseMaybe parseJSON x) <|>
-        (TravelingDetail <$> parseMaybe parseJSON x) <|>
-        (BeautyDetail <$> parseMaybe parseJSON x) <|>
-        (CommonDetail <$> parseMaybe parseJSON x)
+        unfoldAllBusinessCategoryDetailAlt
+          (Proxy :: Proxy FromJSON)
+          (parseMaybe parseJSON)
+          x
 
 instance FromHttpApiData BusinessCategoryDetail where
   parseUrlPiece = businessCategoryDetailFromText
