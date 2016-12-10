@@ -13,15 +13,17 @@ import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, UploadedFile(..), (<//>), files, getContext, prehook, root,
-        redirect, renderRoute, var)
+       (ActionCtxT, Path, UploadedFile(..), (<//>), files, getContext,
+        params, prehook, root, redirect, renderRoute, var)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
-       (Key(..), LoginTokenExpirationTime(..), Store(..),
+       (BusinessCategory(..), BusinessCategoryDetail(..), Key(..),
+        LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
-                        storeLoginTokenLoginToken))
-import Kucipong.Db (BusinessCategory(..), BusinessCategoryDetail(..))
+                        storeLoginTokenLoginToken),
+        isValidBusinessCategoryDetailFor, readBusinessCategory,
+        unfoldAllBusinessCategoryDetailAlt)
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
@@ -214,21 +216,20 @@ storeEditPost = do
       url
   redirect . renderRoute $ storeUrlPrefix
   where
-    -- TODO: put previous input texts
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
+      p <- params
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
-      let
-        errors = [errMsg]
-        name = Nothing :: Maybe Text
-        businessCategory = Nothing :: Maybe BusinessCategory
-        businessCategoryDetails = [] :: [BusinessCategoryDetail]
-        salesPoint = Nothing :: Maybe Text
-        address = Nothing :: Maybe Text
-        phoneNumber = Nothing :: Maybe Text
-        businessHourLines = [] :: [Text]
-        regularHoliday = Nothing :: Maybe Text
-        url = Nothing :: Maybe Text
+      let errors = [errMsg]
+          name = lookup "name" p
+          businessCategory = readBusinessCategory =<< lookup "businessCategory" p
+          businessCategoryDetails = businessCategoryDetailsFromParams p
+          salesPoint = lookup "salesPoint" p
+          address = lookup "address" p
+          phoneNumber = lookup "phoneNumber" p
+          businessHourLines = maybe [] (lines) $ lookup "businessHours" p
+          regularHoliday = lookup "regularHoliday" p
+          url = lookup "url" p
       $(renderTemplateFromEnv "storeUser_store_edit.html")
 
 storeAuthHook
@@ -271,3 +272,24 @@ allBusinessCategoryDetails (Just Gadget) = map GadgetDetail [minBound .. maxBoun
 allBusinessCategoryDetails (Just Traveling) = map TravelingDetail [minBound .. maxBound]
 allBusinessCategoryDetails (Just Beauty) = map BeautyDetail [minBound .. maxBound]
 allBusinessCategoryDetails Nothing = map CommonDetail [minBound .. maxBound]
+
+-- | Take the list of all parameters (which includes business category details)
+-- returned from 'params', and return only those which are valid
+-- 'BusinessCategoryDetail's.
+--
+-- >>> let nameParam = ("name", "foo store")
+-- >>> let busCatDetParam1 = ("businessCategoryDetails", "GourmetSushi")
+-- >>> let busCatDetParam2 = ("businessCategoryDetails", "TravelingAsia")
+-- >>> let busCatDetParamBad = ("businessCategoryDetails", "foobarbaz")
+-- >>> let ps = [nameParam, busCatDetParam1, busCatDetParam2, busCatDetParamBad]
+-- >>> businessCategoryDetailsFromParams ps
+-- [GourmetSushi,TravelingAsia]
+businessCategoryDetailsFromParams :: [(Text, Text)] -> [BusinessCategoryDetail]
+businessCategoryDetailsFromParams =
+  catMaybes .
+  map (unfoldAllBusinessCategoryDetailAlt (Proxy :: Proxy Read) readMay) .
+  filterBusinessCategoryDetails
+  where
+    filterBusinessCategoryDetails :: [(Text, Text)] -> [Text]
+    filterBusinessCategoryDetails =
+      fmap snd . filter (\(key, _) -> key == "businessCategoryDetails")
