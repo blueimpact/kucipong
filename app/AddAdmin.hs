@@ -9,7 +9,7 @@ import Options.Applicative
     ( InfoMod, Parser, ParserInfo, ReadM, argument, eitherReader, execParser
     , fullDesc, header, helper, info, metavar, progDesc, str
     )
-import Text.Email.Validate ( validateFromString )
+import Text.EmailAddress ( validateFromString )
 
 import Kucipong.Config ( createConfigFromEnv )
 import Kucipong.Db ( AdminLoginToken(adminLoginTokenLoginToken) )

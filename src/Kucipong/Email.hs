@@ -9,7 +9,7 @@ import Mail.Hailgun
     , HailgunMessage, HailgunSendResponse, MessageContent(..)
     , MessageRecipients(..), emptyMessageRecipients, hailgunMessage, sendEmail )
 import Network.HTTP.Base ( urlEncode )
-import "emailaddress" Text.Email.Validate ( toByteString )
+import Text.EmailAddress ( toByteString )
 import Text.Shakespeare.Text ( st )
 
 import Kucipong.Host
