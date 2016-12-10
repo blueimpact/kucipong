@@ -64,8 +64,5 @@ script:
   npm run build
   cd ../
   # TODO: haddock fails with ghc-8.0.1.  Reenable haddock when we get lts-8.
-  stack --no-terminal build --bench --no-run-benchmarks # --haddock --no-haddock-deps
+  stack --no-terminal test --bench --no-run-benchmarks # --haddock --no-haddock-deps
   set +ex
-# TODO: The doc tests take a really long time to run.
-# Fix this so we don't have to worry about timeouts?
-#- travis_wait 50 stack --no-terminal test --bench --no-run-benchmarks --haddock --no-haddock-deps
