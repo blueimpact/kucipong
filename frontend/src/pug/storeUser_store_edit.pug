@@ -37,12 +37,12 @@ include _layout
                 | %{ forall categoryDetail <- mappend (allBusinessCategoryDetails (Just category)) (allBusinessCategoryDetails Nothing) }
                 .checkboxWrapper
                   input.checkbox(
-                    id="storeTags\#{key categoryDetail}"
+                    id="storeTags\#{key category}-\#{key categoryDetail}"
                     type="checkbox" name="businessCategoryDetails"
                     value="\#{key categoryDetail}"
                     #{isChecked businessCategoryDetails categoryDetail}
                   )
-                  label.checkboxLabel(for="storeTags\#{key categoryDetail}")
+                  label.checkboxLabel(for="storeTags\#{key category}-\#{key categoryDetail}")
                     | \#{label categoryDetail}
                 | %{ endforall }
               | %{ endforall }
