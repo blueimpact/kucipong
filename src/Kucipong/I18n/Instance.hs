@@ -53,9 +53,9 @@ instance I18n StoreDeleteResult where
 
 instance I18n StoreError where
   label EnUS StoreErrorCouldNotSendEmail =
-    "Could not send email."
+    "Could not send email. Please try again."
   label EnUS StoreErrorNoImage =
-    "Could not find the image."
+    "Failed to upload image. Please try again."
   label EnUS (StoreErrorNoStoreEmail email) =
     "Could not find store for email " <> tshow email <> "."
 
