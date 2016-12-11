@@ -13,6 +13,7 @@ import Kucipong.Db.Models.Base
         BusinessCategoryDetail(..), CommonDetail(..), FashionDetail(..),
         GourmetDetail(..), GadgetDetail(..), TravelingDetail(..))
 import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
+import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.Monad.Db.Class (StoreDeleteResult(..))
 
 import Text.EmailAddress (toText)
@@ -39,7 +40,7 @@ instance I18n AdminError where
 
 instance I18n AdminMsg where
   label EnUS AdminMsgSentVerificationEmail =
-    "We have sent you email with verification URL."
+    "We have sent you an email with verification URL."
 
 instance I18n StoreDeleteResult where
   label EnUS StoreDeleteSuccess = "Successfully deleted store."
@@ -49,6 +50,18 @@ instance I18n StoreDeleteResult where
     "\"."
   label EnUS (StoreDeleteErrDoesNotExist email) =
     "Store with email address of \"" <> toText email <> "\" does not exist."
+
+instance I18n StoreError where
+  label EnUS StoreErrorCouldNotSendEmail =
+    "Could not send email."
+  label EnUS StoreErrorNoImage =
+    "Could not find the image."
+  label EnUS (StoreErrorNoStoreEmail email) =
+    "Could not find store for email " <> tshow email <> "."
+
+instance I18n StoreMsg where
+  label EnUS StoreMsgSentVerificationEmail =
+    "We have sent you an email with verification URL."
 
 instance I18n BusinessCategory where
   label EnUS Gourmet = "Gourmet"
