@@ -30,6 +30,7 @@ library
                      , Kucipong.Form
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
+                     , Kucipong.Handler.Admin.Types
                      , Kucipong.Handler.Store
                      , Kucipong.Handler.Static
                      , Kucipong.Handler.Static.TH
@@ -69,6 +70,7 @@ library
                      , blaze-markup
                      , classy-prelude
                      , clientsession
+                     , data-default
                      , emailaddress
                      , envelope
                      , from-sum

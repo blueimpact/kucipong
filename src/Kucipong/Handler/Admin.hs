@@ -4,12 +4,14 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
+import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
+
 import Control.FromSum (fromEitherM, fromMaybeM, fromMaybeOrM)
 import Control.Monad.Time (MonadTime(..))
+import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
-import Text.EmailAddress (toText)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
        (ActionCtxT, Path, (<//>), getContext, redirect, renderRoute,
@@ -28,6 +30,7 @@ import Kucipong.Form
         AdminStoreCreateForm(AdminStoreCreateForm),
         AdminStoreDeleteForm(AdminStoreDeleteForm),
         AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm))
+import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
@@ -80,12 +83,11 @@ loginPost = do
   (AdminLoginForm email) <- getReqParamErr handleErr
   maybeAdminEntity <- dbFindAdmin email
   (Entity adminKey _) <-
-    fromMaybeM (handleErr "Could not login.") maybeAdminEntity
+    fromMaybeM (handleErr $ label def AdminErrorNoAdminEmail) maybeAdminEntity
   (Entity _ adminLoginToken) <- dbCreateAdminMagicLoginToken adminKey
   maybe (pure ()) handleSendEmailFail =<<
     sendAdminLoginEmail email (adminLoginTokenLoginToken adminLoginToken)
-  let
-    messages = ["We have sent you email with verification URL." :: Text]
+  let messages = [label def AdminMsgSentVerificationEmail]
   $(renderTemplateFromEnv "adminUser_login.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -93,11 +95,10 @@ loginPost = do
       $(logDebug) $ "got following error in admin loginPost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_login.html")
-
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
       $(logDebug) $ "got email error in admin loginPost: " <> tshow emailError
-      handleErr "could not send email"
+      handleErr (label def AdminErrorCouldNotSendEmail)
 
 -- | Login an admin.  Take the admin's 'LoginToken', and send them a session
 -- cookie.
@@ -120,12 +121,12 @@ doLoginGet loginToken = do
     noAdminLoginTokenError :: ActionCtxT ctx m a
     noAdminLoginTokenError = do
       setStatus forbidden403
-      let errors = ["Failed to log in X(\nPlease try again." :: Text]
+      let errors = [label def AdminErrorNoAdminLoginToken]
       $(renderTemplateFromEnv "adminUser_login.html")
     tokenExpiredError :: ActionCtxT ctx m a
     tokenExpiredError = do
       setStatus forbidden403
-      let errors = ["This log in URL has been expired X(\nPlease try again." :: Text]
+      let errors = [label def AdminErrorTokenExpired]
       $(renderTemplateFromEnv "adminUser_login.html")
 
 -- | Return the store create page for an admin.
@@ -159,25 +160,23 @@ storeCreatePost = do
         "got following error in admin storeCreatePost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_admin_store_create.html")
-
     handleCreateStoreFail :: DbSafeError -> ActionCtxT (HVect xs) m a
     handleCreateStoreFail DbSafeUniquenessViolation =
-      handleErr "store with that email address already exists"
-    handleCreateStoreFail _ = handleErr "problem with database"
-
+      handleErr $ label def AdminErrorStoreWithSameEmailExists
+    handleCreateStoreFail _ =
+      handleErr $ label def AdminErrorStoreCreateDbProblem
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
       $(logDebug) $
         "got email error in admin storeCreatePost: " <> tshow emailError
-      handleErr "could not send email"
+      handleErr $ label def AdminErrorSendEmailFailure
 
 -- | Return the store create page for an admin.
 storeDeleteGet
   :: forall xs m.
      MonadIO m
   => ActionCtxT (HVect xs) m ()
-storeDeleteGet =
-  $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
+storeDeleteGet = $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
 -- | Return the store delete confirmation page for an admin.
 storeDeleteConfirmPost
@@ -187,15 +186,15 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ Store{storeName = storeName_}) <-
-    fromMaybeOrM maybeStoreEntity $
-    handleErr "Could not find a store with that email address"
+  (Entity _ Store {storeName = storeName_}) <-
+    fromMaybeOrM maybeStoreEntity $ handleErr $ label def AdminErrorNoStoreEmail
   $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $
-        "got following error in admin storeDeleteConfirmPost handler: " <> errMsg
+        "got following error in admin storeDeleteConfirmPost handler: " <>
+        errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
@@ -208,29 +207,19 @@ storeDeletePost = do
     getReqParamErr handleErr
   deleteStoreResult <- dbDeleteStoreIfNameMatches storeEmailParam storeNameParam
   case deleteStoreResult of
-    StoreDeleteSuccess ->
-      let messages = ["Successfully deleted store." :: Text]
+    res@StoreDeleteSuccess ->
+      let messages = [label def res]
       in $(renderTemplateFromEnv "adminUser_admin_store_create.html")
-    StoreDeleteErrDoesNotExist ->
-      handleErr $ "Store with email address of \"" <> toText storeEmailParam <>
-      "\" does not exist"
-    StoreDeleteErrNameDoesNotMatch realStore ->
-      let
-        storeName_ = storeName realStore
-        errors =
-          [ "Store name \"" <> storeNameParam <>
-            "\" does not match the real store name \"" <>
-            storeName realStore <>
-            "\""
-          ]
-      in
-        $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
+    res@(StoreDeleteErrDoesNotExist _) -> handleErr $ label def res
+    res@(StoreDeleteErrNameDoesNotMatch realStore _) ->
+      let storeName_ = storeName realStore
+          errors = [label def res]
+      in $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $
-        "got following error in admin storeDeletePost handler: " <>
-        errMsg
+        "got following error in admin storeDeletePost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
@@ -241,10 +230,8 @@ adminAuthHook = do
   maybeAdminSession <- getAdminCookie
   case maybeAdminSession of
     Nothing ->
-      let
-        errors = [ "Need to be logged in as admin in order to access this page." :: Text ]
-      in
-        $(renderTemplateFromEnv "adminUser_login.html")
+      let errors = [label def AdminErrorNoAdminSession]
+      in $(renderTemplateFromEnv "adminUser_login.html")
     Just adminSession -> do
       oldCtx <- getContext
       return $ adminSession :&: oldCtx
