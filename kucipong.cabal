@@ -69,6 +69,7 @@ library
                      , blaze-markup
                      , classy-prelude
                      , clientsession
+                     , data-default
                      , emailaddress
                      , envelope
                      , from-sum

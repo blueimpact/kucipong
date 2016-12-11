@@ -7,12 +7,13 @@ module Kucipong.RenderTemplate
 
 import           Kucipong.Prelude           hiding (try)
 
+import Data.Default (def)
 import           Text.Blaze.Renderer.Text   (renderMarkup)
 import           Language.Haskell.TH        (Exp, Q, appE)
 import           Text.Heterocephalus        (compileHtmlFileWithDefault)
 import           Web.Spock                  (html)
 
-import           Kucipong.I18n (Lang(..), label)
+import           Kucipong.I18n (label)
 
 templateDirectory :: FilePath
 templateDirectory = "frontend" </> "dist"
@@ -35,7 +36,7 @@ renderTemplateFromEnv filename = renderer `appE` body
         , ("isSelected", [|isSelected|])
         , ("isChecked", [|isChecked|])
         , ("key", [|key|])
-        , ("label", [|label EnUS|])
+        , ("label", [|label def|])
         ]
 
     renderer :: Q Exp
