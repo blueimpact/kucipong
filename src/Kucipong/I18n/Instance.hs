@@ -18,20 +18,16 @@ import Kucipong.Monad.Db.Class (StoreDeleteResult(..))
 import Text.EmailAddress (toText)
 
 instance I18n AdminError where
-  label EnUS AdminErrorNoAdminEmail =
-    "Could not login."
-  label EnUS AdminErrorCouldNotSendEmail =
-    "Could not send email."
+  label EnUS AdminErrorNoAdminEmail = "Could not login."
+  label EnUS AdminErrorCouldNotSendEmail = "Could not send email."
   label EnUS AdminErrorNoAdminLoginToken =
     "Failed to log in X(\nPlease try again."
   label EnUS AdminErrorTokenExpired =
     "This log in URL has been expired X(\nPlease try again."
   label EnUS AdminErrorStoreWithSameEmailExists =
     "Store with that email address already exists."
-  label EnUS AdminErrorStoreCreateDbProblem =
-    "Problem with database."
-  label EnUS AdminErrorSendEmailFailure =
-    "Could not send email."
+  label EnUS AdminErrorStoreCreateDbProblem = "Problem with database."
+  label EnUS AdminErrorSendEmailFailure = "Could not send email."
   label EnUS AdminErrorNoStoreEmail =
     "Could not find a store with that email address."
   label EnUS AdminErrorNoAdminSession =
@@ -44,10 +40,9 @@ instance I18n AdminMsg where
 instance I18n StoreDeleteResult where
   label EnUS StoreDeleteSuccess = "Successfully deleted store."
   label EnUS (StoreDeleteErrNameDoesNotMatch realStore given) =
-    "Store name \"" <> given <>
-      "\" does not match the real store name \"" <>
-      storeName realStore <>
-      "\"."
+    "Store name \"" <> given <> "\" does not match the real store name \"" <>
+    storeName realStore <>
+    "\"."
   label EnUS (StoreDeleteErrDoesNotExist email) =
     "Store with email address of \"" <> toText email <> "\" does not exist"
 
