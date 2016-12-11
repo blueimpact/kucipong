@@ -20,9 +20,9 @@ import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
 data StoreDeleteResult
   = StoreDeleteSuccess
   -- ^ Successfully deleted the store.
-  | StoreDeleteErrNameDoesNotMatch Store
+  | StoreDeleteErrNameDoesNotMatch Store Text
   -- ^ 'Store' name passed in does not match the name of the actual 'Store'.
-  | StoreDeleteErrDoesNotExist
+  | StoreDeleteErrDoesNotExist EmailAddress
   -- ^ 'EmailAddress' passed in does not match an actual 'Store'.
   deriving (Eq, Generic, Show, Typeable)
 

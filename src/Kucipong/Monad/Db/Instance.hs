@@ -194,8 +194,8 @@ instance ( MonadBaseControl IO m
               | storeName store == name -> do
                 update storeKey [StoreDeleted =. Just (DeletedTime currTime)]
                 pure StoreDeleteSuccess
-              | otherwise -> pure $ StoreDeleteErrNameDoesNotMatch store
-            Nothing -> pure StoreDeleteErrDoesNotExist
+              | otherwise -> pure $ StoreDeleteErrNameDoesNotMatch store name
+            Nothing -> pure $ StoreDeleteErrDoesNotExist email
 
 
   -- ======= --
