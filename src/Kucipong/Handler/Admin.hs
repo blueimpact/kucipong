@@ -87,8 +87,7 @@ loginPost = do
   (Entity _ adminLoginToken) <- dbCreateAdminMagicLoginToken adminKey
   maybe (pure ()) handleSendEmailFail =<<
     sendAdminLoginEmail email (adminLoginTokenLoginToken adminLoginToken)
-  let
-    messages = [label def AdminMsgSentVerificationEmail]
+  let messages = [label def AdminMsgSentVerificationEmail]
   $(renderTemplateFromEnv "adminUser_login.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -96,7 +95,6 @@ loginPost = do
       $(logDebug) $ "got following error in admin loginPost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_login.html")
-
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
       $(logDebug) $ "got email error in admin loginPost: " <> tshow emailError
@@ -162,12 +160,11 @@ storeCreatePost = do
         "got following error in admin storeCreatePost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_admin_store_create.html")
-
     handleCreateStoreFail :: DbSafeError -> ActionCtxT (HVect xs) m a
     handleCreateStoreFail DbSafeUniquenessViolation =
       handleErr $ label def AdminErrorStoreWithSameEmailExists
-    handleCreateStoreFail _ = handleErr $ label def AdminErrorStoreCreateDbProblem
-
+    handleCreateStoreFail _ =
+      handleErr $ label def AdminErrorStoreCreateDbProblem
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
       $(logDebug) $
@@ -179,8 +176,7 @@ storeDeleteGet
   :: forall xs m.
      MonadIO m
   => ActionCtxT (HVect xs) m ()
-storeDeleteGet =
-  $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
+storeDeleteGet = $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
 -- | Return the store delete confirmation page for an admin.
 storeDeleteConfirmPost
@@ -190,15 +186,15 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ Store{storeName = storeName_}) <-
-    fromMaybeOrM maybeStoreEntity $
-    handleErr $ label def AdminErrorNoStoreEmail
+  (Entity _ Store {storeName = storeName_}) <-
+    fromMaybeOrM maybeStoreEntity $ handleErr $ label def AdminErrorNoStoreEmail
   $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $
-        "got following error in admin storeDeleteConfirmPost handler: " <> errMsg
+        "got following error in admin storeDeleteConfirmPost handler: " <>
+        errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
@@ -214,20 +210,16 @@ storeDeletePost = do
     res@StoreDeleteSuccess ->
       let messages = [label def res]
       in $(renderTemplateFromEnv "adminUser_admin_store_create.html")
-    res@(StoreDeleteErrDoesNotExist _) ->
-      handleErr $ label def res
+    res@(StoreDeleteErrDoesNotExist _) -> handleErr $ label def res
     res@(StoreDeleteErrNameDoesNotMatch realStore _) ->
-      let
-        storeName_ = storeName realStore
-        errors = [label def res]
-      in
-        $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
+      let storeName_ = storeName realStore
+          errors = [label def res]
+      in $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $
-        "got following error in admin storeDeletePost handler: " <>
-        errMsg
+        "got following error in admin storeDeletePost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
 
@@ -238,10 +230,8 @@ adminAuthHook = do
   maybeAdminSession <- getAdminCookie
   case maybeAdminSession of
     Nothing ->
-      let
-        errors = [label def AdminErrorNoAdminSession]
-      in
-        $(renderTemplateFromEnv "adminUser_login.html")
+      let errors = [label def AdminErrorNoAdminSession]
+      in $(renderTemplateFromEnv "adminUser_login.html")
     Just adminSession -> do
       oldCtx <- getContext
       return $ adminSession :&: oldCtx
