@@ -201,6 +201,7 @@ storeEditPost = do
       -- s3UploadFile originalFileName contentType tempLocation
       pure ()
     Nothing -> handleErr $ I18n.label def StoreErrorNoImage
+  checkBusinessCategoryDetails businessCategory businessCategoryDetails
   void $
     dbUpsertStore
       email
@@ -216,6 +217,14 @@ storeEditPost = do
       url
   redirect . renderRoute $ storeUrlPrefix
   where
+    checkBusinessCategoryDetails :: BusinessCategory
+                                 -> [BusinessCategoryDetail]
+                                 -> ActionCtxT (HVect xs) m ()
+    checkBusinessCategoryDetails busiCat busiCatDets
+      | all (isValidBusinessCategoryDetailFor busiCat) busiCatDets = pure ()
+      | otherwise =
+        handleErr $ I18n.label def StoreErrorBusinessCategoryDetailIncorrect
+
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       p <- params

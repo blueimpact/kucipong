@@ -6,7 +6,8 @@ module Kucipong.Handler.Store.Types
 import Kucipong.Prelude
 
 data StoreError
-  = StoreErrorCouldNotSendEmail
+  = StoreErrorBusinessCategoryDetailIncorrect
+  | StoreErrorCouldNotSendEmail
   | StoreErrorNoImage
   | StoreErrorNoStoreEmail EmailAddress
   deriving (Show, Eq, Ord, Read)
