@@ -20,8 +20,6 @@ import Database.Persist.TH (
     )
 
 import Kucipong.Db.Models.Base
-    ( BusinessCategory(..), BusinessCategoryDetail(..), CouponType, CreatedTime(..), DeletedTime(..), FashionDetail(..), GourmetDetail(..), Image
-    , LoginTokenExpirationTime(..), Percent, Price, UpdatedTime(..) )
 import Kucipong.Db.Models.EntityDefs ( kucipongEntityDefs )
 import Kucipong.LoginToken ( LoginToken )
 
