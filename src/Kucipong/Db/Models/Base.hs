@@ -487,3 +487,21 @@ instance FromJSON BusinessCategoryDetail where
 
 instance FromHttpApiData BusinessCategoryDetail where
   parseUrlPiece = businessCategoryDetailFromText
+
+-- | Returns whether a given 'BusinessCategoryDetail' works in a
+-- 'BusinessCategory'. 'CommonDetail's are valid for every 'BusinessCategory'.
+--
+-- >>> isValidBusinessCategoryDetailFor Gourmet (GourmetDetail GourmetSushi)
+-- True
+-- >>> isValidBusinessCategoryDetailFor Fashion (GourmetDetail GourmetSushi)
+-- False
+-- >>> isValidBusinessCategoryDetailFor Gadget (CommonDetail CommonPoliteService)
+-- True
+isValidBusinessCategoryDetailFor :: BusinessCategory -> BusinessCategoryDetail -> Bool
+isValidBusinessCategoryDetailFor Gourmet (GourmetDetail _) = True
+isValidBusinessCategoryDetailFor Fashion (FashionDetail _) = True
+isValidBusinessCategoryDetailFor Gadget (GadgetDetail _) = True
+isValidBusinessCategoryDetailFor Traveling (TravelingDetail _) = True
+isValidBusinessCategoryDetailFor Beauty (BeautyDetail _) = True
+isValidBusinessCategoryDetailFor _ (CommonDetail _) = True
+isValidBusinessCategoryDetailFor _ _ = False
