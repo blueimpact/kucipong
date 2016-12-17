@@ -13,17 +13,13 @@ module Kucipong.Db.Models
 
 import Kucipong.Prelude
 
-import Database.Persist
-    ( EntityField(..), Key(..), Unique )
-import Database.Persist.TH (
-    share, mkPersist, sqlSettings, mkMigrate, mpsGenerateLenses,
-    )
+import Database.Persist (EntityField(..), Key(..), Unique)
+import Database.Persist.TH
+       (share, mkPersist, sqlSettings, mkMigrate, mpsGenerateLenses)
 
 import Kucipong.Db.Models.Base
-    ( BusinessCategory(..), BusinessCategoryDetail(..), CouponType, CreatedTime(..), DeletedTime(..), FashionDetail(..), GourmetDetail(..), Image
-    , LoginTokenExpirationTime(..), Percent, Price, UpdatedTime(..) )
-import Kucipong.Db.Models.EntityDefs ( kucipongEntityDefs )
-import Kucipong.LoginToken ( LoginToken )
+import Kucipong.Db.Models.EntityDefs (kucipongEntityDefs)
+import Kucipong.LoginToken (LoginToken)
 
 share [ mkPersist sqlSettings { mpsGenerateLenses = False }
       , mkMigrate "migrateAll"

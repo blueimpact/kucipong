@@ -52,6 +52,8 @@ instance I18n StoreDeleteResult where
     "Store with email address of \"" <> toText email <> "\" does not exist."
 
 instance I18n StoreError where
+  label EnUS StoreErrorBusinessCategoryDetailIncorrect =
+    "Business category details do not belong to the selected business category."
   label EnUS StoreErrorCouldNotSendEmail =
     "Could not send email. Please try again."
   label EnUS StoreErrorNoImage =

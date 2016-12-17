@@ -8,6 +8,7 @@ import Control.FromSum (fromMaybeOrM)
 import Data.Aeson ( FromJSON, ToJSON, Value, parseJSON, toJSON )
 import Data.Aeson.TH (defaultOptions, deriveJSON)
 import Data.Aeson.Types (parseMaybe, typeMismatch)
+import Data.Data (toConstr)
 import Data.Kind (Constraint)
 import Database.Persist ( PersistField(..), PersistValue )
 import Database.Persist.Sql ( PersistFieldSql(..), SqlType )
@@ -487,3 +488,33 @@ instance FromJSON BusinessCategoryDetail where
 
 instance FromHttpApiData BusinessCategoryDetail where
   parseUrlPiece = businessCategoryDetailFromText
+
+-- | Returns whether a given 'BusinessCategoryDetail' works in a
+-- 'BusinessCategory'. 'CommonDetail's are valid for every 'BusinessCategory'.
+--
+-- This currently just compares the 'BusinessCategory' constructor to the first
+-- characters of the 'BusinessCategoryDetail' constructor and tests if they are
+-- the same.
+--
+-- For instance, the 'Gourmet' constructor matches the 'GourmetDetail'
+-- constructor.
+--
+-- >>> isValidBusinessCategoryDetailFor Gourmet (GourmetDetail GourmetSushi)
+-- True
+--
+-- However, the 'Fashion' constructor doesn't match the 'GourmetDetail'
+-- constructor.
+--
+-- >>> isValidBusinessCategoryDetailFor Fashion (GourmetDetail GourmetSushi)
+-- False
+--
+-- The 'CommonDetail' constructor works for any 'BusinessCategory'.
+--
+-- >>> isValidBusinessCategoryDetailFor Gadget (CommonDetail CommonPoliteService)
+-- True
+isValidBusinessCategoryDetailFor :: BusinessCategory -> BusinessCategoryDetail -> Bool
+isValidBusinessCategoryDetailFor busiCat busiCatDet =
+  let busiCatConstr = toConstr busiCat
+      busiCatDetConstr = toConstr busiCatDet
+  in show busiCatConstr `isPrefixOf` show busiCatDetConstr ||
+     "Common" `isPrefixOf` show busiCatDetConstr
