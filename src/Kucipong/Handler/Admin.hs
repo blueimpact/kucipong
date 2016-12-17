@@ -12,6 +12,7 @@ import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
+import Text.Heterocephalus (overwrite)
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
        (ActionCtxT, Path, (<//>), getContext, redirect, renderRoute,
@@ -36,7 +37,8 @@ import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
         MonadKucipongSendEmail(..), StoreDeleteResult(..), dbFindAdmin,
         dbFindAdminLoginToken, dbFindStoreByEmail)
-import Kucipong.RenderTemplate (renderTemplateFromEnv)
+import Kucipong.RenderTemplate
+       (renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
        (ContainsAdminSession, getAdminCookie, getAdminEmail,
@@ -186,9 +188,10 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ Store {storeName = storeName_}) <-
+  (Entity _ Store {storeName}) <-
     fromMaybeOrM maybeStoreEntity $ handleErr $ label def AdminErrorNoStoreEmail
-  $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
+  $(renderTemplate "adminUser_admin_store_delete_confirm.html" $
+    overwrite "storeName" [|storeName|])
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
@@ -212,9 +215,10 @@ storeDeletePost = do
       in $(renderTemplateFromEnv "adminUser_admin_store_create.html")
     res@(StoreDeleteErrDoesNotExist _) -> handleErr $ label def res
     res@(StoreDeleteErrNameDoesNotMatch realStore _) ->
-      let storeName_ = storeName realStore
+      let storeName' = storeName realStore
           errors = [label def res]
-      in $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
+      in $(renderTemplate "adminUser_admin_store_delete_confirm.html" $
+        overwrite "storeName" [|storeName'|])
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do

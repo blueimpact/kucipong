@@ -28,7 +28,7 @@ import Kucipong.Db
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
-import qualified Kucipong.I18n as I18n
+import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
@@ -74,12 +74,12 @@ loginPost = do
   maybeStoreEntity <- dbFindStoreByEmail email
   (Entity (StoreKey storeEmailKey) _) <-
     fromMaybeM
-      (handleErr $ I18n.label def (StoreErrorNoStoreEmail email))
+      (handleErr $ label def (StoreErrorNoStoreEmail email))
       maybeStoreEntity
   (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeEmailKey
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail email (storeLoginTokenLoginToken storeLoginToken)
-  let messages = [I18n.label def StoreMsgSentVerificationEmail]
+  let messages = [label def StoreMsgSentVerificationEmail]
   $(renderTemplateFromEnv "storeUser_login.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -91,7 +91,7 @@ loginPost = do
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
       $(logDebug) $ "got email error in store loginPost: " <> tshow emailError
-      handleErr $ I18n.label def StoreErrorCouldNotSendEmail
+      handleErr $ label def StoreErrorCouldNotSendEmail
 
 -- | Login an store.  Take the store's 'LoginToken', and send them a session
 -- cookie.
@@ -201,7 +201,7 @@ storeEditPost = do
       -- upload the file to S3 here:
       -- s3UploadFile originalFileName contentType tempLocation
       pure ()
-    Nothing -> handleErr $ I18n.label def StoreErrorNoImage
+    Nothing -> handleErr $ label def StoreErrorNoImage
   checkBusinessCategoryDetails businessCategory businessCategoryDetails
   void $
     dbUpsertStore
@@ -224,7 +224,7 @@ storeEditPost = do
     checkBusinessCategoryDetails busiCat busiCatDets
       | all (isValidBusinessCategoryDetailFor busiCat) busiCatDets = pure ()
       | otherwise =
-        handleErr $ I18n.label def StoreErrorBusinessCategoryDetailIncorrect
+        handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect
 
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do

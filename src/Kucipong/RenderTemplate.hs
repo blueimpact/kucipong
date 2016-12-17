@@ -1,8 +1,8 @@
-{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Kucipong.RenderTemplate
-  ( renderTemplateFromEnv
+  ( renderTemplate
+  , renderTemplateFromEnv
   ) where
 
 import Kucipong.Prelude hiding (try)
@@ -10,7 +10,8 @@ import Kucipong.Prelude hiding (try)
 import Data.Default (def)
 import Language.Haskell.TH (Exp, Q, appE)
 import Text.Blaze.Renderer.Text (renderMarkup)
-import Text.Heterocephalus (compileHtmlFileWithDefault)
+import Text.Heterocephalus
+       (ScopeM, compileHtmlFileWith, overwrite, setDefault)
 import Web.Spock (html)
 
 import Kucipong.I18n (label)
@@ -20,25 +21,29 @@ templateDirectory = "frontend" </> "dist"
 
 -- | Render a template file with adding empty @errors@ and @messages@ keys/values
 -- if they don't already exist in scope.
-renderTemplateFromEnv :: String -> Q Exp
-renderTemplateFromEnv filename = renderer `appE` body
-  where
+renderTemplate :: String -> ScopeM () -> Q Exp
+renderTemplate filename extraScope = renderer `appE` body
     -- This is the full path of the template file.
+  where
     fullFilePath :: FilePath
     fullFilePath = templateDirectory </> filename
     body :: Q Exp
     body =
-      compileHtmlFileWithDefault
-        fullFilePath
-        [ ("errors", [|empty :: [Text]|])
-        , ("messages", [|empty :: [Text]|])
-        , ("isSelected", [|isSelected|])
-        , ("isChecked", [|isChecked|])
-        , ("key", [|key|])
-        , ("label", [|label def|])
-        ]
+      compileHtmlFileWith fullFilePath $ do
+        setDefault "errors" [|empty :: [Text]|]
+        setDefault "messages" [|empty :: [Text]|]
+        overwrite "isSelected" [|isSelected|]
+        overwrite "isChecked" [|isChecked|]
+        overwrite "key" [|key|]
+        overwrite "label" [|label def|]
+        extraScope
     renderer :: Q Exp
     renderer = [|html . toStrict . renderMarkup|]
+
+-- | Render a template file with adding empty @errors@ and @messages@ keys/values
+-- if they don't already exist in scope.
+renderTemplateFromEnv :: String -> Q Exp
+renderTemplateFromEnv filename = renderTemplate filename (pure ())
 
 -- | For the purpose of rendering 'selected' attributes in the template file.
 isSelected
