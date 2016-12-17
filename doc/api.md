@@ -2055,7 +2055,7 @@ coupon :: Coupon -- The coupon to edit
 </html>
 ```
 
-### Edit my coupon
+### PUT Edit my coupon
 
 #### Sample request and response
 
@@ -2063,7 +2063,7 @@ This response is a sample simple HTML for convenience.
 Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
 
 ```bash
-$ curl -X POST "http://$domain/store/coupon/${coupon_id}/edit" \
+$ curl -X PUT "http://$domain/store/coupon/${coupon_id}/edit" \
   -H "AUTH-TOKEN: ${token}" \
   -F "couponTitle=当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円" \
   -F "couponImage=@/path/to/image" \
