@@ -9,6 +9,7 @@ import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
+import Data.List (nub)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Web.Routing.Combinators (PathState(Open))
@@ -207,7 +208,7 @@ storeEditPost = do
       email
       name
       businessCategory
-      businessCategoryDetails
+      (nub businessCategoryDetails)
       Nothing
       salesPoint
       address
@@ -284,17 +285,19 @@ allBusinessCategoryDetails Nothing = map CommonDetail [minBound .. maxBound]
 
 -- | Take the list of all parameters (which includes business category details)
 -- returned from 'params', and return only those which are valid
--- 'BusinessCategoryDetail's.
+-- 'BusinessCategoryDetail's.  Remove duplicates.
 --
 -- >>> let nameParam = ("name", "foo store")
 -- >>> let busCatDetParam1 = ("businessCategoryDetails", "GourmetSushi")
 -- >>> let busCatDetParam2 = ("businessCategoryDetails", "TravelingAsia")
+-- >>> let busCatDetParam3 = ("businessCategoryDetails", "GourmetSushi")
 -- >>> let busCatDetParamBad = ("businessCategoryDetails", "foobarbaz")
--- >>> let ps = [nameParam, busCatDetParam1, busCatDetParam2, busCatDetParamBad]
+-- >>> let ps = [nameParam, busCatDetParam1, busCatDetParam2, busCatDetParam3, busCatDetParamBad]
 -- >>> businessCategoryDetailsFromParams ps
 -- [GourmetSushi,TravelingAsia]
 businessCategoryDetailsFromParams :: [(Text, Text)] -> [BusinessCategoryDetail]
 businessCategoryDetailsFromParams =
+  nub .
   catMaybes .
   map (unfoldAllBusinessCategoryDetailAlt (Proxy :: Proxy Read) readMay) .
   filterBusinessCategoryDetails
