@@ -52,17 +52,17 @@ install:
   set -ex
   cd frontend/
   # TODO: We could try installing npm packages globally, and then cache that directory.
-  npm install
+  time npm install
   cd ../
-  stack --no-terminal --install-ghc test --bench --only-dependencies
+  time stack --no-terminal --install-ghc test --bench --only-dependencies
   set +ex
 
 script:
 - |
   set -ex
   cd frontend/
-  npm run build
+  time npm run build
   cd ../
   # TODO: haddock fails with ghc-8.0.1.  Reenable haddock when we get lts-8.
-  stack --no-terminal test --bench --no-run-benchmarks # --haddock --no-haddock-deps
+  time stack --no-terminal test --bench --no-run-benchmarks # --haddock --no-haddock-deps
   set +ex
