@@ -13,12 +13,12 @@ include _layout
           action="/admin/store/delete"
         )
           .row
-            | 「\#{storeName_}」を削除しますか？
+            | 「\#{storeName}」を削除しますか？
           .labeledRow
             label.labeledRow-header(for="storeEmail")
 
               | 確認のため
-              span.strong \#{storeName_}
+              span.strong \#{storeName}
               | と入力してください
             .labeledRow-body
               input#storeName(
