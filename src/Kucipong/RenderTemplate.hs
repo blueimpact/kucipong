@@ -1,7 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Kucipong.RenderTemplate
-  ( renderTemplate
+  ( fromParams
+  , renderTemplate
   , renderTemplateFromEnv
   ) where
 
@@ -18,6 +19,18 @@ import Kucipong.I18n (label)
 
 templateDirectory :: FilePath
 templateDirectory = "frontend" </> "dist"
+
+-- | The `fromParams` construct a `ScopeM ()` from parameter lists.
+fromParams
+  :: Q Exp -- ^ @$(qdict) :: [('Text', 'Text')]@
+  -> [Text]
+  -> ScopeM ()
+fromParams qdict list = foldr f (pure ()) list
+  where
+    f :: Text -> ScopeM () -> ScopeM ()
+    f name scope = do
+      scope
+      overwrite (fromString . unpack $ name) ([|lookup name|] `appE` qdict)
 
 -- | Render a template file with adding empty @errors@ and @messages@ keys/values
 -- if they don't already exist in scope.
