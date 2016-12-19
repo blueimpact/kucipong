@@ -20,26 +20,26 @@ import Kucipong.Db (BusinessCategory(..), BusinessCategoryDetail(..))
 
 data AdminLoginForm = AdminLoginForm
   { email :: !EmailAddress
-  } deriving (Data, Eq, Generic, Show, Typeable)
+  } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 instance FromForm AdminLoginForm
 
 data AdminStoreCreateForm = AdminStoreCreateForm
   { storeEmail :: !EmailAddress
-  } deriving (Data, Eq, Generic, Show, Typeable)
+  } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 instance FromForm AdminStoreCreateForm
 
 data AdminStoreDeleteConfirmForm = AdminStoreDeleteConfirmForm
   { storeEmail :: !EmailAddress
-  } deriving (Data, Eq, Generic, Show, Typeable)
+  } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 instance FromForm AdminStoreDeleteConfirmForm
 
 data AdminStoreDeleteForm = AdminStoreDeleteForm
   { storeEmail :: !EmailAddress
   , storeName :: !Text
-  } deriving (Data, Eq, Generic, Show, Typeable)
+  } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 instance FromForm AdminStoreDeleteForm
 
@@ -49,7 +49,7 @@ instance FromForm AdminStoreDeleteForm
 
 data StoreLoginForm = StoreLoginForm
   { email :: !EmailAddress
-  } deriving (Data, Eq, Generic, Show, Typeable)
+  } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 instance FromForm StoreLoginForm
 
