@@ -26,17 +26,20 @@ data CouponType
   = CouponTypeDiscount
   | CouponTypeGift
   | CouponTypeSet
+  | CouponTypeOther
   deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 couponTypeToText :: CouponType -> Text
 couponTypeToText CouponTypeDiscount = "discount"
 couponTypeToText CouponTypeGift = "gift"
 couponTypeToText CouponTypeSet = "set"
+couponTypeToText CouponTypeOther = "other"
 
 couponTypeFromText :: Text -> Either Text CouponType
 couponTypeFromText "discount" = pure CouponTypeDiscount
 couponTypeFromText "gift" = pure CouponTypeGift
 couponTypeFromText "set" = pure CouponTypeSet
+couponTypeFromText "other" = pure CouponTypeOther
 couponTypeFromText text = Left $ "Tried to convert \"" <> text
     <> "\"to coupon type, but failed."
 

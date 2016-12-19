@@ -15,9 +15,10 @@ import Database.Persist.Sql
 import Kucipong.Config (Config)
 import Kucipong.Db
        (Admin(..), AdminLoginToken(..), BusinessCategory(..),
-        BusinessCategoryDetail(..), CreatedTime(..), DeletedTime(..),
-        DbSafeError(..), EntityField(..), EntityDateFields(..), Image,
-        Key(..), LoginTokenExpirationTime(..), Store(..), StoreEmail(..),
+        BusinessCategoryDetail(..), Coupon(..), CouponType(..),
+        CreatedTime(..), DeletedTime(..), DbSafeError(..), EntityField(..),
+        EntityDateFields(..), Image, Key(..), LoginTokenExpirationTime(..),
+        Percent(..), Price(..), Store(..), StoreEmail(..),
         StoreLoginToken(..), UpdatedTime(..), emailToAdminKey,
         emailToStoreEmailKey, emailToStoreKey, runDb, runDbCurrTime,
         runDbSafe)
@@ -211,6 +212,19 @@ instance ( MonadBaseControl IO m
       go :: m (Maybe (Entity record))
       go = runDb $ getEntity key
 
+  dbInsert
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => (UTCTime -> record)
+    -> KucipongDbT m (Entity record)
+  dbInsert recordCreator = lift go
+    where
+      go :: m (Entity record)
+      go =
+        runDbCurrTime $ \currTime -> do
+          let newRecord = recordCreator currTime
+          insertEntity newRecord
+
   dbSelectFirst
     :: forall record.
        (PersistRecordBackend record SqlBackend)
@@ -266,6 +280,17 @@ dbFindByKeyNotDeleted key = do
         Nothing -> pure (Entity key value)
         -- If this entity is deleted, then return Nothing.
         Just _ -> Nothing
+
+dbInsertWithTime
+  :: forall m record.
+     ( MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => (CreatedTime -> UpdatedTime -> Maybe DeletedTime -> record)
+  -> m (Entity record)
+dbInsertWithTime recordCreator =
+  dbInsert $ \currTime ->
+    recordCreator (CreatedTime currTime) (UpdatedTime currTime) Nothing
 
 dbSelectFirstNotDeleted
   :: forall m record.
@@ -367,6 +392,58 @@ dbUpsertStore email name businessCategory businessCategoryDetails image salesPoi
       businessHours
       regularHoliday
       url
+
+------------
+-- Coupon --
+------------
+
+dbInsertCoupon
+  :: MonadKucipongDb m
+  => EmailAddress
+  -> Text
+  -> CouponType
+  -> UTCTime
+  -> Maybe UTCTime
+  -> Maybe Image
+  -> Maybe Percent
+  -> Maybe Price
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Price
+  -> Maybe Price
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Price
+  -> Maybe Price
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Text
+  -> m (Entity Coupon)
+dbInsertCoupon email title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+  dbInsertWithTime $ \createdTime updatedTime deletedTime ->
+    Coupon
+      (emailToStoreEmailKey email)
+      createdTime
+      updatedTime
+      deletedTime
+      title
+      couponType
+      validFrom
+      validUntil
+      image
+      discountPercent
+      discountMinimumPrice
+      discountOtherConditions
+      giftContent
+      giftReferencePrice
+      giftMinimumPrice
+      giftOtherConditions
+      setContent
+      setPrice
+      setReferencePrice
+      setOtherConditions
+      otherContent
+      otherConditions
 
 -------------
 -- Helpers --
