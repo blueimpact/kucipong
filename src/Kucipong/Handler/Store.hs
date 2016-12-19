@@ -34,7 +34,8 @@ import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
         MonadKucipongSendEmail(..), dbFindStoreByEmail,
         dbFindStoreLoginToken, dbUpsertStore)
-import Kucipong.RenderTemplate (renderTemplateFromEnv)
+import Kucipong.RenderTemplate
+       (fromParams, renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
 import Kucipong.Spock
        (ContainsStoreSession, getReqParamErr, getStoreCookie,
@@ -225,22 +226,25 @@ storeEditPost = do
       | all (isValidBusinessCategoryDetailFor busiCat) busiCatDets = pure ()
       | otherwise =
         handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect
-
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       p <- params
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
       let errors = [errMsg]
-          name = lookup "name" p
-          businessCategory = readBusinessCategory =<< lookup "businessCategory" p
+          businessCategory =
+            readBusinessCategory =<< lookup "businessCategory" p
           businessCategoryDetails = businessCategoryDetailsFromParams p
-          salesPoint = lookup "salesPoint" p
-          address = lookup "address" p
-          phoneNumber = lookup "phoneNumber" p
           businessHourLines = maybe [] (lines) $ lookup "businessHours" p
-          regularHoliday = lookup "regularHoliday" p
-          url = lookup "url" p
-      $(renderTemplateFromEnv "storeUser_store_edit.html")
+      $(renderTemplate "storeUser_store_edit.html" $
+        fromParams
+          [|p|]
+          [ "name"
+          , "salesPoint"
+          , "address"
+          , "phoneNumber"
+          , "regularHoliday"
+          , "url"
+          ])
 
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
