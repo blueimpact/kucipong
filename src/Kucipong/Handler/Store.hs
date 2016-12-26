@@ -7,8 +7,6 @@ module Kucipong.Handler.Store
 
 import Kucipong.Prelude
 
-import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
-
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
@@ -32,6 +30,7 @@ import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.Route (doLoginR, editR, loginR, rootR, storeUrlPrefix)
+import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
