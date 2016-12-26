@@ -2,6 +2,7 @@ include _layout
   body#main.wrapper
     include _storeHeader
       | クーポン情報 編集
+    include _messageArea
     form.couponEditor(enctype="multipart/form-data" method="POST")
       .couponEditor_signbord
         .couponEditor_titleArea

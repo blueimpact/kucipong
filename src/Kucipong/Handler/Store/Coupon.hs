@@ -6,43 +6,22 @@ import Kucipong.Prelude
 
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 
-import Control.FromSum (fromMaybeM)
-import Control.Lens ((&), (.~))
 import Control.Monad.Time (MonadTime(..))
-import Data.Default (def)
-import Data.List (nub)
 import Data.HVect (HVect(..))
-import Database.Persist (Entity(..))
-import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, UploadedFile(..), (<//>), files, getContext,
-        params, prehook, root, redirect, renderRoute, var)
+       (ActionCtxT, (<//>), params, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
-import Kucipong.Db
-       (BusinessCategory(..), BusinessCategoryDetail(..), CouponType(..),
-        Key(..), LoginTokenExpirationTime(..), Store(..),
-        StoreLoginToken(storeLoginTokenExpirationTime,
-                        storeLoginTokenLoginToken),
-        couponTypeToText, isValidBusinessCategoryDetailFor,
-        readBusinessCategory, unfoldAllBusinessCategoryDetailAlt)
-import Kucipong.Email (EmailError)
-import Kucipong.Form
-       (StoreNewCouponForm(..), StoreLoginForm(StoreLoginForm),
-        removeNonUsedCouponInfo)
+import Kucipong.Form (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Store.Route (storeUrlPrefix, couponR)
 import Kucipong.I18n (label)
-import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
-        MonadKucipongSendEmail(..), dbInsertCoupon,
-        dbFindStoreLoginToken, dbUpsertStore)
-import Kucipong.RenderTemplate
-       (fromParams, renderTemplate, renderTemplateFromEnv)
+        MonadKucipongSendEmail(..), dbInsertCoupon)
+import Kucipong.RenderTemplate (fromParams, renderTemplate)
 import Kucipong.Session (Store, Session(..))
 import Kucipong.Spock
-       (ContainsStoreSession, getReqParamErr, getStoreCookie,
-        getStoreEmail, setStoreCookie)
+       (ContainsStoreSession, getReqParamErr, getStoreEmail)
 
 storeGet
   :: forall xs n m.
@@ -172,10 +151,4 @@ storeCouponComponent
 storeCouponComponent = do
   post couponR couponPost
   -- get doLoginR doLogin
-  -- get loginR loginGet
-  -- post loginR loginPost
-  -- prehook storeAuthHook $ do
-  --   get rootR storeGet
-  --   get editR storeEditGet
-  --   post editR storeEditPost
 
