@@ -25,3 +25,5 @@ editR = "edit"
 couponR :: Path '[] 'Open
 couponR = "coupon"
 
+createR :: Path '[] 'Open
+createR = "create"

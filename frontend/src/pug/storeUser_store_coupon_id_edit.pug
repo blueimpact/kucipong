@@ -3,7 +3,7 @@ include _layout
     include _storeHeader
       | クーポン情報 編集
     include _messageArea
-    form.couponEditor(enctype="multipart/form-data" method="POST")
+    form.couponEditor(enctype="multipart/form-data" method="POST" action="/store/coupon")
       .couponEditor_signbord
         .couponEditor_titleArea
           .couponEditor_titleArea-title
@@ -107,7 +107,7 @@ include _layout
                 input#giftReferencePrice(
                   name="giftReferencePrice" type="number"
                   min="0"
-                  value="\#{fromMaybe "30" giftReferencePrice}"
+                  value!='\#{fromMaybe "30" giftReferencePrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="giftMinimumPrice")
@@ -116,7 +116,7 @@ include _layout
                 input#giftMinimumFee(
                   name="giftMinimumPrice" type="number"
                   min="0"
-                  value="\#{fromMaybe "30" giftMinimumPrice}"
+                  value!='\#{fromMaybe "30" giftMinimumPrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="giftOtherConditions")
@@ -143,7 +143,7 @@ include _layout
                 input#setPrice(
                   name="setPrice" type="number"
                   min="0"
-                  value="\#{fromMaybe "3000" setPrice}"
+                  value!='\#{fromMaybe "3000" setPrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="setReferencePrice")
@@ -152,7 +152,7 @@ include _layout
                 input#setReferencePrice(
                   name="setReferencePrice" type="number"
                   min="0"
-                  value="\#{fromMaybe "4000" setReferencePrice}"
+                  value!='\#{fromMaybe "4000" setReferencePrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="setOtherConditions")

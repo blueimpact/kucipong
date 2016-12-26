@@ -12,8 +12,11 @@ import Web.Spock
        (ActionCtxT, (<//>), params, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
-import Kucipong.Form (StoreNewCouponForm(..), removeNonUsedCouponInfo)
-import Kucipong.Handler.Store.Route (storeUrlPrefix, couponR)
+import Kucipong.Db (CouponType(..), couponTypeToText)
+import Kucipong.Form
+       (StoreNewCouponForm(..), removeNonUsedCouponInfo)
+import Kucipong.Handler.Store.Route
+       (storeUrlPrefix, couponR, createR)
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
@@ -60,25 +63,33 @@ storeGet = do
   --   handleNoStoreError =
   --     redirect . renderRoute $ storeUrlPrefix <//> editR
 
-storeEditGet
+couponNewGet
   :: forall xs n m.
      (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
   => ActionCtxT (HVect xs) m ()
-storeEditGet = do
-  undefined
-  -- (StoreSession email) <- getStoreEmail
-  -- maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
-  -- let
-  --   name = (storeName <$> maybeStore)
-  --   businessCategory = (storeBusinessCategory <$> maybeStore)
-  --   businessCategoryDetails = concat (storeBusinessCategoryDetails <$> maybeStore)
-  --   salesPoint = (maybeStore >>= storeSalesPoint)
-  --   address = (maybeStore >>= storeAddress)
-  --   phoneNumber = (maybeStore >>= storePhoneNumber)
-  --   businessHourLines = maybe [] lines (maybeStore >>= storeBusinessHours)
-  --   regularHoliday = (maybeStore >>= storeRegularHoliday)
-  --   url = (maybeStore >>= storeUrl)
-  -- undefined $ (renderTemplateFromEnv "storeUser_store_edit.html")
+couponNewGet = do
+  let p = [] :: [(Text, Text)]
+  $(renderTemplate "storeUser_store_coupon_id_edit.html" $
+    fromParams
+      [|p|]
+      [ "title"
+      , "couponType"
+      , "validFrom"
+      , "validUntil"
+      , "discountPercent"
+      , "discountMinimumPrice"
+      , "discountOtherConditions"
+      , "giftContent"
+      , "giftReferencePrice"
+      , "giftMinimumPrice"
+      , "giftOtherConditions"
+      , "setContent"
+      , "setPrice"
+      , "setReferencePrice"
+      , "setOtherConditions"
+      , "otherContent"
+      , "otherConditions"
+      ])
 
 couponPost
   :: forall xs n m.
@@ -133,7 +144,7 @@ couponPost = do
           , "setContent"
           , "setPrice"
           , "setReferencePrice"
-          , "setOtherConditionstions"
+          , "setOtherConditions"
           , "otherContent"
           , "otherConditions"
           ])
@@ -150,5 +161,5 @@ storeCouponComponent
   => SpockCtxT (HVect (Session Kucipong.Session.Store : xs)) m ()
 storeCouponComponent = do
   post couponR couponPost
-  -- get doLoginR doLogin
+  get (couponR <//> createR) couponNewGet
 
