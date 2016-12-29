@@ -79,8 +79,8 @@ instance FromForm StoreEditForm
 data StoreNewCouponForm = StoreNewCouponForm
   { title :: !Text
   , couponType :: CouponType
-  , validFrom :: !UTCTime
-  , validUntil :: !(Maybe UTCTime)
+  , validFrom :: !Day
+  , validUntil :: !(Maybe Day)
   , discountPercent :: !(Maybe Percent)
   , discountMinimumPrice :: !(Maybe Price)
   , discountOtherConditions :: !(Maybe Text)

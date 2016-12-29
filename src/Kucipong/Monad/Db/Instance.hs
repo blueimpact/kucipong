@@ -402,8 +402,8 @@ dbInsertCoupon
   => EmailAddress
   -> Text
   -> CouponType
-  -> UTCTime
-  -> Maybe UTCTime
+  -> Day
+  -> Maybe Day
   -> Maybe Image
   -> Maybe Percent
   -> Maybe Price
