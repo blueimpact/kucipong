@@ -6,6 +6,10 @@ include _layout
       .store_editBtn
         a.btn.outerBtn(href="/store/coupon/create") クーポン追加
 
+    | %{ if null couponEntities }
+    |   No Coupons
+    | %{ else }
+    |   %{ forall couponEntity <- couponEntities }
     include _couponSimple
-    include _couponSimple
-    include _couponSimple
+    |   %{ endforall }
+    | %{ endif }
