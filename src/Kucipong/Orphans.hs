@@ -15,7 +15,9 @@ import ClassyPrelude
 
 import Control.Monad.Logger (LoggingT, MonadLogger)
 import Control.Monad.Random (MonadRandom(..))
+import Numeric.Natural (Natural)
 import Language.Haskell.TH (Q, runIO)
+import Text.Blaze (Markup, ToMarkup(..), string)
 import Web.Spock (ActionCtxT)
 
 instance MonadRandom m =>
@@ -31,3 +33,7 @@ instance MonadLogger m =>
 instance MonadIO Q where
   liftIO :: IO a -> Q a
   liftIO = runIO
+
+instance ToMarkup Natural where
+  toMarkup :: Natural -> Markup
+  toMarkup = string . show

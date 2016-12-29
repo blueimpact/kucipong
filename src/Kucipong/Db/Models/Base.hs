@@ -13,7 +13,8 @@ import Data.Kind (Constraint)
 import Database.Persist ( PersistField(..), PersistValue )
 import Database.Persist.Sql ( PersistFieldSql(..), SqlType )
 import Database.Persist.TH (derivePersistField)
-import GHC.Natural ( Natural )
+import Numeric.Natural ( Natural )
+import Text.Blaze (ToMarkup)
 import Text.Read (Read(readPrec), ReadPrec)
 import Web.Internal.HttpApiData
        (FromHttpApiData, ToHttpApiData, parseUrlPiece, toUrlPiece)
@@ -159,11 +160,13 @@ newtype Percent = Percent
              , Eq
              , FromHttpApiData
              , Generic
+             , Num
              , PersistField
              , PersistFieldSql
              , Read
              , Show
              , ToHttpApiData
+             , ToMarkup
              , Typeable
              )
 
@@ -177,10 +180,12 @@ newtype Price = Price
              , Eq
              , FromHttpApiData
              , Generic
+             , Num
              , PersistField
              , PersistFieldSql
              , Read
              , Show
+             , ToMarkup
              , ToHttpApiData
              , Typeable
              )
