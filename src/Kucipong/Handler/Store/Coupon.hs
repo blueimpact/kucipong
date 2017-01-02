@@ -9,15 +9,17 @@ import Data.HVect (HVect(..))
 import Database.Persist.Sql (Entity(..), fromSqlKey)
 import Web.Spock
        (ActionCtxT, (<//>), params, redirect, renderRoute)
-import Web.Spock.Core (SpockCtxT, get, post)
+import Web.Spock.Core (SpockCtxT, get, post, var)
 
-import Kucipong.Db (Coupon(..), CouponType(..), couponTypeToText)
+import Kucipong.Db
+       (Coupon(..), CouponType(..), Key(..), Store(..), couponTypeToText)
 import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Store.Route
        (storeUrlPrefix, couponR, createR)
 import Kucipong.Monad
-       (MonadKucipongDb(..), dbFindCouponsByEmail, dbInsertCoupon)
+       (MonadKucipongDb(..), dbFindCouponByEmailAndId,
+        dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
@@ -51,6 +53,16 @@ couponNewGet = do
       , "otherContent"
       , "otherConditions"
       ])
+
+couponGet
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+  => Key Coupon -> ActionCtxT (HVect xs) m ()
+couponGet couponKey = do
+  (StoreSession email) <- getStoreEmail
+  maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
+  maybeStoreEntity <- dbFindStoreByEmail email
+  $(renderTemplateFromEnv "storeUser_store_coupon_id.html")
 
 couponListGet
   :: forall xs n m.
@@ -130,7 +142,16 @@ storeCouponComponent = do
   get couponR couponListGet
   post couponR couponPost
   get (couponR <//> createR) couponNewGet
+  get (couponR <//> var)  couponGet
 
 
 couponTypeIs :: Entity Coupon -> CouponType -> Bool
 couponTypeIs (Entity _ coupon) t = couponCouponType coupon == t
+
+{-# WARNING
+fromJustEx "This function is a temporary hack until heterocephalus gets support for maybe and with control statements."
+ #-}
+
+fromJustEx :: Maybe a -> a
+fromJustEx (Just a) = a
+fromJustEx Nothing = error "Calling fromJustEx with Nothing."

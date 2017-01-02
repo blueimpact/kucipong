@@ -445,6 +445,14 @@ dbInsertCoupon email title couponType validFrom validUntil image discountPercent
       otherContent
       otherConditions
 
+dbFindCouponByEmailAndId
+  :: MonadKucipongDb m
+  => EmailAddress -> Key Coupon -> m (Maybe (Entity Coupon))
+dbFindCouponByEmailAndId email couponKey =
+  dbSelectFirstNotDeleted
+    [CouponStoreEmail ==. emailToStoreEmailKey email, CouponId ==. couponKey]
+    []
+
 dbFindCouponsByEmail
   :: MonadKucipongDb m
   => EmailAddress -> m [Entity Coupon]
