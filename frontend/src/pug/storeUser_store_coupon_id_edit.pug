@@ -107,7 +107,7 @@ include _layout
                 input#giftReferencePrice(
                   name="giftReferencePrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe "30" giftReferencePrice}'
+                  value!='\#{fromMaybe mempty giftReferencePrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="giftMinimumPrice")
@@ -116,7 +116,7 @@ include _layout
                 input#giftMinimumFee(
                   name="giftMinimumPrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe "30" giftMinimumPrice}'
+                  value!='\#{fromMaybe mempty giftMinimumPrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="giftOtherConditions")
@@ -143,7 +143,7 @@ include _layout
                 input#setPrice(
                   name="setPrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe "3000" setPrice}'
+                  value!='\#{fromMaybe mempty setPrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="setReferencePrice")
@@ -152,7 +152,7 @@ include _layout
                 input#setReferencePrice(
                   name="setReferencePrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe "4000" setReferencePrice}'
+                  value!='\#{fromMaybe mempty setReferencePrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="setOtherConditions")
