@@ -12,12 +12,24 @@ module Kucipong.Form where
 import Kucipong.Prelude
 
 import Control.Lens ((.~))
-import Control.Lens.TH (makeLensesFor)
+import Control.Lens.TH (makeLensesFor, makeWrapped)
 import Web.FormUrlEncoded (FromForm)
+import Web.HttpApiData (FromHttpApiData(..))
 
 import Kucipong.Db
        (BusinessCategory(..), BusinessCategoryDetail(..), CouponType(..),
         Percent(..), Price(..))
+
+newtype MaybeEmpty a = MaybeEmpty
+  { unMaybeEmpty :: Maybe a
+  } deriving (Data, Eq, Generic, Read, Show, Typeable)
+
+$(makeWrapped ''MaybeEmpty)
+
+instance FromHttpApiData a => FromHttpApiData (MaybeEmpty a) where
+  parseQueryParam :: Text -> Either Text (MaybeEmpty a)
+  parseQueryParam "" = Right (MaybeEmpty Nothing)
+  parseQueryParam x = MaybeEmpty . Just <$> parseQueryParam x
 
 -----------
 -- Admin --
@@ -80,20 +92,20 @@ data StoreNewCouponForm = StoreNewCouponForm
   { title :: !Text
   , couponType :: CouponType
   , validFrom :: !Day
-  , validUntil :: !(Maybe Day)
-  , discountPercent :: !(Maybe Percent)
-  , discountMinimumPrice :: !(Maybe Price)
-  , discountOtherConditions :: !(Maybe Text)
-  , giftContent :: !(Maybe Text)
-  , giftReferencePrice :: !(Maybe Price)
-  , giftMinimumPrice :: !(Maybe Price)
-  , giftOtherConditions :: !(Maybe Text)
-  , setContent :: !(Maybe Text)
-  , setPrice :: !(Maybe Price)
-  , setReferencePrice :: !(Maybe Price)
-  , setOtherConditions :: !(Maybe Text)
-  , otherContent :: !(Maybe Text)
-  , otherConditions :: !(Maybe Text)
+  , validUntil :: !(MaybeEmpty Day)
+  , discountPercent :: !(MaybeEmpty Percent)
+  , discountMinimumPrice :: !(MaybeEmpty Price)
+  , discountOtherConditions :: !(MaybeEmpty Text)
+  , giftContent :: !(MaybeEmpty Text)
+  , giftReferencePrice :: !(MaybeEmpty Price)
+  , giftMinimumPrice :: !(MaybeEmpty Price)
+  , giftOtherConditions :: !(MaybeEmpty Text)
+  , setContent :: !(MaybeEmpty Text)
+  , setPrice :: !(MaybeEmpty Price)
+  , setReferencePrice :: !(MaybeEmpty Price)
+  , setOtherConditions :: !(MaybeEmpty Text)
+  , otherContent :: !(MaybeEmpty Text)
+  , otherConditions :: !(MaybeEmpty Text)
   } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 $(makeLensesFor
@@ -117,25 +129,28 @@ instance FromForm StoreNewCouponForm
 
 removeDiscountCouponInfo :: StoreNewCouponForm -> StoreNewCouponForm
 removeDiscountCouponInfo =
-  (discountPercentLens .~ Nothing) .
-  (discountMinimumPriceLens .~ Nothing) .
-  (discountOtherConditionsLens .~ Nothing)
+  (discountPercentLens .~ (MaybeEmpty Nothing)) .
+  (discountMinimumPriceLens .~ (MaybeEmpty Nothing)) .
+  (discountOtherConditionsLens .~ (MaybeEmpty Nothing))
 
 removeGiftCouponInfo :: StoreNewCouponForm -> StoreNewCouponForm
 removeGiftCouponInfo =
-  (giftContentLens .~ Nothing) .
-  (giftReferencePriceLens .~ Nothing) .
-  (giftMinimumPriceLens .~ Nothing) . (giftOtherConditionsLens .~ Nothing)
+  (giftContentLens .~ (MaybeEmpty Nothing)) .
+  (giftReferencePriceLens .~ (MaybeEmpty Nothing)) .
+  (giftMinimumPriceLens .~ (MaybeEmpty Nothing)) .
+  (giftOtherConditionsLens .~ (MaybeEmpty Nothing))
 
 removeSetCouponInfo :: StoreNewCouponForm -> StoreNewCouponForm
 removeSetCouponInfo =
-  (setContentLens .~ Nothing) .
-  (setPriceLens .~ Nothing) .
-  (setReferencePriceLens .~ Nothing) . (setOtherConditionsLens .~ Nothing)
+  (setContentLens .~ (MaybeEmpty Nothing)) .
+  (setPriceLens .~ (MaybeEmpty Nothing)) .
+  (setReferencePriceLens .~ (MaybeEmpty Nothing)) .
+  (setOtherConditionsLens .~ (MaybeEmpty Nothing))
 
 removeOtherCouponInfo :: StoreNewCouponForm -> StoreNewCouponForm
 removeOtherCouponInfo =
-  (otherContentLens .~ Nothing) . (otherConditionsLens .~ Nothing)
+  (otherContentLens .~ (MaybeEmpty Nothing)) .
+  (otherConditionsLens .~ (MaybeEmpty Nothing))
 
 -- | Remove the information for the non-used coupon types.
 --

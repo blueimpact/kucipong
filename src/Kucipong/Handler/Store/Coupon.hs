@@ -4,6 +4,7 @@ module Kucipong.Handler.Store.Coupon where
 
 import Kucipong.Prelude
 
+import Control.Lens (_Wrapped, view)
 import Data.HVect (HVect(..))
 import Web.Spock
        (ActionCtxT, (<//>), params, redirect, renderRoute)
@@ -62,21 +63,21 @@ couponPost = do
       title
       couponType
       validFrom
-      validUntil
+      (view _Wrapped validUntil)
       Nothing -- image
-      discountPercent
-      discountMinimumPrice
-      discountOtherConditions
-      giftContent
-      giftReferencePrice
-      giftMinimumPrice
-      giftOtherConditions
-      setContent
-      setPrice
-      setReferencePrice
-      setOtherConditions
-      otherContent
-      otherConditions
+      (view _Wrapped discountPercent)
+      (view _Wrapped discountMinimumPrice)
+      (view _Wrapped discountOtherConditions)
+      (view _Wrapped giftContent)
+      (view _Wrapped giftReferencePrice)
+      (view _Wrapped giftMinimumPrice)
+      (view _Wrapped giftOtherConditions)
+      (view _Wrapped setContent)
+      (view _Wrapped setPrice)
+      (view _Wrapped setReferencePrice)
+      (view _Wrapped setOtherConditions)
+      (view _Wrapped otherContent)
+      (view _Wrapped otherConditions)
   redirect . renderRoute $ storeUrlPrefix <//> couponR
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
