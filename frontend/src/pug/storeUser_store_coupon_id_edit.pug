@@ -2,46 +2,47 @@ include _layout
   body#main.wrapper
     include _storeHeader
       | クーポン情報 編集
-    form.couponEditor(enctype="multipart/form-data" method="POST")
+    include _messageArea
+    form.couponEditor(enctype="multipart/form-data" method="POST" action="/store/coupon")
       .couponEditor_signbord
         .couponEditor_titleArea
           .couponEditor_titleArea-title
             | クーポン情報
         .couponEditor_body
           .labeledRow
-            label.labeledRow-header(for="couponTitle")
+            label.labeledRow-header(for="title")
               | タイトル
             .labeledRow-body
               input#couponTitle(
-                name="couponTitle" type="text"
-                value="当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円"
+                name="title" type="text"
+                value="\#{fromMaybe mempty title}"
               )
           .labeledRow
-            label.labeledRow-header(for="couponImage")
+            label.labeledRow-header(for="image")
               | イメージ画像
             .labeledRow-body
               input#couponImage(
-                name="couponImage" type="file"
+                name="image" type="file"
                 accept="image/*"
               )
               img.labeledRow-body-image(src="./img/dummy.jpg")
 
           .labeledRow
-            label.labeledRow-header(for="couponValidFrom")
+            label.labeledRow-header(for="validFrom")
               | 有効期限 (利用開始日)
             .labeledRow-body
               input#couponValidFrom(
-                name="couponValidFrom" type="date"
-                value="2016-04-15"
+                name="validFrom" type="date"
+                value="\#{fromMaybe mempty validFrom}"
               )
 
           .labeledRow
-            label.labeledRow-header(for="couponExpire")
+            label.labeledRow-header(for="validUntil")
               | 有効期限 (利用期限)
             .labeledRow-body
               input#couponExpire(
-                name="couponExpire" type="date"
-                value="2016-04-30"
+                name="validUntil" type="date"
+                value="\#{fromMaybe mempty validUntil}"
               )
 
           .labeledRow
@@ -50,36 +51,36 @@ include _layout
             .labeledRow-body
               select#couponType(
                 name="couponType"
-                value=""
+                value="\#{fromMaybe mempty couponType}"
               )
-                option(value="0")
+                option(value="\#{couponTypeToText CouponTypeDiscount}")
                   | 購入額から割引
-                option(value="1")
+                option(value="\#{couponTypeToText CouponTypeGift}")
                   | 購入者プレゼント
-                option(value="2")
+                option(value="\#{couponTypeToText CouponTypeSet}")
                   | 特別セット
-                option(value="3")
+                option(value="\#{couponTypeToText CouponTypeOther}")
                   | その他クーポン
 
 
           #js-couponDiscount.js-invisible
             .labeledRow
-              label.labeledRow-header(for="discountRate")
+              label.labeledRow-header(for="discountPercent")
                 | 割引率 (ご購入総額から xx% OFF)
               .labeledRow-body
                 input#discountRate(
-                  name="discountRate" type="number"
+                  name="discountPercent" type="number"
                   min="0" max="100"
-                  value="30"
+                  value="\#{fromMaybe mempty discountPercent}"
                 )
             .labeledRow
-              label.labeledRow-header(for="discountMinimumFee")
+              label.labeledRow-header(for="discountMinimumPrice")
                 | 最低購入額 (xx円以上お買い上げのお客様のみ割引)
               .labeledRow-body
                 input#discountMinimumFee(
-                  name="discountMinimumFee" type="number"
+                  name="discountMinimumPrice" type="number"
                   min="0"
-                  value="30"
+                  value="\#{fromMaybe mempty discountMinimumPrice}"
                 )
             .labeledRow
               label.labeledRow-header(for="discountOtherConditions")
@@ -88,6 +89,7 @@ include _layout
                 textarea#discountOtherConditions(
                    name="discountOtherConditions"
                 )
+                  | \#{fromMaybe mempty discountOtherConditions}
 
           #js-couponGift.js-invisible
             .labeledRow
@@ -96,7 +98,7 @@ include _layout
               .labeledRow-body
                 input#giftContent(
                   name="giftContent" type="text"
-                  value=""
+                  value="\#{fromMaybe mempty giftContent}"
                 )
             .labeledRow
               label.labeledRow-header(for="giftReferencePrice")
@@ -105,16 +107,16 @@ include _layout
                 input#giftReferencePrice(
                   name="giftReferencePrice" type="number"
                   min="0"
-                  value="30"
+                  value!='\#{fromMaybe mempty giftReferencePrice}'
                 )
             .labeledRow
-              label.labeledRow-header(for="giftMinimumFee")
+              label.labeledRow-header(for="giftMinimumPrice")
                 | 最低購入額 (xx円以上お買い上げのお客様にプレゼント)
               .labeledRow-body
                 input#giftMinimumFee(
-                  name="giftMinimumFee" type="number"
+                  name="giftMinimumPrice" type="number"
                   min="0"
-                  value="30"
+                  value!='\#{fromMaybe mempty giftMinimumPrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="giftOtherConditions")
@@ -123,6 +125,7 @@ include _layout
                 textarea#giftOtherConditions(
                    name="giftOtherConditions"
                 )
+                  | \#{fromMaybe mempty giftOtherConditions}
 
           #js-couponSet.js-invisible
             .labeledRow
@@ -132,8 +135,7 @@ include _layout
                 textarea#setContent(
                   name="setContent"
                 )
-                  | 2.5時間飲放題付きの料理4品です。
-                  | 1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム
+                  | \#{fromMaybe mempty setContent}
             .labeledRow
               label.labeledRow-header(for="setPrice")
                 | セット価格
@@ -141,7 +143,7 @@ include _layout
                 input#setPrice(
                   name="setPrice" type="number"
                   min="0"
-                  value="3000"
+                  value!='\#{fromMaybe mempty setPrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="setReferencePrice")
@@ -150,7 +152,7 @@ include _layout
                 input#setReferencePrice(
                   name="setReferencePrice" type="number"
                   min="0"
-                  value="4000"
+                  value!='\#{fromMaybe mempty setReferencePrice}'
                 )
             .labeledRow
               label.labeledRow-header(for="setOtherConditions")
@@ -159,8 +161,7 @@ include _layout
                 textarea#setOtherConditions(
                    name="setOtherConditions"
                 )
-                  | ※ 1グループ1回のご利用時の利用枚数制限はありません。
-                  | ※ 21時以降のご予約のお客様が対象です。
+                  | \#{fromMaybe mempty setOtherConditions}
 
           #js-couponOther.js-invisible
             .labeledRow
@@ -170,6 +171,7 @@ include _layout
                 textarea#otherContent(
                   name="otherContent"
                 )
+                  | \#{fromMaybe mempty otherContent}
             .labeledRow
               label.labeledRow-header(for="otherConditions")
                 | クーポン適用条件
@@ -177,8 +179,7 @@ include _layout
                 textarea#otherConditions(
                    name="otherConditions"
                 )
-                  | ※ 1グループ1回のご利用時の利用枚数制限はありません。
-                  | ※ 21時以降のご予約のお客様が対象です。
+                  | \#{fromMaybe mempty otherConditions}
           .couponSubmit
             button.btn.outerBtn(type="submit")
               | この内容で店舗情報を更新する
@@ -192,10 +193,10 @@ include _layout
       |     elem.classList.add("js-invisible");
       |   });
       |   var toShow = {
-      |     "0": document.getElementById("js-couponDiscount"),
-      |     "1": document.getElementById("js-couponGift"),
-      |     "2": document.getElementById("js-couponSet"),
-      |     "3": document.getElementById("js-couponOther")
+      |     "\#{couponTypeToText CouponTypeDiscount}": document.getElementById("js-couponDiscount"),
+      |     "\#{couponTypeToText CouponTypeGift}": document.getElementById("js-couponGift"),
+      |     "\#{couponTypeToText CouponTypeSet}": document.getElementById("js-couponSet"),
+      |     "\#{couponTypeToText CouponTypeOther}": document.getElementById("js-couponOther")
       |   }[selected];
       |   toShow.classList.remove("js-invisible");
       |   toShow.classList.add("js-visible");

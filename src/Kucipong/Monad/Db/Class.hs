@@ -171,6 +171,20 @@ class Monad m => MonadKucipongDb m where
     => Key record -> t n (Maybe (Entity record))
   dbFindByKey = lift . dbFindByKey
 
+  dbInsert
+    :: (PersistRecordBackend record SqlBackend)
+    => (UTCTime -> record)
+    -> m (Entity record)
+  default dbInsert
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => (UTCTime -> record)
+    -> t n (Entity record)
+  dbInsert = lift . dbInsert
+
   dbSelectFirst
     :: (PersistRecordBackend record SqlBackend)
     => [Filter record] -> [SelectOpt record] -> m (Maybe (Entity record))

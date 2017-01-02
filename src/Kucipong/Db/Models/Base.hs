@@ -14,95 +14,176 @@ import Database.Persist ( PersistField(..), PersistValue )
 import Database.Persist.Sql ( PersistFieldSql(..), SqlType )
 import Database.Persist.TH (derivePersistField)
 import GHC.Natural ( Natural )
-import Web.Internal.HttpApiData (FromHttpApiData, parseUrlPiece)
+import Text.Read (Read(readPrec), ReadPrec)
+import Web.Internal.HttpApiData
+       (FromHttpApiData, ToHttpApiData, parseUrlPiece, toUrlPiece)
 
 ------------
 -- Coupon --
 ------------
 
 data CouponType
-    = CouponTypeDiscount
-    | CouponTypePresent
-    | CouponTypeSet
-    deriving
-        ( Data, Eq, Generic, Show, Typeable )
+  = CouponTypeDiscount
+  | CouponTypeGift
+  | CouponTypeSet
+  | CouponTypeOther
+  deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 couponTypeToText :: CouponType -> Text
 couponTypeToText CouponTypeDiscount = "discount"
-couponTypeToText CouponTypePresent = "present"
+couponTypeToText CouponTypeGift = "gift"
 couponTypeToText CouponTypeSet = "set"
+couponTypeToText CouponTypeOther = "other"
 
 couponTypeFromText :: Text -> Either Text CouponType
 couponTypeFromText "discount" = pure CouponTypeDiscount
-couponTypeFromText "present" = pure CouponTypePresent
+couponTypeFromText "gift" = pure CouponTypeGift
 couponTypeFromText "set" = pure CouponTypeSet
+couponTypeFromText "other" = pure CouponTypeOther
 couponTypeFromText text = Left $ "Tried to convert \"" <> text
     <> "\"to coupon type, but failed."
 
-instance PersistField CouponType where
-    toPersistValue :: CouponType -> PersistValue
-    toPersistValue = toPersistValue . couponTypeToText
+instance FromHttpApiData CouponType where
+  parseUrlPiece :: Text -> Either Text CouponType
+  parseUrlPiece = couponTypeFromText
 
-    fromPersistValue :: PersistValue -> Either Text CouponType
-    fromPersistValue = couponTypeFromText <=< fromPersistValue
+instance ToHttpApiData CouponType where
+  toUrlPiece :: CouponType -> Text
+  toUrlPiece = couponTypeToText
+
+instance PersistField CouponType where
+  toPersistValue :: CouponType -> PersistValue
+  toPersistValue = toPersistValue . couponTypeToText
+
+  fromPersistValue :: PersistValue -> Either Text CouponType
+  fromPersistValue = couponTypeFromText <=< fromPersistValue
 
 instance PersistFieldSql CouponType where
-    sqlType :: Proxy CouponType -> SqlType
-    sqlType _ = sqlType (Proxy :: Proxy Text)
+  sqlType :: Proxy CouponType -> SqlType
+  sqlType _ = sqlType (Proxy :: Proxy Text)
 
 ------------------------------------
 -- Created, modified, delete time --
 ------------------------------------
 
-newtype CreatedTime = CreatedTime { unCreatedTime :: UTCTime }
-    deriving
-        ( Data, Eq, FromJSON, Generic, Ord, PersistField, PersistFieldSql, Show
-        , ToJSON, Typeable )
+newtype CreatedTime = CreatedTime
+  { unCreatedTime :: UTCTime
+  } deriving ( Data
+             , Eq
+             , FromJSON
+             , Generic
+             , Ord
+             , PersistField
+             , PersistFieldSql
+             , Read
+             , Show
+             , ToJSON
+             , Typeable
+             )
 
-newtype UpdatedTime = UpdatedTime { unUpdatedTime :: UTCTime }
-    deriving
-        ( Data, Eq, FromJSON, Generic, Ord, PersistField, PersistFieldSql, Show
-        , ToJSON, Typeable )
+newtype UpdatedTime = UpdatedTime
+  { unUpdatedTime :: UTCTime
+  } deriving ( Data
+             , Eq
+             , FromJSON
+             , Generic
+             , Ord
+             , PersistField
+             , PersistFieldSql
+             , Read
+             , Show
+             , ToJSON
+             , Typeable
+             )
 
-newtype DeletedTime = DeletedTime { unDeletedTime :: UTCTime }
-    deriving
-        ( Data, Eq, FromJSON, Generic, Ord, PersistField, PersistFieldSql, Show
-        , ToJSON, Typeable )
+newtype DeletedTime = DeletedTime
+  { unDeletedTime :: UTCTime
+  } deriving ( Data
+             , Eq
+             , FromJSON
+             , Generic
+             , Ord
+             , PersistField
+             , PersistFieldSql
+             , Read
+             , Show
+             , ToJSON
+             , Typeable
+             )
 
 -----------
 -- Image --
 -----------
 
-newtype Image = Image { unImage :: Text }
-    deriving
-        ( Data, Eq, FromJSON, Generic, Ord, PersistField, PersistFieldSql, Show
-        , ToJSON, Typeable )
+newtype Image = Image
+  { unImage :: Text
+  } deriving ( Data
+             , Eq
+             , FromJSON
+             , Generic
+             , Ord
+             , PersistField
+             , PersistFieldSql
+             , Read
+             , Show
+             , ToJSON
+             , Typeable
+             )
 
 ---------------------------------
 -- Login Token Expiration Time --
 ---------------------------------
 
 newtype LoginTokenExpirationTime = LoginTokenExpirationTime
-    { unLoginTokenExpirationTime :: UTCTime }
-    deriving
-        ( Data, Eq, FromJSON, Generic, Ord, PersistField, PersistFieldSql, Show
-        , ToJSON, Typeable )
+  { unLoginTokenExpirationTime :: UTCTime
+  } deriving ( Data
+             , Eq
+             , FromJSON
+             , Generic
+             , Ord
+             , PersistField
+             , PersistFieldSql
+             , Read
+             , Show
+             , ToJSON
+             , Typeable
+             )
 
 -------------
 -- Percent --
 -------------
 
-newtype Percent = Percent { unPercent :: Natural }
-    deriving
-        ( Data, Eq, Generic, PersistField, PersistFieldSql, Show, Typeable )
+newtype Percent = Percent
+  { unPercent :: Natural
+  } deriving ( Data
+             , Eq
+             , FromHttpApiData
+             , Generic
+             , PersistField
+             , PersistFieldSql
+             , Read
+             , Show
+             , ToHttpApiData
+             , Typeable
+             )
 
 -----------
 -- Price --
 -----------
 
-newtype Price = Price { unPrice :: Int64 }
-    deriving
-        ( Data, Eq, Generic, PersistField, PersistFieldSql, Show, Typeable )
+newtype Price = Price
+  { unPrice :: Int64
+  } deriving ( Data
+             , Eq
+             , FromHttpApiData
+             , Generic
+             , PersistField
+             , PersistFieldSql
+             , Read
+             , Show
+             , ToHttpApiData
+             , Typeable
+             )
 
 ----------------------
 -- BusinessCategory --
@@ -264,6 +345,21 @@ data BusinessCategoryDetail
   | BeautyDetail BeautyDetail
   | CommonDetail CommonDetail
   deriving (Data, Eq, Generic, Typeable)
+
+-- | 'Read' instance for 'BusinessCategoryDetail'.  Just use the underlying
+-- 'Read' instances for the individual categories.
+--
+-- >>> let f = readMay :: Text -> Maybe BusinessCategoryDetail
+-- >>> f "CommonPoliteService"
+-- Just CommonPoliteService
+-- >>> f "GourmetPizza"
+-- Just GourmetPizza
+-- >>> f "foobar"
+-- Nothing
+instance Read BusinessCategoryDetail where
+  readPrec :: ReadPrec BusinessCategoryDetail
+  readPrec =
+    unfoldAllBusinessCategoryDetailAlt (Proxy :: Proxy Read) (const readPrec) ()
 
 instance Show BusinessCategoryDetail where
   show :: BusinessCategoryDetail -> String

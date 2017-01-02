@@ -90,18 +90,30 @@ kucipongEntityDefs = [persistLowerCase|
         deriving Typeable
 
     Coupon
-        image                   Image
+        storeEmail              StoreEmailId
+        created                 CreatedTime
+        updated                 UpdatedTime
+        deleted                 DeletedTime Maybe
         title                   Text
-        validUntil              UTCTime
         couponType              CouponType
+        validFrom               Day
+        validUntil              Day Maybe
+        image                   Image Maybe
         discountPercent         Percent Maybe
         discountMinimumPrice    Price Maybe
-        discountRequirements    Text Maybe
-        presentDescription      Text Maybe
-        presentPrice            Price Maybe
-        presentMinimumPrice     Price Maybe
-        presentRequirements     Text Maybe
-        setDescription          Text Maybe
+        discountOtherConditions Text Maybe
+        giftContent             Text Maybe
+        giftReferencePrice      Price Maybe
+        giftMinimumPrice        Price Maybe
+        giftOtherConditions     Text Maybe
+        setContent              Text Maybe
         setPrice                Price Maybe
-        setRequirements         Text Maybe
+        setReferencePrice       Price Maybe
+        setOtherConditions      Text Maybe
+        otherContent            Text Maybe
+        otherConditions         Text Maybe
+
+        deriving Eq
+        deriving Show
+        deriving Typeable
     |]

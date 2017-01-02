@@ -72,6 +72,15 @@ instance EntityDateFields AdminLoginToken where
   getDeletedEntityFieldValue = adminLoginTokenDeleted
   getUpdatedEntityFieldValue = adminLoginTokenUpdated
 
+instance EntityDateFields Coupon where
+  createdEntityField = CouponCreated
+  deletedEntityField = CouponDeleted
+  updatedEntityField = CouponUpdated
+
+  getCreatedEntityFieldValue = couponCreated
+  getDeletedEntityFieldValue = couponDeleted
+  getUpdatedEntityFieldValue = couponUpdated
+
 instance EntityDateFields Store where
   createdEntityField = StoreCreated
   deletedEntityField = StoreDeleted

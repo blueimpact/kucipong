@@ -1702,21 +1702,21 @@ This response is a sample simple HTML for convenience.
 Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
 
 ```bash
-$ curl -X POST "http://$domain/store/coupon/create" \
+$ curl -X POST "http://$domain/store/coupon" \
   -H "AUTH-TOKEN: ${token}" \
-  -F "couponTitle=当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円" \
-  -F "couponImage=@/path/to/image" \
-  -F "couponValidFrom=2016-04-15" \
-  -F "couponExpire=2016-04-30" \
-  -F "couponType=2" \
-  -F "discountRate=null" \
-  -F "discountMinimumFee=null" \
+  -F "title=当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円" \
+  -F "couponType=set" \
+  -F "validFrom=2016-04-15" \
+  -F "validUntil=2016-04-30" \
+  # -F "image=@/path/to/image" \  ## This will be sent as multipart file \
+  -F "discountPercent=null" \
+  -F "discountMinimumPrice=null" \
   -F "discountOtherConditions=null" \
   -F "giftContent=null" \
   -F "giftReferencePrice=null" \
-  -F "giftMinimumFee=null" \
+  -F "giftMinimumPrice=null" \
   -F "giftOtherConditions=null" \
-  -F "setContent=2.5時間飲放題付きの料理4品です。 1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム" \
+  -F "setDescription=2.5時間飲放題付きの料理4品です。 1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム" \
   -F "setPrice=3600" \
   -F "setReferencePrice=4000" \
   -F "setOtherConditions=※ 1グループ1回のご利用時の利用枚数制限はありません。※ 21時以降のご予約のお客様が対象です。" \
@@ -2055,7 +2055,7 @@ coupon :: Coupon -- The coupon to edit
 </html>
 ```
 
-### Edit my coupon
+### PUT Edit my coupon
 
 #### Sample request and response
 
@@ -2063,7 +2063,7 @@ This response is a sample simple HTML for convenience.
 Some user may bookmark or share this URI and search engine also crawl this page, so do not include version number in the URI.
 
 ```bash
-$ curl -X POST "http://$domain/store/coupon/${coupon_id}/edit" \
+$ curl -X PUT "http://$domain/store/coupon/${coupon_id}/edit" \
   -H "AUTH-TOKEN: ${token}" \
   -F "couponTitle=当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円" \
   -F "couponImage=@/path/to/image" \

@@ -1,10 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Kucipong.Handler.Store where
+module Kucipong.Handler.Store
+  ( module Kucipong.Handler.Store
+  , module Kucipong.Handler.Store.Route
+  ) where
 
 import Kucipong.Prelude
-
-import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 
 import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
@@ -12,10 +13,9 @@ import Data.Default (def)
 import Data.List (nub)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
-import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, UploadedFile(..), (<//>), files, getContext,
-        params, prehook, root, redirect, renderRoute, var)
+       (ActionCtxT, UploadedFile(..), (<//>), files, getContext, params,
+        prehook, root, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
@@ -28,6 +28,9 @@ import Kucipong.Db
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
+import Kucipong.Handler.Store.Coupon (storeCouponComponent)
+import Kucipong.Handler.Store.Route (doLoginR, editR, loginR, rootR, storeUrlPrefix)
+import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
@@ -40,22 +43,6 @@ import Kucipong.Session (Store, Session(..))
 import Kucipong.Spock
        (ContainsStoreSession, getReqParamErr, getStoreCookie,
         getStoreEmail, setStoreCookie)
-
--- | Url prefix for all of the following 'Path's.
-storeUrlPrefix :: Path '[] 'Open
-storeUrlPrefix = "store"
-
-rootR :: Path '[] 'Open
-rootR = ""
-
-loginR :: Path '[] 'Open
-loginR = "login"
-
-doLoginR :: Path '[LoginToken] 'Open
-doLoginR = loginR <//> var
-
-editR :: Path '[] 'Open
-editR = "edit"
 
 -- | Handler for returning the store login page.
 loginGet
@@ -275,6 +262,7 @@ storeComponent = do
     get rootR storeGet
     get editR storeEditGet
     post editR storeEditPost
+    storeCouponComponent
 
 allBusinessCategories :: [BusinessCategory]
 allBusinessCategories = [minBound .. maxBound]
