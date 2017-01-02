@@ -1,7 +1,7 @@
 .coupon
   .card
     .card_header
-      h2.card_header_text \%{if isJust maybeStoreEntity}\#{maybe mempty (storeName . entityVal) maybeStoreEntity}\%{else}(no title)\%{endif}
+      h2.card_header_text %{if isJust maybeStoreEntity}\#{maybe mempty (storeName . entityVal) maybeStoreEntity}%{else}(no title)%{endif}
       .card_header_icon
         .icon.icon-fav.checkableIcon
           input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{fromSqlKey (entityKey (fromJustEx maybeCouponEntity))}")
