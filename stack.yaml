@@ -18,6 +18,8 @@ extra-deps:
     - heterocephalus-1.0.2.0
     # This should be available in lts-8.
     - emailaddress-0.2.0.0
+    # This should be available in lts-8.
+    - pretty-simple-0.3.0.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}

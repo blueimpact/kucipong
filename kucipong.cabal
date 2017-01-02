@@ -24,6 +24,7 @@ library
                      , Kucipong.Db.Models.EntityDefs
                      , Kucipong.Db.Pool
                      , Kucipong.Db.Run
+                     , Kucipong.Dev
                      , Kucipong.Email
                      , Kucipong.Environment
                      , Kucipong.Errors
@@ -98,6 +99,7 @@ library
                      , persistent-postgresql
                      , persistent-template
                      , postgresql-simple
+                     , pretty-simple
                      , pwstore-fast
                      , read-env-var
                      , reroute
