@@ -15,7 +15,7 @@ extra-deps:
     # This should be available in lts-8.
     - from-sum-0.1.2.0
     # This should be available in lts-8.
-    - heterocephalus-1.0.2.0
+    - heterocephalus-1.0.2.3
     # This should be available in lts-8.
     - emailaddress-0.2.0.0
     # This should be available in lts-8.
