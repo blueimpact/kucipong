@@ -1,18 +1,30 @@
 .coupon
   .card
     .card_header
-      h2.card_header_text 七輪焼肉・安安
+      h2.card_header_text \#{maybe "(no title)" (storeName . entityVal) maybeStoreEntity}
       .card_header_icon
         .icon.icon-fav.checkableIcon
-          input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="3")
+          input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{fromSqlKey (entityKey (fromJustEx maybeCouponEntity))}")
           label.checkableIcon-icon(for="js-fav-3")
+
     .annotatedImageGroup
       img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
       span.annotatedImageGroup-annotation 画像は一例です
     .card_body
       .card_body_title
-        | 当日OK! 21時以降のご予約で2.5H飲放題付き料理4品で3,600円
+        | \#{couponTitle (entityVal (fromJustEx maybeCouponEntity))}
+
       .card_body_summary.highlightedBlock
+        | %{ if couponTypeIs (fromJustEx maybeCouponEntity) CouponTypeDiscount }
+        |     %{ if isJust (couponDiscountPercent (entityVal (fromJustEx maybeCouponEntity))) }
+        span.highlightedBlock-sub \#{ fromMaybe 0 (couponDiscountPercent (entityVal (fromJustEx maybeCouponEntity))) }% OFF
+        |     %{ endif }
+        |     %{ if isJust (couponDiscountMinimumPrice (entityVal (fromJustEx maybeCouponEntity))) }
+        span.highlightedBlock-main \#{ fromMaybe 0 (couponDiscountMinimumPrice (entityVal (fromJustEx maybeCouponEntity))) }円
+        |     %{ endif }
+        | %{ endif }
+
+
         span.highlightedBlock-sub 10% OFF
         span.highlightedBlock-main 3600円
       .card_body_expiration
@@ -25,7 +37,7 @@
     .location_map(data-latitude="41.40243" data-longitude="2.17551")
       iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
   .aboutStore
-    a.btn.outerBtn(href="/store/52") 七輪焼き肉・安安
+    a.btn.outerBtn(href="/store") 七輪焼き肉・安安
   .moreContents
     p.moreContents_txt 2.5時間飲放題付きの料理4品です。
     p.moreContents_txt 1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム

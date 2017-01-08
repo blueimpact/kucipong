@@ -1,11 +1,45 @@
 .couponSimple
-  a.card(href="/coupon/3")
+  a.card(href="/store/coupon/\#{ fromSqlKey (entityKey couponEntity) }")
     .annotatedImageGroup
-      img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
+      img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="\#{ couponTitle (entityVal couponEntity) }")
       span.annotatedImageGroup-annotation 画像は一例です
     .card_body
       .couponSimple_abstraction
-        h2.couponSimple_abstraction-store 七輪焼肉・安安
+        h2.couponSimple_abstraction-store \#{ couponTitle (entityVal couponEntity) }
         .couponSimple_abstraction-summary
-          span.couponSimple_abstraction-summary-sub 10% OFF
-          span.couponSimple_abstraction-summary-main 3600円
+
+          | %{ if couponTypeIs couponEntity CouponTypeDiscount }
+          |     %{ if isJust (couponDiscountPercent (entityVal couponEntity)) }
+          span.couponSimple_abstraction-summary-sub \#{ fromMaybe 0 (couponDiscountPercent (entityVal couponEntity)) }% OFF
+          |     %{ endif }
+          |     %{ if isJust (couponDiscountMinimumPrice (entityVal couponEntity)) }
+          span.couponSimple_abstraction-summary-main \#{ fromMaybe 0 (couponDiscountMinimumPrice (entityVal couponEntity)) }円
+          |     %{ endif }
+          | %{ endif }
+
+
+          | %{ if couponTypeIs couponEntity CouponTypeGift }
+          |     %{ if isJust (couponGiftContent (entityVal couponEntity)) }
+          span.couponSimple_abstraction-summary-sub \#{ fromMaybe "" (couponGiftContent (entityVal couponEntity)) }
+          |     %{ endif }
+          |     %{ if isJust (couponGiftMinimumPrice (entityVal couponEntity)) }
+          span.couponSimple_abstraction-summary-main \#{ fromMaybe 0 (couponGiftMinimumPrice (entityVal couponEntity)) }円
+          |     %{ endif }
+          | %{ endif }
+
+
+          | %{ if couponTypeIs couponEntity CouponTypeSet }
+          |     %{ if isJust (couponSetContent (entityVal couponEntity)) }
+          span.couponSimple_abstraction-summary-sub \#{ fromMaybe "" (couponSetContent (entityVal couponEntity)) }
+          |     %{ endif }
+          |     %{ if isJust (couponSetPrice (entityVal couponEntity)) }
+          span.couponSimple_abstraction-summary-main \#{ fromMaybe 0 (couponSetPrice (entityVal couponEntity)) }円
+          |     %{ endif }
+          | %{ endif }
+
+
+          | %{ if couponTypeIs couponEntity CouponTypeOther }
+          |     %{ if isJust (couponOtherContent (entityVal couponEntity)) }
+          span.couponSimple_abstraction-summary-sub \#{ fromMaybe "" (couponOtherContent (entityVal couponEntity)) }
+          |     %{ endif }
+          | %{ endif }
