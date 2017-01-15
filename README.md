@@ -18,6 +18,7 @@ $ sudo -i -u postgres
 
 # as postgres user, initialize the database
 # (maybe only needed on arch linux?)
+# (On Ubuntu, need not to do this)
 $ initdb --locale en_US.UTF-8 -E UTF8 -D '/var/lib/postgres/data'
 
 # as postgres user, comment out all lines in the following file and add the
@@ -25,8 +26,10 @@ $ initdb --locale en_US.UTF-8 -E UTF8 -D '/var/lib/postgres/data'
 # user can login as any database user without a password), and enables
 # password-based authentication (but only from localhost).
 $ echo 'host all all 127.0.0.1/32 md5' >> /var/lib/postgres/data/pg_hba.conf
+# On Ubuntu, the conf file path is `/etc/postgresql/{version}/main/pg_hba.conf`.
 
 # create the kucipong user for developement and testing
+# Note that you have to change password on production server.
 $ sudo -u postgres -- psql --command "CREATE ROLE kucipong NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN ENCRYPTED PASSWORD 'nuy07078akyy1y7anvya7072'"
 
 # create the kucipong database for developement
