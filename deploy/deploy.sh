@@ -7,6 +7,9 @@ if [[ $# -lt 1 ]]; then
   exit -1
 fi
 
+if [[ "$2" != "--skip-build" ]]; then
+  make
+fi
 stack install
 pushd ./deploy
 cp ~/.local/bin/kucipong .
