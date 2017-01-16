@@ -116,6 +116,7 @@ Type=simple
 ExecStart = /opt/keter/bin/keter /opt/keter/etc/keter-config.yaml
 Environment=KUCIPONG_DB_PASSWORD=xxxx
 Environment=KUCIPONG_MAILGUN_APIKEY=xxxx
+Restart = always
 
 [Install]
 WantedBy=multi-user.target
