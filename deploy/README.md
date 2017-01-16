@@ -13,6 +13,8 @@ GOOGLE_MAP_API_KEY="xxxxx" ./deploy/deploy.sh SERVER_HOST_NAME
 where `SERVER_HOST_NAME` is the host name for the server you want to deploy to.
 (i.e., The `ssh SERVER_HOST_NAME` successfully connected to the server.)
 
+Make sure to replace `xxxxx` with proper API key listed in [API manager](https://console.developers.google.com/apis/credentials?project=kucipong-dev)
+
 The deploy command make it possible to realize no-down-time deployment with the help of [`keter`](https://hackage.haskell.org/package/keter).
 
 ## Set up server
