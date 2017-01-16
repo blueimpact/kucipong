@@ -1,0 +1,148 @@
+/* ================
+ * Basic elements
+ * ================ */
+
+@mixin title($font-color) {
+  color: $font-color;
+  font-size: 1em;
+  padding: 0.4em;
+  font-weight: normal;
+}
+
+@mixin stretchedBlock($background-color) {
+  background-color: $background-color;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+@mixin headBlock($background-color, $shadow-color) {
+  box-shadow: 0 18px 15px -22px $shadow-color;
+  @include stretchedBlock($background-color);
+}
+
+@mixin middleBlock($background-color) {
+  box-shadow: 18px 18px 15px -22px $shadow-color;
+  @include stretchedBlock($background-color);
+}
+
+@mixin bottomBlock($background-color, $shadow-color) {
+  box-shadow: 0 -18px 15px -22px $shadow-color;
+  @include stretchedBlock($background-color);
+}
+
+@mixin balloon($dir, $border-color, $body-color) {
+  position: relative;
+  border: 3px solid $border-color;
+  border-radius: 0.8em;
+  background: $body-color;
+
+  // Inner triangle
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+
+    @if $dir == "left" {
+      left: -8px;
+    } @else if $dir == "right" {
+      right: -8px;
+    }
+
+    margin-top: -9px;
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+
+    @if $dir == "left" {
+      border-width: 9px 9px 9px 0;
+    } @else if $dir == "right" {
+      border-width: 9px 0 9px 9px;
+    }
+
+    @if $dir == "left" {
+      border-color: transparent $body-color transparent transparent;
+    } @else if $dir == "right" {
+      border-color: transparent transparent transparent $body-color;
+    }
+
+    z-index: 0;
+  }
+
+  // Outer triangle
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+
+    @if $dir == "left" {
+      left: -12px;
+    } @else if $dir == "right" {
+      right: -12px;
+    }
+
+    margin-top: -10px;
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    z-index: -1;
+
+    @if $dir == "left" {
+      border-width: 10px 10px 10px 0;
+    } @else if $dir == "right" {
+      border-width: 10px 0 10px 10px;
+    }
+
+    @if $dir == "left" {
+      border-color: transparent $border-color transparent transparent;
+    } @else if $dir == "right" {
+      border-color: transparent transparent transparent $border-color;
+    }
+  }
+}
+
+@mixin btn($color, $border-color, $background-color) {
+  min-height: 2em;
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 2px;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  border-color: $border-color;
+  background-color: $background-color;
+  color: $color;
+  padding: 0 0.2em;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+/* ================
+ * For page layout
+ * ================ */
+
+@mixin fixedHeightPage {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin expandableBlock {
+  flex: 1;
+  overflow-y: scroll;
+}
+
+/* ================
+ *    Animation
+ * ================ */
+
+@keyframes VerticalMove {
+  0% { transform: translateY(0.18em); }
+  50% { transform: translateY(0); }
+  100% { transform: translateY(0.18em); }
+}

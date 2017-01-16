@@ -6,7 +6,8 @@ import Kucipong.Prelude
 
 import Data.HVect (HVect(HNil))
 import Network.Wai (Middleware)
-import Web.Spock (ActionCtxT, html, root, runSpock)
+import Web.Spock
+       (ActionCtxT, html, redirect, renderRoute, root, runSpock)
 import Web.Spock.Core (spockT, get, prehook, subcomponent)
 
 import Kucipong.Config (Config)
@@ -36,4 +37,5 @@ app middleware config = do
         prehook baseHook $ do
           subcomponent adminUrlPrefix adminComponent
           subcomponent storeUrlPrefix storeComponent
-        get root $ do html "<p>hello world</p>"
+        get root $
+          redirect . renderRoute $ "static/chat.html"

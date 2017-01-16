@@ -23,6 +23,8 @@ staticComponent' = do
             contentType = case takeExtension fp of
                 ".css" -> Just "text/css; charset=utf-8"
                 ".gif" -> Just "image/gif"
+                ".htm" -> Just "text/html; charset=utf-8"
+                ".html" -> Just "text/html; charset=utf-8"
                 ".js" -> Just "application/javascript; charset=utf-8"
                 ".jpeg" -> Just "image/jpeg"
                 ".jpg" -> Just "image/jpeg"

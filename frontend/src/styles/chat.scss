@@ -1,5 +1,384 @@
+@import "~modularscale-sass/stylesheets/modular-scale";
+
+/* import mixins */
+@import "mixin";
+
+@import "atom";
+
+/* import settings */
+@import "variables";
+
+/* mixins */
+@mixin formCommon($border-color, $sub-color) {
+  border: 2px solid $border-color;
+  background-color: white;
+  padding: 0 0.6em;
+
+  &:focus {
+    border: 1px solid $sub-color;
+  }
+}
+
+/* Reset CSS */
+* {
+  box-sizing: border-box;
+  font-size: 1em;
+  text-decoration: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+:focus {
+  outline: 0;
+}
+
 body {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  color: $font-color;
+  line-height: 1;
+  font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', Meiryo, メイリオ, Osaka, 'MS PGothic', arial, helvetica, sans-serif;
+  @include ms-respond(font-size, 1);
+}
+
+/* Main */
+.wrapper {
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: $break-point-tablet;
+  @include fixedHeightPage;
+
+  .header {
+    justify-content: center;
+    align-items: center;
+    min-height: 3em;
+    @include headBlock($main-color, $shadow-color);
+
+    .header_title {
+      @include title($invert-font-color);
+    }
+  }
+
+  .body {
+    @include expandableBlock;
+  }
+
+  .footer {
+    min-height: 1.3em;
+    @include bottomBlock($main-color, $shadow-color);
+  }
+
+  .submitArea {
+    width: 100%;
+    display: flex;
+    flex-direction: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0.8em 1em;
+    max-height: 20vh;
+    overflow-y: scroll;
+    justify-content: flex-end;
+
+    input[type=text],
+    input[type=url],
+    input[type=email],
+    input[type=tel],
+    input[type=password],
+    input[type=number] {
+      border-radius: 6px;
+      height: 1.8em;
+      border-color: $main-color;
+      flex: 1;
+      max-width: 100%;
+      margin-bottom: 0.2em;
+      @include formCommon($main-color, $second-color);
+    }
+
+    textarea {
+      flex: 1;
+      padding: .75em 1em 0;
+      height: 1.3em;
+      @include formCommon($main-color, $second-color);
+
+      &:focus {
+        height: 6em;
+      }
+    }
+
+    .inputRange {
+      padding: 0.5em 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+
+      .inputRange-labelArea {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9em;
+        color: white;
+      }
+
+      .inputRange-range {
+        width: 100%;
+      }
+    }
+
+    .selectList {
+      flex: 1 0 10em;
+
+      select {
+        width: 100%;
+        height: 1.8em;
+        padding: 0 1em;
+        border-radius: 6px;
+        border-color: $main-color;
+        margin-bottom: 0.2em;
+        @include formCommon($main-color, $second-color);
+      }
+    }
+
+    .multiSelect {
+      flex: 1 1 20em;
+
+      .checkboxWrapper {
+        display: inline-block;
+      }
+    }
+
+    .submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4em 0;
+      background-color: $main-color;
+    }
+
+    .annotation {
+      padding: 0.5em;
+    }
+
+    .error {
+      color: $font-color-strong;
+    }
+  }
+
+  .emphasize {
+    animation: FlashShadow 1.2s infinite;
+    @keyframes FlashShadow {
+      50% {
+        box-shadow: 0 1px 15px 1px red inset;
+        border-color: red;
+        z-index: 1;
+      }
+    }
+  }
+}
+
+.checkboxWrapper {
+  padding: 0.2em;
+
+  .checkboxWrapper_checkbox {
+    display: none;
+  }
+
+  .checkboxWrapper_label {
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 2px;
+    cursor: pointer;
+    display: block;
+  }
+
+  .checkboxWrapper_checkbox:checked ~ .checkboxWrapper_label {
+    color: $font-color;
+    border-color: $second-color;
+    background-color: $second-color;
+  }
+
+  .checkboxWrapper_checkbox:not(:checked) ~ .checkboxWrapper_label {
+    color: $font-color-light;
+    border-color: $font-color-lightest;
+    background-color: $font-color-lightest;
+  }
+}
+
+.output-area {
+  .input-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 1em 2em 1em 1em;
+
+    .img {
+      width: 3em;
+      height: 3em;
+      background-image: url("../img/mee.svg");
+      background-size: contain;
+      background-position: center center;
+      background-repeat: no-repeat;
+      animation: VerticalMove ease-in-out 1.2s infinite;
+    }
+
+    .message-balloon {
+      margin: 0 0 0 2em;
+      line-height: 2em;
+      color: $font-color;
+      text-align: left;
+    }
+
+    &.ai {
+      justify-content: flex-start;
+
+      .message-balloon {
+        @include balloon("left", $main-color, $invert-font-color);
+      }
+    }
+
+    &:not(.ai) {
+      justify-content: flex-end;
+
+      .message-balloon {
+        @include balloon("right", $second-color, $invert-font-color);
+      }
+    }
+
+    .message-area {
+      flex: 0 1 30em;
+
+      .message-balloon {
+        padding: 0.5em 1em;
+
+        p {
+          line-height: 1.4em;
+          font-size: 0.9em;
+          margin: 0;
+        }
+
+        .message-title {
+          font-size: 1.2em;
+        }
+
+        .message-sub {
+          font-size: 0.9em;
+          line-height: 1.2em;
+        }
+
+        .message-image {
+          img {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}
+
+.btn {
+  margin-left: 0.5em;
+  @include btn(
+    $invert-font-color,
+    $invert-font-color,
+    $main-color
+  );
+}
+
+.popupMap {
+  width: 100%;
+}
+
+.getGeocodeArea {
+  .getGeocodeArea-checkbutton {
+    margin-left: 1em;
+
+    &:not(:disabled) {
+      @include btn(
+        $invert-font-color,
+        $invert-font-color,
+        $main-color
+      );
+    }
+
+    &:disabled {
+      @include btn(
+        $invert-font-color,
+        $font-color-light,
+        $font-color-light
+      );
+    }
+  }
+}
+
+.mapModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $shadow-color;
+  padding: 5%;
+
+  .mapModal-card {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background-color: $invert-font-color;
+    padding: 5%;
+    text-align: right;
+  }
+
+  .mapModal-card-embeddedMap {
+    width: 100%;
+    margin: 0 auto;
+    display: block;
+    height: calc(100% - 6em);
+  }
+
+  .mapModal-card-submitButton {
+    margin-top: 0.4em;
+    margin-left: 1em;
+    min-width: 10em;
+
+    &:not(:disabled) {
+      @include btn(
+        $invert-font-color,
+        $main-color,
+        $main-color
+      );
+    }
+
+    &:disabled {
+      @include btn(
+        $invert-font-color,
+        $font-color-light,
+        $font-color-light
+      );
+    }
+  }
+
+  .mapModal-card-cancelButton {
+    margin-top: 0.4em;
+
+    &:not(:disabled) {
+      @include btn(
+        $main-color,
+        $main-color,
+        $invert-font-color
+      );
+    }
+
+    &:disabled {
+      @include btn(
+        $invert-font-color,
+        $font-color-light,
+        $font-color-light
+      );
+    }
+  }
 }

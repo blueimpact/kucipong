@@ -7,11 +7,13 @@ This directory contains files for staging/production server setup/deployment.
 Run following command on the parent directory (root of kucipong repository).
 
 ```bash
-./deploy/deploy.sh SERVER_HOST_NAME
+GOOGLE_MAP_API_KEY="xxxxx" ./deploy/deploy.sh SERVER_HOST_NAME
 ```
 
 where `SERVER_HOST_NAME` is the host name for the server you want to deploy to.
 (i.e., The `ssh SERVER_HOST_NAME` successfully connected to the server.)
+
+Make sure to replace `xxxxx` with proper API key listed in [API manager](https://console.developers.google.com/apis/credentials?project=kucipong-dev)
 
 The deploy command make it possible to realize no-down-time deployment with the help of [`keter`](https://hackage.haskell.org/package/keter).
 
@@ -116,6 +118,7 @@ Type=simple
 ExecStart = /opt/keter/bin/keter /opt/keter/etc/keter-config.yaml
 Environment=KUCIPONG_DB_PASSWORD=xxxx
 Environment=KUCIPONG_MAILGUN_APIKEY=xxxx
+Restart = always
 
 [Install]
 WantedBy=multi-user.target

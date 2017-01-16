@@ -17,10 +17,16 @@ const ENV = TARGET_ENV === 'production' ?
     'apiRoot': JSON.stringify(
       process.env.API_ROOT || 'http://kucipong.com/api/v0/'
     ),
+    'googleMapApiKey': JSON.stringify(
+      process.env.GOOGLE_MAP_API_KEY || ''
+    ),
   } :
   {
     'apiRoot': JSON.stringify(
       process.env.API_ROOT || 'http://localhost:8081/v0/'
+    ),
+    'googleMapApiKey': JSON.stringify(
+      process.env.GOOGLE_MAP_API_KEY || ''
     ),
   };
 
@@ -36,6 +42,9 @@ const commonConfig = {
   resolve: {
     modulesDirectories: ['node_modules'],
     extensions: ['', '.js', '.elm'],
+    root: [
+      path.resolve('src/elm'),
+    ]
   },
 
   module: {
@@ -63,8 +72,15 @@ const commonConfig = {
       chunks: ['chat'],
       template: 'src/pug/chat.pug',
       inject:   'body',
-      filename: 'chat.html',
+      filename: 'static/chat.html',
     }),
+    new HtmlWebpackPlugin({
+      chunks: ['chat'],
+      template: 'src/style-guide/chat.html',
+      inject:   'body',
+      filename: 'style-guide_chat.html',
+    }),
+
     // Compile end-user related pages
     new HtmlWebpackPlugin({
       chunks: ['endUser'],
@@ -225,10 +241,11 @@ if (TARGET_ENV === 'development') {
         {
           test: /\.(css|scss)$/,
           loaders: [
-            'style-loader',
-            'css-loader',
-            'sass-loader',
-            'postcss-loader',
+            'style',
+            'css',
+            'resolve-url',
+            'sass',
+            'postcss',
           ]
         }
       ]
@@ -273,10 +290,11 @@ if (TARGET_ENV === 'production') {
         },
         {
           test: /\.(css|scss)$/,
-          loader: ExtractTextPlugin.extract('style-loader', [
-            'css-loader',
-            'sass-loader',
-            'postcss-loader',
+          loader: ExtractTextPlugin.extract('style', [
+            'css',
+            'resolve-url',
+            'sass',
+            'postcss',
           ])
         }
       ]
