@@ -167,7 +167,7 @@ view : Model -> Html Msg
 view model =
   Html.form
     [ class "getGeocodeArea submitArea"
-    , onSubmit AskGetGeocode
+    , onSubmit OnUpdateMap
     ]
     [ input
       [ type' "text"
@@ -216,9 +216,10 @@ view model =
           ]
           [ text "場所を入力し直す" ]
         , button
-          [ type' "submit"
+          [ type' "button"
           , class "mapModal-card-submitButton"
           , disabled model.loading
+          , onClick AskGetGeocode
           ]
           [ text <| if model.loading
             then "処理中..."

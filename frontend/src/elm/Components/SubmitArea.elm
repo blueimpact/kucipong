@@ -929,7 +929,6 @@ renderInputPlace c =
     ]
 
 
--- TODO It's just a dummy.
 renderInputLocation : Model -> InputLocationConfig -> Html Msg
 renderInputLocation model c =
   div [class "popupMap"]
