@@ -7,7 +7,7 @@ This directory contains files for staging/production server setup/deployment.
 Run following command on the parent directory (root of kucipong repository).
 
 ```bash
-./deploy/deploy.sh SERVER_HOST_NAME
+GOOGLE_MAP_API_KEY="xxxxx" ./deploy/deploy.sh SERVER_HOST_NAME
 ```
 
 where `SERVER_HOST_NAME` is the host name for the server you want to deploy to.
