@@ -4,5 +4,6 @@ stanzas:
     host: 188.166.234.56
     env:
       ENV: Production
-      KUCIPONG_DB_PASSWORD: xxxx
-      KUCIPONG_MAILGUN_APIKEY: xxxx
+    forward-env:
+      - KUCIPONG_DB_PASSWORD
+      - KUCIPONG_MAILGUN_APIKEY
