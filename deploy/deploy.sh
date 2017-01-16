@@ -7,7 +7,7 @@ if [[ $# -lt 1 ]]; then
   exit -1
 fi
 
-if [[ "$2" != "--skip-build" ]]; then
+if [[ $# -lt 2 || "$2" != "--skip-build" ]]; then
   make
 fi
 stack install
