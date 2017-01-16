@@ -8,13 +8,12 @@ if [[ $# -lt 1 ]]; then
 fi
 
 stack install
-pushd ~/.local/bin/
-tar cvzf kucipong.tar.gz kucipong
-scp kucipong.tar.gz "$1":
-rm kucipong.tar.gz
+pushd ./deploy
+cp ~/.local/bin/kucipong .
+tar cvzf kucipong.keter kucipong config/keter.yaml
+scp kucipong.keter "$1":
+rm kucipong.keter kucipong
 ssh -t "$1" '
-  tar xvf kucipong.tar.gz && \
-  tar cvzf kucipong.keter config/keter.yaml kucipong && \
   cp kucipong.keter /opt/keter/incoming
 '
 popd
