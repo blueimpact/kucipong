@@ -72,7 +72,7 @@ const commonConfig = {
       chunks: ['chat'],
       template: 'src/pug/chat.pug',
       inject:   'body',
-      filename: 'chat.html',
+      filename: 'static/chat.html',
     }),
     new HtmlWebpackPlugin({
       chunks: ['chat'],
