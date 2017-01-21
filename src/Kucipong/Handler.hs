@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Kucipong.Handler where
 
 import Kucipong.Prelude
@@ -7,7 +5,7 @@ import Kucipong.Prelude
 import Data.HVect (HVect(HNil))
 import Network.Wai (Middleware)
 import Web.Spock
-       (ActionCtxT, html, redirect, renderRoute, root, runSpock)
+       (ActionCtxT, redirect, renderRoute, root, runSpock)
 import Web.Spock.Core (spockT, get, prehook, subcomponent)
 
 import Kucipong.Config (Config)

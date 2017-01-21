@@ -15,7 +15,7 @@ import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Web.Spock
        (ActionCtxT, UploadedFile(..), (<//>), files, getContext, params,
-        prehook, root, redirect, renderRoute)
+        prehook, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
@@ -97,7 +97,7 @@ doLogin loginToken = do
         storeLoginTokenExpirationTime storeLoginToken
   when (now > expirationTime) tokenExpiredError
   setStoreCookie storeEmail
-  redirect $ renderRoute root
+  redirect . renderRoute $ storeUrlPrefix <//> rootR
   where
     noStoreLoginTokenError :: ActionCtxT ctx m a
     noStoreLoginTokenError =
@@ -204,7 +204,7 @@ storeEditPost = do
       businessHours
       regularHoliday
       url
-  redirect . renderRoute $ storeUrlPrefix
+  redirect . renderRoute $ storeUrlPrefix <//> rootR
   where
     checkBusinessCategoryDetails :: BusinessCategory
                                  -> [BusinessCategoryDetail]
