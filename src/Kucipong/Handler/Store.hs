@@ -204,7 +204,7 @@ storeEditPost = do
       businessHours
       regularHoliday
       url
-  redirect . renderRoute $ storeUrlPrefix
+  redirect . renderRoute $ storeUrlPrefix <//> rootR
   where
     checkBusinessCategoryDetails :: BusinessCategory
                                  -> [BusinessCategoryDetail]
