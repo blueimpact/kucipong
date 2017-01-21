@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Kucipong.Handler where
 
 import Kucipong.Prelude
