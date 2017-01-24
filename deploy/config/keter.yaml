@@ -1,9 +1,9 @@
 stanzas:
-  - type: background
+  - type: webapp
     exec: ../kucipong
     host: 188.166.234.56
     env:
-      KUCIPONG_HOST: "188.166.234.56:8101"
+      KUCIPONG_HOST: "188.166.234.56"
       ENV: Production
     forward-env:
       - KUCIPONG_DB_PASSWORD

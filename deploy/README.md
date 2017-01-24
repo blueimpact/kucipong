@@ -29,7 +29,7 @@ sudo apt-get -y install ufw postgresql
 
 ### Fire wall settings
 
-If you planning to run kucipong server on port `KUCIPONG_PORT`, open the port with [`ufw`](https://help.ubuntu.com/community/UFW).
+If you planning to run kucipong server on port `PORT`, open the port with [`ufw`](https://help.ubuntu.com/community/UFW).
 Also, make sure to open port for ssh.
 
 ### PostgreSQL settings

@@ -137,7 +137,7 @@ initKucipongSessionKey = fromEitherM handleErr . (initKey <=< decode)
 createConfigFromEnv :: IO Config
 createConfigFromEnv = do
   env <- readEnvVarDef "KUCIPONG_ENV" Development
-  port <- readEnvVarDef "KUCIPONG_PORT" 8101
+  port <- readEnvVarDef "PORT" 8101
   hailgunContextDomain <-
     lookupEnvDef
       "KUCIPONG_MAILGUN_DOMAIN"
