@@ -144,15 +144,3 @@ storeCouponComponent = do
   post couponR couponPost
   get (couponR <//> createR) couponNewGet
   get (couponR <//> var)  couponGet
-
-
-couponTypeIs :: Entity Coupon -> CouponType -> Bool
-couponTypeIs (Entity _ coupon) t = couponCouponType coupon == t
-
-{-# WARNING
-fromJustEx "This function is a temporary hack until heterocephalus gets support for maybe and with control statements."
- #-}
-
-fromJustEx :: Maybe a -> a
-fromJustEx (Just a) = a
-fromJustEx Nothing = error "Calling fromJustEx with Nothing."
