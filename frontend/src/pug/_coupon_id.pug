@@ -4,7 +4,7 @@
       h2.card_header_text \#{maybe "(no title)" (storeName . entityVal) maybeStoreEntity}
       .card_header_icon
         .icon.icon-fav.checkableIcon
-          input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{fromSqlKey (entityKey (fromJustEx maybeCouponEntity))}")
+          input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{fromSqlKey couponKey}")
           label.checkableIcon-icon(for="js-fav-3")
 
     .annotatedImageGroup
@@ -12,34 +12,119 @@
       span.annotatedImageGroup-annotation 画像は一例です
     .card_body
       .card_body_title
-        | \#{couponTitle (entityVal (fromJustEx maybeCouponEntity))}
+        | \#{couponTitle coupon}
 
       .card_body_summary.highlightedBlock
-        | %{ if couponTypeIs (fromJustEx maybeCouponEntity) CouponTypeDiscount }
-        |     %{ if isJust (couponDiscountPercent (entityVal (fromJustEx maybeCouponEntity))) }
-        span.highlightedBlock-sub \#{ fromMaybe 0 (couponDiscountPercent (entityVal (fromJustEx maybeCouponEntity))) }% OFF
-        |     %{ endif }
-        |     %{ if isJust (couponDiscountMinimumPrice (entityVal (fromJustEx maybeCouponEntity))) }
-        span.highlightedBlock-main \#{ fromMaybe 0 (couponDiscountMinimumPrice (entityVal (fromJustEx maybeCouponEntity))) }円
-        |     %{ endif }
-        | %{ endif }
+        | %{ case couponCouponType coupon }
+        | %{ of CouponTypeDiscount }
+        |     %{ case couponDiscountPercent coupon }
+        |     %{ of Just discountPercent }
+        span.highlightedBlock-sub \#{discountPercent}% OFF
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        |     %{ case couponDiscountMinimumPrice coupon }
+        |     %{ of Just discountMinimumPrice }
+        span.highlightedBlock-main \#{discountMinimumPrice}円
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        | %{ of CouponTypeGift }
+        |     %{ case couponGiftContent coupon }
+        |     %{ of Just giftContent }
+        span.highlightedBlock-sub \#{giftContent}
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        |     %{ case couponGiftMinimumPrice coupon }
+        |     %{ of Just giftMinimumPrice }
+        span.highlightedBlock-main \#{giftMinimumPrice}円
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        |     %{ case couponGiftReferencePrice coupon }
+        |     %{ of Just giftReferencePrice }
+        span.highlightedBlock-main \#{giftReferencePrice}円
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        | %{ of CouponTypeSet }
+        |     %{ case couponSetContent coupon }
+        |     %{ of Just setContent }
+        span.highlightedBlock-sub \#{setContent}
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        |     %{ case couponSetPrice coupon }
+        |     %{ of Just setPrice }
+        span.highlightedBlock-main \#{setPrice}円
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        |     %{ case couponSetReferencePrice coupon }
+        |     %{ of Just setReferencePrice }
+        span.highlightedBlock-main \#{setReferencePrice}円
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        | %{ of CouponTypeOther }
+        |     %{ case couponOtherContent coupon }
+        |     %{ of Just otherContent }
+        span.highlightedBlock-sub \#{otherContent}
+        |     %{ of Nothing }
+        |     %{ endcase }
+
+        | %{ endcase }
 
 
-        span.highlightedBlock-sub 10% OFF
-        span.highlightedBlock-main 3600円
       .card_body_expiration
         span.card_body_expiration-title
           | 有効期限
         span.card_body_expiration-body
-          | 2016年4月15日から 2016年4月30日まで
+          | %{ case couponValidFrom coupon }
+          | %{ of Just validFrom }
+          | \#{tshow validFrom}から
+          | %{ of Nothing }
+          | %{ endcase }
+
+          | %{ case couponValidUntil coupon }
+          | %{ of Just validUntil }
+          | \#{tshow validUntil}まで
+          | %{ of Nothing }
+          | %{ endcase }
   .annotation ※ この画面を店舗でご提示ください
   .location
     .location_map(data-latitude="41.40243" data-longitude="2.17551")
       iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
   .aboutStore
-    a.btn.outerBtn(href="/store") 七輪焼き肉・安安
+    a.btn.outerBtn(href="/store") \#{maybe "(no title)" (storeName . entityVal) maybeStoreEntity}
   .moreContents
-    p.moreContents_txt 2.5時間飲放題付きの料理4品です。
-    p.moreContents_txt 1. 前菜 2. 焼き肉盛り合わせ 3. 冷麺 4. アイスクリーム
-    p.moreContents_txt ※ 1グループ1回のご利用時の利用枚数制限はありません。
-    p.moreContents_txt ※ 21時以降のご予約のお客様が対象です。
+    | %{ case couponCouponType coupon }
+    | %{ of CouponTypeDiscount }
+    |     %{ case couponDiscountOtherConditions coupon }
+    |     %{ of Just discountOtherConditions }
+    p.moreContents_txt \#{discountOtherConditions}
+    |     %{ of Nothing }
+    |     %{ endcase }
+
+    | %{ of CouponTypeGift }
+    |     %{ case couponGiftOtherConditions coupon }
+    |     %{ of Just giftOtherConditions }
+    p.moreContents_txt \#{giftOtherConditions}
+    |     %{ of Nothing }
+    |     %{ endcase }
+
+    | %{ of CouponTypeSet }
+    |     %{ case couponSetOtherConditions coupon }
+    |     %{ of Just setOtherConditions }
+    p.moreContents_txt \#{setOtherConditions}
+    |     %{ of Nothing }
+    |     %{ endcase }
+
+    | %{ of CouponTypeOther }
+    |     %{ case couponOtherConditions coupon }
+    |     %{ of Just otherConditions }
+    p.moreContents_txt \#{otherConditions}
+    |     %{ of Nothing }
+    |     %{ endcase }
+    | %{ endcase }
