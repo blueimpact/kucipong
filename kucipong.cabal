@@ -147,6 +147,7 @@ library
                      , TupleSections
                      , TypeFamilies
                      , TypeOperators
+                     , ViewPatterns
   other-extensions:    QuasiQuotes
                      , TemplateHaskell
 
@@ -184,6 +185,7 @@ executable kucipong
                      , TupleSections
                      , TypeFamilies
                      , TypeOperators
+                     , ViewPatterns
   other-extensions:    QuasiQuotes
                      , TemplateHaskell
 
@@ -227,6 +229,7 @@ executable kucipong-add-admin
                      , TupleSections
                      , TypeFamilies
                      , TypeOperators
+                     , ViewPatterns
   other-extensions:    QuasiQuotes
                      , TemplateHaskell
 

@@ -42,4 +42,5 @@ ghcExtensions =
     , "-XTupleSections"
     , "-XTypeFamilies"
     , "-XTypeOperators"
+    , "-XViewPatterns"
     ]
