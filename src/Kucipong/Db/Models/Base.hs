@@ -170,6 +170,9 @@ newtype Percent = Percent
              , Typeable
              )
 
+percentToText :: Percent -> Text
+percentToText = tshow . unPercent
+
 -----------
 -- Price --
 -----------
@@ -189,6 +192,9 @@ newtype Price = Price
              , ToHttpApiData
              , Typeable
              )
+
+priceToText :: Price -> Text
+priceToText = tshow . unPrice
 
 ----------------------
 -- BusinessCategory --

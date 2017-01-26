@@ -4,6 +4,7 @@ module Kucipong.Handler.Store.Coupon where
 
 import Kucipong.Prelude
 
+import Control.FromSum (fromMaybeM)
 import Control.Lens (_Wrapped, view)
 import Data.HVect (HVect(..))
 import Database.Persist.Sql (Entity(..), fromSqlKey)
@@ -12,11 +13,12 @@ import Web.Spock
 import Web.Spock.Core (SpockCtxT, get, post, var)
 
 import Kucipong.Db
-       (Coupon(..), CouponType(..), Key(..), Store(..), couponTypeToText)
+       (Coupon(..), CouponType(..), Key(..), Store(..), couponTypeToText,
+        percentToText, priceToText)
 import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Store.Route
-       (storeUrlPrefix, couponR, createR)
+       (couponR, createR, editR, storeUrlPrefix)
 import Kucipong.Monad
        (MonadKucipongDb(..), dbFindCouponByEmailAndId,
         dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon)
@@ -63,6 +65,45 @@ couponGet couponKey = do
   maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
   maybeStoreEntity <- dbFindStoreByEmail email
   $(renderTemplateFromEnv "storeUser_store_coupon_id.html")
+
+couponEditGet
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+  => Key Coupon -> ActionCtxT (HVect xs) m ()
+couponEditGet couponKey = do
+  (StoreSession email) <- getStoreEmail
+  maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
+  Entity _ (Coupon _ _ _ _ (Just -> title) (Just . couponTypeToText -> couponType) (fmap tshow -> validFrom) (fmap tshow -> validUntil) _ (fmap percentToText  -> discountPercent) (fmap priceToText -> discountMinimumPrice) discountOtherConditions giftContent (fmap priceToText -> giftReferencePrice) (fmap priceToText -> giftMinimumPrice) giftOtherConditions setContent (fmap priceToText -> setPrice) (fmap priceToText -> setReferencePrice) setOtherConditions otherContent otherConditions) <-
+    fromMaybeM (handleErr "couldn't find coupon") maybeCouponEntity
+  $(renderTemplateFromEnv "storeUser_store_coupon_id_edit.html")
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg = do
+      p <- params
+      $(logDebug) $ "params: " <> tshow p
+      $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
+      let errors = [errMsg]
+      $(renderTemplate "storeUser_store_coupon_id_edit.html" $
+        fromParams
+          [|p|]
+          [ "title"
+          , "couponType"
+          , "validFrom"
+          , "validUntil"
+          , "discountPercent"
+          , "discountMinimumPrice"
+          , "discountOtherConditions"
+          , "giftContent"
+          , "giftReferencePrice"
+          , "giftMinimumPrice"
+          , "giftOtherConditions"
+          , "setContent"
+          , "setPrice"
+          , "setReferencePrice"
+          , "setOtherConditions"
+          , "otherContent"
+          , "otherConditions"
+          ])
 
 couponListGet
   :: forall xs n m.
@@ -143,4 +184,5 @@ storeCouponComponent = do
   get couponR couponListGet
   post couponR couponPost
   get (couponR <//> createR) couponNewGet
-  get (couponR <//> var)  couponGet
+  get (couponR <//> var) couponGet
+  get (couponR <//> var <//> editR) couponEditGet
