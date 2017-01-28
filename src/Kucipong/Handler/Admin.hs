@@ -31,6 +31,9 @@ import Kucipong.Form
         AdminStoreCreateForm(AdminStoreCreateForm),
         AdminStoreDeleteForm(AdminStoreDeleteForm),
         AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm))
+import Kucipong.Handler.Route
+       (adminR, adminLoginR, adminLoginVarR, adminStoreCreateR,
+        adminStoreDeleteR, adminStoreDeleteConfirmR)
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
@@ -43,31 +46,6 @@ import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
        (ContainsAdminSession, getAdminCookie, getAdminEmail,
         getReqParamErr, setAdminCookie)
-
--- | Url prefix for all of the following 'Path's.
-adminUrlPrefix :: Path '[] 'Open
-adminUrlPrefix = "admin"
-
-rootR :: Path '[] 'Open
-rootR = ""
-
-loginR :: Path '[] 'Open
-loginR = "login"
-
-doLoginR :: Path '[LoginToken] 'Open
-doLoginR = loginR <//> var
-
-storeR :: Path '[] 'Open
-storeR = "store"
-
-storeCreateR :: Path '[] 'Open
-storeCreateR = storeR <//> "create"
-
-storeDeleteR :: Path '[] 'Open
-storeDeleteR = storeR <//> "delete"
-
-storeDeleteConfirmR :: Path '[] 'Open
-storeDeleteConfirmR = storeDeleteR <//> "confirm"
 
 -- | Handler for returning the admin login page.
 loginGet
@@ -118,7 +96,7 @@ doLoginGet loginToken = do
         adminLoginTokenExpirationTime adminLoginToken
   when (now > expirationTime) tokenExpiredError
   setAdminCookie adminEmail
-  redirect $ renderRoute adminUrlPrefix
+  redirect $ renderRoute adminR
   where
     noAdminLoginTokenError :: ActionCtxT ctx m a
     noAdminLoginTokenError = do
@@ -154,7 +132,7 @@ storeCreatePost = do
     sendStoreLoginEmail
       (storeEmailEmail storeEmail)
       (storeLoginTokenLoginToken storeLoginToken)
-  redirect . renderRoute $ adminUrlPrefix <//> storeCreateR
+  redirect $ renderRoute adminStoreCreateR
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
@@ -251,13 +229,13 @@ adminComponent
      )
   => SpockCtxT (HVect xs) m ()
 adminComponent = do
-  get doLoginR doLoginGet
-  get loginR loginGet
-  post loginR loginPost
+  get adminLoginVarR doLoginGet
+  get adminLoginR loginGet
+  post adminLoginR loginPost
   prehook adminAuthHook $ do
-    get rootR storeCreateGet
-    get storeCreateR storeCreateGet
-    post storeCreateR storeCreatePost
-    get storeDeleteR storeDeleteGet
-    post storeDeleteR storeDeletePost
-    post storeDeleteConfirmR storeDeleteConfirmPost
+    get adminR storeCreateGet
+    get adminStoreCreateR storeCreateGet
+    post adminStoreCreateR storeCreatePost
+    get adminStoreDeleteR storeDeleteGet
+    post adminStoreDeleteR storeDeletePost
+    post adminStoreDeleteConfirmR storeDeleteConfirmPost

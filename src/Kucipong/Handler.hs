@@ -9,8 +9,7 @@ import Web.Spock
 import Web.Spock.Core (spockT, get, prehook, subcomponent)
 
 import Kucipong.Config (Config)
-import Kucipong.Handler.Admin (adminComponent, adminUrlPrefix)
-import Kucipong.Handler.Route (storeR)
+import Kucipong.Handler.Admin (adminComponent)
 import Kucipong.Handler.Static (staticComponent, staticUrlPrefix)
 import Kucipong.Handler.Store (storeComponent)
 import Kucipong.Host (HasPort(..))
@@ -34,7 +33,7 @@ app middleware config = do
       spockT (runKucipongMHandleErrors config) $ do
         subcomponent staticUrlPrefix staticComponent
         prehook baseHook $ do
-          subcomponent adminUrlPrefix adminComponent
+          adminComponent
           storeComponent
         get root $
           redirect . renderRoute $ "static/chat.html"

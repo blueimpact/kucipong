@@ -11,11 +11,20 @@ import Kucipong.Db (Coupon, Key(..))
 -- Path Pieces --
 -----------------
 
+adminR :: Path '[] 'Open
+adminR = "admin"
+
 createR :: Path '[] 'Open
 createR = "create"
 
+confirmR :: Path '[] 'Open
+confirmR = "confirm"
+
 couponR :: Path '[] 'Open
 couponR = "coupon"
+
+deleteR :: Path '[] 'Open
+deleteR = "delete"
 
 editR :: Path '[] 'Open
 editR = "edit"
@@ -33,6 +42,21 @@ storeR = "store"
 ----------------
 -- Full paths --
 ----------------
+
+adminLoginR :: Path '[] 'Open
+adminLoginR = adminR <//> loginR
+
+adminLoginVarR :: Path '[LoginToken] 'Open
+adminLoginVarR = adminR <//> loginR <//> var
+
+adminStoreCreateR :: Path '[] 'Open
+adminStoreCreateR = adminR <//> storeR <//> createR
+
+adminStoreDeleteR :: Path '[] 'Open
+adminStoreDeleteR = adminR <//> storeR <//> deleteR
+
+adminStoreDeleteConfirmR :: Path '[] 'Open
+adminStoreDeleteConfirmR = adminR <//> storeR <//> deleteR <//> confirmR
 
 storeCouponR :: Path '[] 'Open
 storeCouponR = storeR <//> couponR
