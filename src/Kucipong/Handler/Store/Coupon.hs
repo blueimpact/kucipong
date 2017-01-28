@@ -21,7 +21,7 @@ import Kucipong.Handler.Store.Route
        (couponR, createR, editR, storeUrlPrefix)
 import Kucipong.Monad
        (MonadKucipongDb(..), dbFindCouponByEmailAndId,
-        dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon)
+        dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon, dbUpdateCoupon)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
@@ -34,6 +34,7 @@ couponNewGet
   => ActionCtxT (HVect xs) m ()
 couponNewGet = do
   let p = [] :: [(Text, Text)]
+      action = renderRoute $ storeUrlPrefix <//> couponR
   $(renderTemplate "storeUser_store_coupon_id_edit.html" $
     fromParams
       [|p|]
@@ -75,6 +76,10 @@ couponEditGet couponKey = do
   maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
   Entity _ (Coupon _ _ _ _ (Just -> title) (Just . couponTypeToText -> couponType) (fmap tshow -> validFrom) (fmap tshow -> validUntil) _ (fmap percentToText  -> discountPercent) (fmap priceToText -> discountMinimumPrice) discountOtherConditions giftContent (fmap priceToText -> giftReferencePrice) (fmap priceToText -> giftMinimumPrice) giftOtherConditions setContent (fmap priceToText -> setPrice) (fmap priceToText -> setReferencePrice) setOtherConditions otherContent otherConditions) <-
     fromMaybeM (handleErr "couldn't find coupon") maybeCouponEntity
+  let action =
+        renderRoute
+          (storeUrlPrefix <//> couponR <//> var <//> editR)
+          (fromSqlKey couponKey)
   $(renderTemplateFromEnv "storeUser_store_coupon_id_edit.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -83,6 +88,75 @@ couponEditGet couponKey = do
       $(logDebug) $ "params: " <> tshow p
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
       let errors = [errMsg]
+          action =
+            renderRoute
+              (storeUrlPrefix <//> couponR <//> var <//> editR)
+              (fromSqlKey couponKey)
+      $(renderTemplate "storeUser_store_coupon_id_edit.html" $
+        fromParams
+          [|p|]
+          [ "title"
+          , "couponType"
+          , "validFrom"
+          , "validUntil"
+          , "discountPercent"
+          , "discountMinimumPrice"
+          , "discountOtherConditions"
+          , "giftContent"
+          , "giftReferencePrice"
+          , "giftMinimumPrice"
+          , "giftOtherConditions"
+          , "setContent"
+          , "setPrice"
+          , "setReferencePrice"
+          , "setOtherConditions"
+          , "otherContent"
+          , "otherConditions"
+          ])
+
+couponEditPost
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+  => Key Coupon -> ActionCtxT (HVect xs) m ()
+couponEditPost couponKey = do
+  (StoreSession email) <- getStoreEmail
+  storeNewCouponForm <- getReqParamErr handleErr
+  let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
+  void $
+    dbUpdateCoupon
+      couponKey
+      email
+      title
+      couponType
+      (view _Wrapped validFrom)
+      (view _Wrapped validUntil)
+      Nothing -- image
+      (view _Wrapped discountPercent)
+      (view _Wrapped discountMinimumPrice)
+      (view _Wrapped discountOtherConditions)
+      (view _Wrapped giftContent)
+      (view _Wrapped giftReferencePrice)
+      (view _Wrapped giftMinimumPrice)
+      (view _Wrapped giftOtherConditions)
+      (view _Wrapped setContent)
+      (view _Wrapped setPrice)
+      (view _Wrapped setReferencePrice)
+      (view _Wrapped setOtherConditions)
+      (view _Wrapped otherContent)
+      (view _Wrapped otherConditions)
+  redirect . renderRoute $ storeUrlPrefix <//> couponR
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg = do
+      p <- params
+      $(logDebug) $ "params: " <> tshow p
+      $(logDebug) $
+        "got following error in store couponEditPost handler: " <> errMsg
+      let errors = [errMsg]
+      let action =
+            renderRoute
+              (storeUrlPrefix <//> couponR <//> var <//> editR)
+              (fromSqlKey couponKey)
       $(renderTemplate "storeUser_store_coupon_id_edit.html" $
         fromParams
           [|p|]
@@ -151,6 +225,7 @@ couponPost = do
       $(logDebug) $ "params: " <> tshow p
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
       let errors = [errMsg]
+          action = renderRoute $ storeUrlPrefix <//> couponR
       $(renderTemplate "storeUser_store_coupon_id_edit.html" $
         fromParams
           [|p|]
@@ -186,3 +261,4 @@ storeCouponComponent = do
   get (couponR <//> createR) couponNewGet
   get (couponR <//> var) couponGet
   get (couponR <//> var <//> editR) couponEditGet
+  post (couponR <//> var <//> editR) couponEditPost
