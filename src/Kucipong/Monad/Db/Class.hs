@@ -6,7 +6,8 @@ import Kucipong.Prelude
 
 import Control.Monad.Trans (MonadTrans)
 import Database.Persist.Sql
-       (Entity, Filter, PersistRecordBackend, SelectOpt, SqlBackend)
+       (Entity, Filter, PersistRecordBackend, SelectOpt, SqlBackend,
+        Update)
 import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
@@ -208,6 +209,18 @@ class Monad m => MonadKucipongDb m where
        )
     => [Filter record] -> [SelectOpt record] -> t n [Entity record]
   dbSelectList filters selectOpts = lift (dbSelectList filters selectOpts)
+
+  dbUpdate
+    :: (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> (UTCTime -> [Update record]) -> m ()
+  default dbUpdate
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => [Filter record] -> (UTCTime -> [Update record]) -> t n ()
+  dbUpdate filters updatesCreator = lift $ dbUpdate filters updatesCreator
 
   dbUpsert
     :: (PersistRecordBackend record SqlBackend)

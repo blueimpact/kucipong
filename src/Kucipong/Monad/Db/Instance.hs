@@ -9,8 +9,9 @@ import Control.Monad.Random (MonadRandom(..))
 import Control.Monad.Time (MonadTime(..))
 import Database.Persist.Sql
        (Entity(..), Filter, PersistRecordBackend, PersistStoreRead,
-        SelectOpt, SqlBackend, (==.), (=.), get, insert, insertEntity,
-        repsert, selectFirst, selectList, update, updateGet)
+        SelectOpt, SqlBackend, Update, (==.), (=.), get, insert,
+        insertEntity, repsert, selectFirst, selectList, update, updateGet,
+        updateWhere)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
@@ -245,6 +246,15 @@ instance ( MonadBaseControl IO m
       go :: m [Entity record]
       go = runDb $ selectList filters selectOpts
 
+  dbUpdate
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => [Filter record] -> (UTCTime -> [Update record]) -> KucipongDbT m ()
+  dbUpdate filters updatesCreator = lift go
+    where
+      go :: m ()
+      go = runDbCurrTime $ updateWhere filters . updatesCreator
+
   dbUpsert
     :: forall record.
        (PersistRecordBackend record SqlBackend)
@@ -311,6 +321,16 @@ dbSelectListNotDeleted
   => [Filter record] -> [SelectOpt record] -> m [Entity record]
 dbSelectListNotDeleted filters selectOpts =
   dbSelectList ((deletedEntityField ==. Nothing) : filters) selectOpts
+
+dbUpdateWithTime
+  :: forall m record.
+     ( EntityDateFields record
+     , MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => [Filter record] -> [Update record] -> m ()
+dbUpdateWithTime filters updates = dbUpdate filters $ \currTime ->
+  (updatedEntityField =. UpdatedTime currTime) : updates
 
 dbUpsertWithTime
   :: forall m record.
@@ -458,6 +478,52 @@ dbFindCouponsByEmail
   => EmailAddress -> m [Entity Coupon]
 dbFindCouponsByEmail email =
   dbSelectList [CouponStoreEmail ==. emailToStoreEmailKey email] []
+
+dbUpdateCoupon
+  :: MonadKucipongDb m
+  => Key Coupon
+  -> EmailAddress
+  -> Text
+  -> CouponType
+  -> Maybe Day
+  -> Maybe Day
+  -> Maybe Image
+  -> Maybe Percent
+  -> Maybe Price
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Price
+  -> Maybe Price
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Price
+  -> Maybe Price
+  -> Maybe Text
+  -> Maybe Text
+  -> Maybe Text
+  -> m ()
+dbUpdateCoupon couponKey email title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+  dbUpdateWithTime
+    [CouponId ==. couponKey, CouponStoreEmail ==. emailToStoreEmailKey email]
+    [ CouponTitle =. title
+    , CouponCouponType =. couponType
+    , CouponValidFrom =. validFrom
+    , CouponValidUntil =. validUntil
+    , CouponImage =. image
+    , CouponDiscountPercent =. discountPercent
+    , CouponDiscountMinimumPrice =. discountMinimumPrice
+    , CouponDiscountOtherConditions =. discountOtherConditions
+    , CouponGiftContent =. giftContent
+    , CouponGiftReferencePrice =. giftReferencePrice
+    , CouponGiftMinimumPrice =. giftMinimumPrice
+    , CouponGiftOtherConditions =. giftOtherConditions
+    , CouponSetContent =. setContent
+    , CouponSetPrice =. setPrice
+    , CouponSetReferencePrice =. setReferencePrice
+    , CouponSetOtherConditions =. setOtherConditions
+    , CouponOtherContent =. otherContent
+    , CouponOtherConditions =. otherConditions
+    ]
 
 -------------
 -- Helpers --
