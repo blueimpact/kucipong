@@ -9,8 +9,8 @@ import Control.Lens (_Wrapped, view)
 import Data.HVect (HVect(..))
 import Database.Persist.Sql (Entity(..), fromSqlKey)
 import Web.Spock
-       (ActionCtxT, (<//>), params, redirect, renderRoute)
-import Web.Spock.Core (SpockCtxT, get, post, var)
+       (ActionCtxT, params, redirect, renderRoute)
+import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
        (Coupon(..), CouponType(..), Key(..), Store(..), couponTypeToText,
@@ -18,7 +18,8 @@ import Kucipong.Db
 import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Route
-       (couponR, createR, editR, storeCouponR, storeCouponVarEditR)
+       (storeCouponR, storeCouponCreateR, storeCouponVarR,
+        storeCouponVarEditR)
 import Kucipong.Monad
        (MonadKucipongDb(..), dbFindCouponByEmailAndId,
         dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon, dbUpdateCoupon)
@@ -76,7 +77,7 @@ couponEditGet couponKey = do
   maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
   Entity _ (Coupon _ _ _ _ (Just -> title) (Just . couponTypeToText -> couponType) (fmap tshow -> validFrom) (fmap tshow -> validUntil) _ (fmap percentToText  -> discountPercent) (fmap priceToText -> discountMinimumPrice) discountOtherConditions giftContent (fmap priceToText -> giftReferencePrice) (fmap priceToText -> giftMinimumPrice) giftOtherConditions setContent (fmap priceToText -> setPrice) (fmap priceToText -> setReferencePrice) setOtherConditions otherContent otherConditions) <-
     fromMaybeM (handleErr "couldn't find coupon") maybeCouponEntity
-  let action = renderRoute storeCouponVarEditR (fromSqlKey couponKey)
+  let action = renderRoute storeCouponVarEditR couponKey
   $(renderTemplateFromEnv "storeUser_store_coupon_id_edit.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -85,7 +86,7 @@ couponEditGet couponKey = do
       $(logDebug) $ "params: " <> tshow p
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
       let errors = [errMsg]
-          action = renderRoute storeCouponVarEditR (fromSqlKey couponKey)
+          action = renderRoute storeCouponVarEditR couponKey
       $(renderTemplate "storeUser_store_coupon_id_edit.html" $
         fromParams
           [|p|]
@@ -147,7 +148,7 @@ couponEditPost couponKey = do
       $(logDebug) $
         "got following error in store couponEditPost handler: " <> errMsg
       let errors = [errMsg]
-      let action = renderRoute storeCouponVarEditR (fromSqlKey couponKey)
+      let action = renderRoute storeCouponVarEditR couponKey
       $(renderTemplate "storeUser_store_coupon_id_edit.html" $
         fromParams
           [|p|]
@@ -247,9 +248,9 @@ storeCouponComponent
      )
   => SpockCtxT (HVect (Session Kucipong.Session.Store : xs)) m ()
 storeCouponComponent = do
-  get couponR couponListGet
-  post couponR couponPost
-  get (couponR <//> createR) couponNewGet
-  get (couponR <//> var) couponGet
-  get (couponR <//> var <//> editR) couponEditGet
-  post (couponR <//> var <//> editR) couponEditPost
+  get storeCouponR couponListGet
+  post storeCouponR couponPost
+  get storeCouponCreateR couponNewGet
+  get storeCouponVarR couponGet
+  get storeCouponVarEditR couponEditGet
+  post storeCouponVarEditR couponEditPost

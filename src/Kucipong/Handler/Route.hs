@@ -1,12 +1,11 @@
 
 module Kucipong.Handler.Route where
 
-import ClassyPrelude
-
 import Web.Routing.Combinators (PathState(Open))
 import Web.Spock (Path, (<//>), var)
 
 import Kucipong.LoginToken (LoginToken)
+import Kucipong.Db (Coupon, Key(..))
 
 -----------------
 -- Path Pieces --
@@ -30,8 +29,6 @@ rootR = ""
 storeR :: Path '[] 'Open
 storeR = "store"
 
-doLoginR :: Path '[LoginToken] 'Open
-doLoginR = loginR <//> var
 
 ----------------
 -- Full paths --
@@ -40,7 +37,13 @@ doLoginR = loginR <//> var
 storeCouponR :: Path '[] 'Open
 storeCouponR = storeR <//> couponR
 
-storeCouponVarEditR :: Path '[Int64] 'Open
+storeCouponCreateR :: Path '[] 'Open
+storeCouponCreateR = storeR <//> couponR <//> createR
+
+storeCouponVarR :: Path '[Key Coupon] 'Open
+storeCouponVarR = storeR <//> couponR <//> var
+
+storeCouponVarEditR :: Path '[Key Coupon] 'Open
 storeCouponVarEditR = storeR <//> couponR <//> var <//> editR
 
 storeEditR :: Path '[] 'Open
@@ -48,3 +51,6 @@ storeEditR = storeR <//> editR
 
 storeLoginR :: Path '[] 'Open
 storeLoginR = storeR <//> loginR
+
+storeLoginVarR :: Path '[LoginToken] 'Open
+storeLoginVarR = storeR <//> loginR <//> var

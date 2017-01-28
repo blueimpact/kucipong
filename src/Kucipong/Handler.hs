@@ -35,6 +35,6 @@ app middleware config = do
         subcomponent staticUrlPrefix staticComponent
         prehook baseHook $ do
           subcomponent adminUrlPrefix adminComponent
-          subcomponent storeR storeComponent
+          storeComponent
         get root $
           redirect . renderRoute $ "static/chat.html"

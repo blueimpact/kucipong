@@ -13,8 +13,8 @@ import Data.List (nub)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Web.Spock
-       (ActionCtxT, UploadedFile(..), (<//>), files, getContext, params,
-        prehook, redirect, renderRoute)
+       (ActionCtxT, UploadedFile(..), files, getContext, params, prehook,
+        redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
@@ -28,7 +28,7 @@ import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
 import Kucipong.Handler.Route
-       (doLoginR, editR, loginR, rootR, storeR, storeEditR, storeLoginR)
+       (storeR, storeEditR, storeLoginR, storeLoginVarR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.I18n (label)
@@ -255,13 +255,13 @@ storeComponent
      )
   => SpockCtxT (HVect xs) m ()
 storeComponent = do
-  get doLoginR doLogin
-  get loginR loginGet
-  post loginR loginPost
+  get storeLoginVarR doLogin
+  get storeLoginR loginGet
+  post storeLoginR loginPost
   prehook storeAuthHook $ do
-    get rootR storeGet
-    get editR storeEditGet
-    post editR storeEditPost
+    get storeR storeGet
+    get storeEditR storeEditGet
+    post storeEditR storeEditPost
     storeCouponComponent
 
 allBusinessCategories :: [BusinessCategory]
