@@ -2,7 +2,6 @@
 
 module Kucipong.Handler.Store
   ( module Kucipong.Handler.Store
-  , module Kucipong.Handler.Store.Route
   ) where
 
 import Kucipong.Prelude
@@ -28,8 +27,9 @@ import Kucipong.Db
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
+import Kucipong.Handler.Route
+       (doLoginR, editR, loginR, rootR, storeR, storeEditR, storeLoginR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
-import Kucipong.Handler.Store.Route (doLoginR, editR, loginR, rootR, storeUrlPrefix)
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
@@ -97,13 +97,13 @@ doLogin loginToken = do
         storeLoginTokenExpirationTime storeLoginToken
   when (now > expirationTime) tokenExpiredError
   setStoreCookie storeEmail
-  redirect . renderRoute $ storeUrlPrefix <//> rootR
+  redirect $ renderRoute storeR
   where
     noStoreLoginTokenError :: ActionCtxT ctx m a
     noStoreLoginTokenError =
-      redirect . renderRoute $ storeUrlPrefix <//> loginR
+      redirect $ renderRoute storeLoginR
     tokenExpiredError :: ActionCtxT ctx m a
-    tokenExpiredError = redirect . renderRoute $ storeUrlPrefix <//> loginR
+    tokenExpiredError = redirect $ renderRoute storeLoginR
 
 storeGet
   :: forall xs n m.
@@ -139,7 +139,7 @@ storeGet = do
   where
     handleNoStoreError :: ActionCtxT (HVect xs) m a
     handleNoStoreError =
-      redirect . renderRoute $ storeUrlPrefix <//> editR
+      redirect $ renderRoute storeEditR
 
 storeEditGet
   :: forall xs n m.
@@ -204,7 +204,7 @@ storeEditPost = do
       businessHours
       regularHoliday
       url
-  redirect . renderRoute $ storeUrlPrefix <//> rootR
+  redirect $ renderRoute storeR
   where
     checkBusinessCategoryDetails :: BusinessCategory
                                  -> [BusinessCategoryDetail]
@@ -239,7 +239,7 @@ storeAuthHook
 storeAuthHook = do
   maybeStoreSession <- getStoreCookie
   case maybeStoreSession of
-    Nothing -> redirect . renderRoute $ storeUrlPrefix <//> loginR
+    Nothing -> redirect $ renderRoute storeLoginR
     Just storeSession -> do
       oldCtx <- getContext
       return $ storeSession :&: oldCtx
