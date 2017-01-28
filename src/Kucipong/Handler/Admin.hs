@@ -4,8 +4,6 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
-import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
-
 import Control.FromSum (fromEitherM, fromMaybeM, fromMaybeOrM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
@@ -13,10 +11,8 @@ import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
 import Text.Heterocephalus (overwrite)
-import Web.Routing.Combinators (PathState(Open))
 import Web.Spock
-       (ActionCtxT, Path, (<//>), getContext, redirect, renderRoute,
-        setStatus, var)
+       (ActionCtxT, getContext, redirect, renderRoute, setStatus)
 import Web.Spock.Core (SpockCtxT, get, post, prehook)
 
 import Kucipong.Db
@@ -31,6 +27,7 @@ import Kucipong.Form
         AdminStoreCreateForm(AdminStoreCreateForm),
         AdminStoreDeleteForm(AdminStoreDeleteForm),
         AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm))
+import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
 import Kucipong.Handler.Route
        (adminR, adminLoginR, adminLoginVarR, adminStoreCreateR,
         adminStoreDeleteR, adminStoreDeleteConfirmR)

@@ -35,9 +35,11 @@ loginR = "login"
 rootR :: Path '[] 'Open
 rootR = ""
 
+staticR :: Path '[] 'Open
+staticR = "static"
+
 storeR :: Path '[] 'Open
 storeR = "store"
-
 
 ----------------
 -- Full paths --
