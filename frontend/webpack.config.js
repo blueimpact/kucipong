@@ -18,7 +18,8 @@ const ENV = TARGET_ENV === 'production' ?
       process.env.API_ROOT || 'http://kucipong.com/api/v0/'
     ),
     'googleMapApiKey': JSON.stringify(
-      process.env.GOOGLE_MAP_API_KEY || ''
+      // Default key bellow is only available on `stage.kucipong.com`.
+      process.env.GOOGLE_MAP_API_KEY || 'AIzaSyA6yBv38YNHWzaAI5S7c27JfqkSFMFC-7g'
     ),
   } :
   {
@@ -224,6 +225,8 @@ if (TARGET_ENV === 'development') {
         path.join( __dirname, 'src/magicLogin.js' )
       ],
     },
+
+    devtool: 'source-map',
 
     devServer: {
       contentBase: 'src',
