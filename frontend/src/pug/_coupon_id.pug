@@ -103,28 +103,36 @@
     | %{ of CouponTypeDiscount }
     |     %{ case couponDiscountOtherConditions coupon }
     |     %{ of Just discountOtherConditions }
-    p.moreContents_txt \#{discountOtherConditions}
+    |         %{ forall condition <- lines discountOtherConditions }
+    p.moreContents_txt \#{condition}
+    |         %{ endforall }
     |     %{ of Nothing }
     |     %{ endcase }
 
     | %{ of CouponTypeGift }
     |     %{ case couponGiftOtherConditions coupon }
     |     %{ of Just giftOtherConditions }
-    p.moreContents_txt \#{giftOtherConditions}
+    |         %{ forall condition <- lines giftOtherConditions }
+    p.moreContents_txt \#{condition}
+    |         %{ endforall }
     |     %{ of Nothing }
     |     %{ endcase }
 
     | %{ of CouponTypeSet }
     |     %{ case couponSetOtherConditions coupon }
     |     %{ of Just setOtherConditions }
-    p.moreContents_txt \#{setOtherConditions}
+    |         %{ forall condition <- lines setOtherConditions }
+    p.moreContents_txt \#{condition}
+    |         %{ endforall }
     |     %{ of Nothing }
     |     %{ endcase }
 
     | %{ of CouponTypeOther }
     |     %{ case couponOtherConditions coupon }
     |     %{ of Just otherConditions }
-    p.moreContents_txt \#{otherConditions}
+    |         %{ forall condition <- lines otherConditions }
+    p.moreContents_txt \#{condition}
+    |         %{ endforall }
     |     %{ of Nothing }
     |     %{ endcase }
     | %{ endcase }
