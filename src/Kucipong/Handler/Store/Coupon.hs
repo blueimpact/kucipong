@@ -86,7 +86,7 @@ couponPost = do
       email
       title
       couponType
-      validFrom
+      (view _Wrapped validFrom)
       (view _Wrapped validUntil)
       Nothing -- image
       (view _Wrapped discountPercent)
@@ -107,6 +107,7 @@ couponPost = do
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       p <- params
+      $(logDebug) $ "params: " <> tshow p
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplate "storeUser_store_coupon_id_edit.html" $

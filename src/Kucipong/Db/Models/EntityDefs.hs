@@ -96,7 +96,7 @@ kucipongEntityDefs = [persistLowerCase|
         deleted                 DeletedTime Maybe
         title                   Text
         couponType              CouponType
-        validFrom               Day
+        validFrom               Day Maybe
         validUntil              Day Maybe
         image                   Image Maybe
         discountPercent         Percent Maybe

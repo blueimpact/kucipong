@@ -402,7 +402,7 @@ dbInsertCoupon
   => EmailAddress
   -> Text
   -> CouponType
-  -> Day
+  -> Maybe Day
   -> Maybe Day
   -> Maybe Image
   -> Maybe Percent
