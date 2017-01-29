@@ -2,11 +2,12 @@ include _layout
   body#main.wrapper
     include _storeHeader
       | クーポン情報
-    | %{if isJust maybeCouponEntity}
+    | %{ case maybeCouponEntity }
+    | %{ of Just (Entity couponKey coupon) }
     .store
       .store_editBtn
-        a.btn.outerBtn(href="/store/coupon/\#{fromSqlKey (entityKey (fromJustEx maybeCouponEntity))}/edit") クーポン情報編集
+        a.btn.outerBtn(href="/store/coupon/\#{ fromSqlKey couponKey }/edit") クーポン情報編集
     include _coupon_id
-    | %{else}
+    | %{ of Nothing }
     | No coupon info.
-    | %{endif}
+    | %{ endcase }
