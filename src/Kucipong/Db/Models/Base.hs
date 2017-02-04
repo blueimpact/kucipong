@@ -172,7 +172,7 @@ percentToText = tshow . unPercent
 -----------
 
 newtype Price = Price
-  { unPrice :: Int64
+  { unPrice :: Natural
   } deriving ( Data
              , Eq
              , FromHttpApiData
