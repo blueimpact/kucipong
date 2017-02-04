@@ -5,7 +5,7 @@ include _layout
     include _messageArea
     .store
       form#js-request-verification.loginSignboard(
-        action="/store/login"
+        action="\#{renderRoute storeLoginR}"
         method="POST"
         data-user-type="store"
       )

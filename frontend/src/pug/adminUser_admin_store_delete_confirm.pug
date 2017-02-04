@@ -10,7 +10,7 @@ include _layout
             | 店舗ユーザの削除
         form.signboard_body(
           method="POST"
-          action="/admin/store/delete"
+          action="\#{renderRoute adminStoreDeleteR}"
         )
           .row
             | 「\#{storeName}」を削除しますか？
