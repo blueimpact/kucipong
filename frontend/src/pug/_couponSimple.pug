@@ -1,5 +1,5 @@
 .couponSimple
-  a.card(href="/store/coupon/\#{ fromSqlKey couponKey }")
+  a.card(href="\#{renderRoute storeCouponVarR couponKey}")
     .annotatedImageGroup
       img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="\#{ couponTitle coupon }")
       span.annotatedImageGroup-annotation 画像は一例です

@@ -28,7 +28,7 @@ import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
 import Kucipong.Handler.Route
-       (storeR, storeEditR, storeLoginR, storeLoginVarR)
+       (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.I18n (label)

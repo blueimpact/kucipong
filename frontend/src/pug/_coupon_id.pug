@@ -97,7 +97,7 @@
     .location_map(data-latitude="41.40243" data-longitude="2.17551")
       iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
   .aboutStore
-    a.btn.outerBtn(href="/store") \#{maybe "(no title)" (storeName . entityVal) maybeStoreEntity}
+    a.btn.outerBtn(href="\#{renderRoute storeR}") \#{maybe "(no title)" (storeName . entityVal) maybeStoreEntity}
   .moreContents
     | %{ case couponCouponType coupon }
     | %{ of CouponTypeDiscount }

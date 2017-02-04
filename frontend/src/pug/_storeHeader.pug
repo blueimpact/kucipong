@@ -6,11 +6,11 @@ header.header
     .sideMenu
       .sideMenu_hide
         label.sideMenu_hide-text(for="storeHeaderShowMenu")
-      a.btn.outerBtn(href="/store") 店舗情報
-      a.btn.outerBtn(href="/store/coupon") クーポン一覧
+      a.btn.outerBtn(href="\#{renderRoute storeR}") 店舗情報
+      a.btn.outerBtn(href="\#{renderRoute storeCouponR}") クーポン一覧
 
   h1.title
     yield
   .icons
-    a.icon.icon-me(href="/store")
+    a.icon.icon-me(href="\#{renderRoute storeR}")
       img(src=require("../img/me.svg"))
