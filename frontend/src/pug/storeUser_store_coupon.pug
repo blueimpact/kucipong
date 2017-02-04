@@ -4,7 +4,7 @@ include _layout
       | クーポン一覧
     .store
       .store_editBtn
-        a.btn.outerBtn(href="/store/coupon/create") クーポン追加
+        a.btn.outerBtn(href="\#{renderRoute storeCouponCreateR}") クーポン追加
 
     | %{ case couponEntities }
     | %{ of [] }
