@@ -53,13 +53,25 @@ include _layout
                 name="couponType"
                 value="\#{fromMaybe mempty couponType}"
               )
-                option(value="\#{key CouponTypeDiscount}")
+                option(
+                  value="\#{key CouponTypeDiscount}"
+                  #{isSelected couponType (key CouponTypeDiscount)}
+                )
                   | \#{label CouponTypeDiscount}
-                option(value="\#{key CouponTypeGift}")
+                option(
+                  value="\#{key CouponTypeGift}"
+                  #{isSelected couponType (key CouponTypeGift)}
+                )
                   | \#{label CouponTypeGift}
-                option(value="\#{key CouponTypeSet}")
+                option(
+                  value="\#{key CouponTypeSet}"
+                  #{isSelected couponType (key CouponTypeSet)}
+                )
                   | \#{label CouponTypeSet}
-                option(value="\#{key CouponTypeOther}")
+                option(
+                  value="\#{key CouponTypeOther}"
+                  #{isSelected couponType (key CouponTypeOther)}
+                )
                   | \#{label CouponTypeOther}
 
 
