@@ -60,6 +60,9 @@ adminStoreDeleteR = adminR <//> storeR <//> deleteR
 adminStoreDeleteConfirmR :: Path '[] 'Open
 adminStoreDeleteConfirmR = adminR <//> storeR <//> deleteR <//> confirmR
 
+adminStoreLoginR :: Path '[] 'Open
+adminStoreLoginR = adminR <//> storeR <//> loginR
+
 storeCouponR :: Path '[] 'Open
 storeCouponR = storeR <//> couponR
 

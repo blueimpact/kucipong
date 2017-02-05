@@ -6,7 +6,8 @@ include _layout
     | %{ of Just (Entity couponKey coupon) }
     .store
       .store_editBtn
-        a.btn.outerBtn(href="/store/coupon/\#{ fromSqlKey couponKey }/edit") クーポン情報編集
+        a.btn.outerBtn(href="\#{renderRoute storeCouponVarEditR couponKey}")
+          | クーポン情報編集
     include _coupon_id
     | %{ of Nothing }
     | No coupon info.

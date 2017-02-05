@@ -6,11 +6,11 @@ header.header
     .sideMenu
       .sideMenu_hide
         label.sideMenu_hide-text(for="adminHeaderShowMenu")
-      a.btn.outerBtn(href="/admin/store/create") 店舗ユーザ作成
-      a.btn.outerBtn(href="/admin/store/delete") 店舗ユーザ削除
-      a.btn.outerBtn(href="/admin/store/login") 店舗ユーザとしてログイン
+      a.btn.outerBtn(href="\#{renderRoute adminStoreCreateR}") 店舗ユーザ作成
+      a.btn.outerBtn(href="\#{renderRoute adminStoreDeleteR}") 店舗ユーザ削除
+      a.btn.outerBtn(href="\#{renderRoute adminStoreLoginR}") 店舗ユーザとしてログイン
   h1.title
     yield
   .icons
-    a.icon.icon-me(href="/admin/store/login")
+    a.icon.icon-me(href="\#{renderRoute adminStoreLoginR}")
       img(src=require("../img/me.svg"))

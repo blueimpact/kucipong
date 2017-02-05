@@ -19,7 +19,7 @@ import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Route
        (storeCouponR, storeCouponCreateR, storeCouponVarR,
-        storeCouponVarEditR)
+        storeCouponVarEditR, storeR)
 import Kucipong.Monad
        (MonadKucipongDb(..), dbFindCouponByEmailAndId,
         dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon, dbUpdateCoupon)

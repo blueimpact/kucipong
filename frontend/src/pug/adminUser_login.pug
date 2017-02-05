@@ -5,7 +5,7 @@ include _layout
     include _messageArea
     .admin
       form#js-request-verification.loginSignboard(
-        action="/admin/login"
+        action="\#{renderRoute adminLoginR}"
         method="POST"
         data-user-type="admin"
       )

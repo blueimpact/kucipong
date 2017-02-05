@@ -30,7 +30,7 @@ import Kucipong.Form
 import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
 import Kucipong.Handler.Route
        (adminR, adminLoginR, adminLoginVarR, adminStoreCreateR,
-        adminStoreDeleteR, adminStoreDeleteConfirmR)
+        adminStoreDeleteR, adminStoreDeleteConfirmR, adminStoreLoginR)
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad

@@ -5,7 +5,7 @@ include _layout
     include _messageArea
     .store
       .store_editBtn
-        a.btn.outerBtn(href="/store/edit") 店舗情報編集
+        a.btn.outerBtn(href="\#{renderRoute storeEditR}") 店舗情報編集
       header.storeHeader
         .annotatedImageGroup
           img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="\#{ name }")
@@ -17,7 +17,7 @@ include _layout
         .storeBody_description
           p \#{ fromMaybe mempty salesPoint }
         .storeBody_couponBtn
-          a.btn.defaultBtn(href="/store/coupon/") クーポン一覧
+          a.btn.defaultBtn(href="\#{renderRoute storeCouponR}") クーポン一覧
         .storeBody_info
           .storeBody_info_titleArea
             .storeBody_info_titleArea-text
