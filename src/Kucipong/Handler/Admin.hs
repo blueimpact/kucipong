@@ -164,7 +164,7 @@ storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
   (Entity _ Store {storeName}) <-
-    fromMaybeOrM maybeStoreEntity $ handleErr $ label def AdminErrorNoStoreEmail
+    fromMaybeOrM maybeStoreEntity . handleErr $ label def AdminErrorNoStoreEmail
   $(renderTemplate "adminUser_admin_store_delete_confirm.html" $
     overwrite "storeName" [|storeName|])
   where

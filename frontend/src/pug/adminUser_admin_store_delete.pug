@@ -8,7 +8,7 @@ include _layout
         .signboard_titleArea
           .signboard_titleArea-title
             | 店舗ユーザの削除
-        form.signboard_body(method="GET" action="/admin/store/delete/confirm")
+        form.signboard_body(method="POST" action="/admin/store/delete/confirm")
           .labeledRow
             label.labeledRow-header(for="storeEmail")
               | 削除する店舗ユーザのメールアドレス
