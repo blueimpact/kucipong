@@ -7,7 +7,6 @@ module Kucipong.Monad
 
 import Kucipong.Prelude
 
-import Control.Monad.Logger (runStdoutLoggingT)
 import Control.Monad.Random (MonadRandom)
 import Control.Monad.Time (MonadTime)
 import Control.Monad.Trans.Class (MonadTrans)
@@ -17,6 +16,7 @@ import Control.Monad.Trans.Control
 
 import Kucipong.Config (Config)
 import Kucipong.Errors (AppErr)
+import Kucipong.Logger (runLogger)
 import Kucipong.Monad.Cookie as X
 import Kucipong.Monad.Db as X
 import Kucipong.Monad.OtherInstances ()
@@ -147,5 +147,4 @@ instance MonadBaseControl IO KucipongM where
 -- | Run the 'KucipongM' monad stack.
 runKucipongM :: Config -> KucipongM a -> IO (Either AppErr a)
 runKucipongM config =
-  runStdoutLoggingT .
-  runExceptT . flip runReaderT config . runKucipongT . unKucipongM
+  runLogger . runExceptT . flip runReaderT config . runKucipongT . unKucipongM

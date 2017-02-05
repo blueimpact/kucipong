@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 {- |
 Module      :  Kucipong.Aws
 
@@ -16,11 +18,15 @@ import Kucipong.Prelude
 import Control.Exception.Lens (trying)
 import Control.Lens ((&), set)
 import Control.Monad.Trans.Resource (runResourceT)
-import Network.AWS (Env, Region(..), _Error, runAWS, send)
+import Network.AWS
+       (Env, Error(ServiceError), Region(..),
+        ServiceError(ServiceError', _serviceStatus), _Error, runAWS, send)
+import Network.AWS.Data (ToText(toText))
 import Network.AWS.S3
        (BucketName(..), LocationConstraint(..),
         cbCreateBucketConfiguration, cbcLocationConstraint, createBucket,
         createBucketConfiguration)
+import Network.HTTP.Types (Status(Status, statusCode))
 
 newtype S3ImageBucketName = S3ImageBucketName
   { unS3ImageBucketName :: Text
@@ -40,7 +46,9 @@ instance HasAwsRegion Region where
   getAwsRegion :: Region -> Region
   getAwsRegion = id
 
-createS3ImageBucket :: Region -> Env -> S3ImageBucketName -> IO ()
+createS3ImageBucket
+  :: (MonadBaseControl IO m, MonadIO m, MonadLogger m, MonadThrow m)
+  => Region -> Env -> S3ImageBucketName -> m ()
 createS3ImageBucket awsRegion awsEnv s3ImageBucketName = do
   let bucketName = s3ImageBucketNameToBucketName s3ImageBucketName
       bucketConf =
@@ -52,13 +60,24 @@ createS3ImageBucket awsRegion awsEnv s3ImageBucketName = do
   eitherCreateBucketResp <-
     runResourceT . runAWS awsEnv . trying _Error $ send createBucketReq
   case eitherCreateBucketResp of
-      Right createBucketResp -> do
-        putStrLn $ "createBucket resp from aws: " <> tshow createBucketResp
-        pure ()
-      Left errorResp -> do
-        -- TODO: throw an error here if we are not able to create the bucket on S3.
-        putStrLn $ "error resp from aws: " <> tshow errorResp
-        pure ()
+    Right createBucketResp -> do
+      $(logDebug) $
+        "successfully created bucket \"" <> toText bucketName <> "\" on aws: " <>
+        tshow createBucketResp
+      pure ()
+    -- The bucket already exists, so we don't need to do anything.
+    Left errResp@(ServiceError ServiceError' {_serviceStatus = Status {statusCode = 409}}) -> do
+      $(logDebug) $
+        "bucket \"" <> toText bucketName <>
+        "\" already exists. No action needs to be taken: " <>
+        tshow errResp
+      pure ()
+    Left errResp -> do
+      error $
+        "got unexpected error when trying to create bucket \"" <>
+        unpack (toText bucketName) <>
+        "\" on aws: " <>
+        show errResp
 
 s3ImageBucketNameToBucketName :: S3ImageBucketName -> BucketName
 s3ImageBucketNameToBucketName = BucketName . unS3ImageBucketName

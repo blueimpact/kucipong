@@ -9,12 +9,13 @@ import Kucipong.Aws (createS3ImageBucket)
 import Kucipong.Config ( Config(..), createConfigFromEnv, setLoggerMiddleware )
 import Kucipong.Db ( doMigrations )
 import Kucipong.Handler ( app )
+import Kucipong.Logger ( runLogger )
 
 -- | Run the API.
 defaultMain :: IO ()
 defaultMain = do
     config <- createConfigFromEnv
-    createS3ImageBucket
+    runLogger $ createS3ImageBucket
       (configAwsRegion config)
       (configAwsEnv config)
       (configS3ImageBucketName config)

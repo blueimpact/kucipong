@@ -44,6 +44,7 @@ library
                      , Kucipong.I18n.Instance
                      , Kucipong.I18n.Types
                      , Kucipong.LoginToken
+                     , Kucipong.Logger
                      , Kucipong.Monad
                      , Kucipong.Monad.Cookie
                      , Kucipong.Monad.Cookie.Class
