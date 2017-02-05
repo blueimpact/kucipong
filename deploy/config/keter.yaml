@@ -5,6 +5,7 @@ stanzas:
     env:
       KUCIPONG_HOST: "stage.kucipong.com"
       KUCIPONG_PROTOCOL: "https"
+      KUCIPONG_MAILGUN_DOMAIN: "stage.kucipong.com"
       ENV: Production
     forward-env:
       - KUCIPONG_DB_PASSWORD
