@@ -53,14 +53,14 @@ include _layout
                 name="couponType"
                 value="\#{fromMaybe mempty couponType}"
               )
-                option(value="\#{couponTypeToText CouponTypeDiscount}")
-                  | 購入額から割引
-                option(value="\#{couponTypeToText CouponTypeGift}")
-                  | 購入者プレゼント
-                option(value="\#{couponTypeToText CouponTypeSet}")
-                  | 特別セット
-                option(value="\#{couponTypeToText CouponTypeOther}")
-                  | その他クーポン
+                option(value="\#{key CouponTypeDiscount}")
+                  | \#{label CouponTypeDiscount}
+                option(value="\#{key CouponTypeGift}")
+                  | \#{label CouponTypeGift}
+                option(value="\#{key CouponTypeSet}")
+                  | \#{label CouponTypeSet}
+                option(value="\#{key CouponTypeOther}")
+                  | \#{label CouponTypeOther}
 
 
           #js-couponDiscount.js-invisible

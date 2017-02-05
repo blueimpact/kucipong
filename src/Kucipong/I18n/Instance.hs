@@ -10,8 +10,9 @@ import Kucipong.I18n.Types (Lang(..))
 import Kucipong.Db (Store(..))
 import Kucipong.Db.Models.Base
        (BeautyDetail(..), BusinessCategory(..),
-        BusinessCategoryDetail(..), CommonDetail(..), FashionDetail(..),
-        GourmetDetail(..), GadgetDetail(..), TravelingDetail(..))
+        BusinessCategoryDetail(..), CommonDetail(..), CouponType(..),
+        FashionDetail(..), GourmetDetail(..), GadgetDetail(..),
+        TravelingDetail(..), foldAllBusinessCategoryDetail)
 import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.Monad.Db.Class (StoreDeleteResult(..))
@@ -73,12 +74,7 @@ instance I18n BusinessCategory where
   label EnUS Beauty = "Beauty"
 
 instance I18n BusinessCategoryDetail where
-  label lang (GourmetDetail a) = label lang a
-  label lang (FashionDetail a) = label lang a
-  label lang (GadgetDetail a) = label lang a
-  label lang (TravelingDetail a) = label lang a
-  label lang (BeautyDetail a) = label lang a
-  label lang (CommonDetail a) = label lang a
+  label lang = foldAllBusinessCategoryDetail (Proxy :: Proxy I18n) (label lang)
 
 instance I18n GourmetDetail where
   label EnUS GourmetPizza = "Pizza"
@@ -103,3 +99,9 @@ instance I18n BeautyDetail where
 instance I18n CommonDetail where
   label EnUS CommonPoliteService = "Polite service"
   label EnUS CommonChainStore = "Chain store"
+
+instance I18n CouponType where
+  label EnUS CouponTypeDiscount = "Discount"
+  label EnUS CouponTypeGift = "Gift"
+  label EnUS CouponTypeSet = "Set"
+  label EnUS CouponTypeOther = "Other"

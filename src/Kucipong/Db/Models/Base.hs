@@ -31,18 +31,12 @@ data CouponType
   deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 couponTypeToText :: CouponType -> Text
-couponTypeToText CouponTypeDiscount = "discount"
-couponTypeToText CouponTypeGift = "gift"
-couponTypeToText CouponTypeSet = "set"
-couponTypeToText CouponTypeOther = "other"
+couponTypeToText = tshow
 
 couponTypeFromText :: Text -> Either Text CouponType
-couponTypeFromText "discount" = pure CouponTypeDiscount
-couponTypeFromText "gift" = pure CouponTypeGift
-couponTypeFromText "set" = pure CouponTypeSet
-couponTypeFromText "other" = pure CouponTypeOther
-couponTypeFromText text = Left $ "Tried to convert \"" <> text
-    <> "\"to coupon type, but failed."
+couponTypeFromText text =
+  fromMaybeOrM (readMay text) $
+  Left $ "Tried to convert \"" <> text <> "\" to coupon type, but failed."
 
 instance FromHttpApiData CouponType where
   parseUrlPiece :: Text -> Either Text CouponType
@@ -178,7 +172,7 @@ percentToText = tshow . unPercent
 -----------
 
 newtype Price = Price
-  { unPrice :: Int64
+  { unPrice :: Natural
   } deriving ( Data
              , Eq
              , FromHttpApiData
