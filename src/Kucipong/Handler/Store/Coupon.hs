@@ -139,7 +139,7 @@ couponEditPost couponKey = do
       (view _Wrapped setOtherConditions)
       (view _Wrapped otherContent)
       (view _Wrapped otherConditions)
-  redirect $ renderRoute storeCouponR
+  redirect $ renderRoute storeCouponVarR couponKey
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
