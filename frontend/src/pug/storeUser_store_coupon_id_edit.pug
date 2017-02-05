@@ -3,7 +3,7 @@ include _layout
     include _storeHeader
       | クーポン情報 編集
     include _messageArea
-    form.couponEditor(enctype="multipart/form-data" method="POST" action="/store/coupon")
+    form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}")
       .couponEditor_signbord
         .couponEditor_titleArea
           .couponEditor_titleArea-title

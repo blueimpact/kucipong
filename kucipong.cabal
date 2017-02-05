@@ -32,9 +32,9 @@ library
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
                      , Kucipong.Handler.Admin.Types
+                     , Kucipong.Handler.Route
                      , Kucipong.Handler.Store
                      , Kucipong.Handler.Store.Coupon
-                     , Kucipong.Handler.Store.Route
                      , Kucipong.Handler.Store.Types
                      , Kucipong.Handler.Static
                      , Kucipong.Handler.Static.TH

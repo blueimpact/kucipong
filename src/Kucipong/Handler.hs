@@ -6,12 +6,12 @@ import Data.HVect (HVect(HNil))
 import Network.Wai (Middleware)
 import Web.Spock
        (ActionCtxT, redirect, renderRoute, root, runSpock)
-import Web.Spock.Core (spockT, get, prehook, subcomponent)
+import Web.Spock.Core (spockT, get, prehook)
 
 import Kucipong.Config (Config)
-import Kucipong.Handler.Admin (adminComponent, adminUrlPrefix)
-import Kucipong.Handler.Static (staticComponent, staticUrlPrefix)
-import Kucipong.Handler.Store (storeComponent, storeUrlPrefix)
+import Kucipong.Handler.Admin (adminComponent)
+import Kucipong.Handler.Static (staticComponent)
+import Kucipong.Handler.Store (storeComponent)
 import Kucipong.Host (HasPort(..))
 import Kucipong.Monad (KucipongM, runKucipongM)
 
@@ -31,9 +31,9 @@ app middleware config = do
     spockMiddlewareIO :: IO Middleware
     spockMiddlewareIO =
       spockT (runKucipongMHandleErrors config) $ do
-        subcomponent staticUrlPrefix staticComponent
+        staticComponent
         prehook baseHook $ do
-          subcomponent adminUrlPrefix adminComponent
-          subcomponent storeUrlPrefix storeComponent
+          adminComponent
+          storeComponent
         get root $
           redirect . renderRoute $ "static/chat.html"
