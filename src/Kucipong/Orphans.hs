@@ -15,6 +15,7 @@ import ClassyPrelude
 
 import Control.Monad.Logger (LoggingT, MonadLogger)
 import Control.Monad.Random (MonadRandom(..))
+import Control.Monad.Trans.Resource (ResourceT)
 import Numeric.Natural (Natural)
 import Language.Haskell.TH (Q, runIO)
 import Text.Blaze (Markup, ToMarkup(..), string)
@@ -29,6 +30,12 @@ instance MonadRandom m =>
 
 instance MonadLogger m =>
          MonadLogger (ActionCtxT ctx m)
+
+instance MonadRandom m => MonadRandom (ResourceT m) where
+  getRandom = lift getRandom
+  getRandomR = lift . getRandomR
+  getRandoms = lift getRandoms
+  getRandomRs = lift . getRandomRs
 
 instance MonadIO Q where
   liftIO :: IO a -> Q a
