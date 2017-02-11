@@ -14,6 +14,7 @@ import Kucipong.Db
        (Admin, AdminLoginToken, BusinessCategory(..),
         BusinessCategoryDetail(..), DbSafeError, Image, Key, Store,
         StoreEmail, StoreLoginToken)
+import Kucipong.Monad.Aws.Trans ( KucipongAwsT )
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
 
@@ -241,6 +242,7 @@ class Monad m => MonadKucipongDb m where
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
 instance MonadKucipongDb m => MonadKucipongDb (IdentityT m)
+instance MonadKucipongDb m => MonadKucipongDb (KucipongAwsT m)
 instance MonadKucipongDb m => MonadKucipongDb (KucipongCookieT m)
 instance MonadKucipongDb m => MonadKucipongDb (KucipongSendEmailT m)
 instance MonadKucipongDb m => MonadKucipongDb (ReaderT r m)

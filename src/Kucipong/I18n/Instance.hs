@@ -57,6 +57,8 @@ instance I18n StoreError where
     "Business category details do not belong to the selected business category."
   label EnUS StoreErrorCouldNotSendEmail =
     "Could not send email. Please try again."
+  label EnUS StoreErrorCouldNotUploadImage =
+    "Could not upload image. Please try again."
   label EnUS StoreErrorNoImage =
     "Failed to upload image. Please try again."
   label EnUS (StoreErrorNoStoreEmail email) =

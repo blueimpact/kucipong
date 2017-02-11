@@ -9,6 +9,7 @@ import Web.Spock ( ActionCtxT )
 
 import Kucipong.Email (EmailError)
 import Kucipong.LoginToken ( LoginToken )
+import Kucipong.Monad.Aws.Trans ( KucipongAwsT )
 import Kucipong.Monad.Cookie.Trans ( KucipongCookieT )
 import Kucipong.Monad.Db.Trans ( KucipongDbT )
 
@@ -43,6 +44,7 @@ class Monad m => MonadKucipongSendEmail m where
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (ActionCtxT ctx m)
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (ExceptT e m)
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (IdentityT m)
+instance MonadKucipongSendEmail m => MonadKucipongSendEmail (KucipongAwsT m)
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (KucipongCookieT m)
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (KucipongDbT m)
 instance MonadKucipongSendEmail m => MonadKucipongSendEmail (ReaderT r m)

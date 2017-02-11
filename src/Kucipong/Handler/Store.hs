@@ -6,7 +6,7 @@ module Kucipong.Handler.Store
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromMaybeM)
+import Control.FromSum (fromEitherOrM, fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
 import Data.List (nub)
@@ -34,9 +34,9 @@ import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
-       (MonadKucipongCookie, MonadKucipongDb(..),
-        MonadKucipongSendEmail(..), dbFindStoreByEmail,
-        dbFindStoreLoginToken, dbUpsertStore)
+       (FileUploadError(..), MonadKucipongAws(..), MonadKucipongCookie,
+        MonadKucipongDb(..), MonadKucipongSendEmail(..),
+        dbFindStoreByEmail, dbFindStoreLoginToken, dbUpsertStore)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
@@ -162,7 +162,12 @@ storeEditGet = do
 
 storeEditPost
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     , MonadLogger m
+     )
   => ActionCtxT (HVect xs) m ()
 storeEditPost = do
   (StoreSession email) <- getStoreEmail
@@ -178,18 +183,12 @@ storeEditPost = do
                 } <- getReqParamErr handleErr
   filesHashMap <- files
   let maybeUploadedFile = lookup "image" filesHashMap
-  case maybeUploadedFile of
-    Just uploadedFile -> do
-      let originalFileName = uf_name uploadedFile
-          contentType = uf_contentType uploadedFile
-          tempLocation = uf_tempLocation uploadedFile
-      $(logDebug) $ "image original filename: " <> originalFileName
-      $(logDebug) $ "image content type: " <> contentType
-      $(logDebug) $ "image temporary location: " <> pack tempLocation
-      -- upload the file to S3 here:
-      -- s3UploadFile originalFileName contentType tempLocation
-      pure ()
-    Nothing -> handleErr $ label def StoreErrorNoImage
+  s3ImageName <-
+    case maybeUploadedFile of
+      Just uploadedFile -> do
+        eitherS3ImageName <- awsS3PutUploadedFile uploadedFile
+        fromEitherOrM eitherS3ImageName $ handleFileUploadError uploadedFile
+      Nothing -> handleErr $ label def StoreErrorNoImage
   checkBusinessCategoryDetails businessCategory businessCategoryDetails
   void $
     dbUpsertStore
@@ -197,7 +196,7 @@ storeEditPost = do
       name
       businessCategory
       (nub businessCategoryDetails)
-      Nothing
+      (Just s3ImageName)
       salesPoint
       address
       phoneNumber
@@ -213,6 +212,20 @@ storeEditPost = do
       | all (isValidBusinessCategoryDetailFor busiCat) busiCatDets = pure ()
       | otherwise =
         handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect
+
+    handleFileUploadError :: UploadedFile
+                          -> FileUploadError
+                          -> ActionCtxT (HVect xs) m a
+    handleFileUploadError uploadedFile (AwsError err) = do
+      $(logDebug) $ "got following aws error in storeEditPost handler: " <> tshow err
+      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
+      handleErr $ label def StoreErrorCouldNotUploadImage
+    handleFileUploadError uploadedFile (FileReadError err) = do
+      $(logDebug) $ "got following error trying to read the uploaded file " <>
+        "in storeEditPost handler: " <> tshow err
+      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
+      handleErr $ label def StoreErrorCouldNotUploadImage
+
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       p <- params
@@ -247,6 +260,7 @@ storeAuthHook = do
 storeComponent
   :: forall m xs.
      ( MonadIO m
+     , MonadKucipongAws m
      , MonadKucipongCookie m
      , MonadKucipongDb m
      , MonadKucipongSendEmail m

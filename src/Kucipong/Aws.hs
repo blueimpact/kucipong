@@ -11,6 +11,7 @@ module Kucipong.Aws
     , S3ImageBucketName(..)
     , HasS3ImageBucketName(..)
     , createS3ImageBucket
+    , getAwsBucketM
     ) where
 
 import Kucipong.Prelude
@@ -91,3 +92,6 @@ createS3ImageBucket awsRegion awsEnv s3ImageBucketName = do
 -- | Convert an 'S3ImageBucketName' to a 'BucketName'.
 s3ImageBucketNameToBucketName :: S3ImageBucketName -> BucketName
 s3ImageBucketNameToBucketName = BucketName . unS3ImageBucketName
+
+getAwsBucketM :: (HasS3ImageBucketName r, MonadReader r m) => m BucketName
+getAwsBucketM = reader $ s3ImageBucketNameToBucketName . getS3ImageBucketName
