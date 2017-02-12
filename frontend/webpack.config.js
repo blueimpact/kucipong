@@ -140,7 +140,7 @@ const commonConfig = {
       filename: 'storeUser_store_coupon_id.html',
     }),
     new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
+      chunks: ['storeUser', 'date-input-polyfill'],
       template: 'src/pug/storeUser_store_coupon_id_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon_id_edit.html',
@@ -216,6 +216,10 @@ if (TARGET_ENV === 'development') {
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/js/storeUser_store_edit.js' )
       ],
+      "date-input-polyfill": [
+        'webpack-dev-server/client?http://localhost:8080',
+        'date-input-polyfill',
+      ],
       adminUser: [
         'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/adminUser.js' )
@@ -273,8 +277,10 @@ if (TARGET_ENV === 'production') {
         path.join( __dirname, 'src/storeUser.js' )
       ],
       "storeUser_store_edit": [
-        'webpack-dev-server/client?http://localhost:8080',
         path.join( __dirname, 'src/js/storeUser_store_edit.js' )
+      ],
+      "date-input-polyfill": [
+        'date-input-polyfill',
       ],
       adminUser: [
         path.join( __dirname, 'src/adminUser.js' )
