@@ -75,7 +75,7 @@ include _layout
                   | \#{label CouponTypeOther}
 
 
-          #js-couponDiscount.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeDiscount}")
             .labeledRow
               label.labeledRow-header(for="discountPercent")
                 | 割引率 (ご購入総額から xx% OFF)
@@ -103,7 +103,7 @@ include _layout
                 )
                   | \#{fromMaybe mempty discountOtherConditions}
 
-          #js-couponGift.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeGift}")
             .labeledRow
               label.labeledRow-header(for="giftContent")
                 | プレゼント内容
@@ -139,7 +139,7 @@ include _layout
                 )
                   | \#{fromMaybe mempty giftOtherConditions}
 
-          #js-couponSet.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeSet}")
             .labeledRow
               label.labeledRow-header(for="setContent")
                 | セット内容
@@ -175,7 +175,7 @@ include _layout
                 )
                   | \#{fromMaybe mempty setOtherConditions}
 
-          #js-couponOther.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeOther}")
             .labeledRow
               label.labeledRow-header(for="otherContent")
                 | クーポン内容
@@ -195,23 +195,3 @@ include _layout
           .couponSubmit
             button.btn.outerBtn(type="submit")
               | この内容で店舗情報を更新する
-    script
-      | var showByCouponType = function () {
-      |   var selected = document.getElementById("couponType").value;
-      |   Array.prototype.slice.call(
-      |     document.getElementsByClassName("js-visible") || []
-      |   ).forEach(function (elem){
-      |     elem.classList.remove("js-visible");
-      |     elem.classList.add("js-invisible");
-      |   });
-      |   var toShow = {
-      |     "\#{couponTypeToText CouponTypeDiscount}": document.getElementById("js-couponDiscount"),
-      |     "\#{couponTypeToText CouponTypeGift}": document.getElementById("js-couponGift"),
-      |     "\#{couponTypeToText CouponTypeSet}": document.getElementById("js-couponSet"),
-      |     "\#{couponTypeToText CouponTypeOther}": document.getElementById("js-couponOther")
-      |   }[selected];
-      |   toShow.classList.remove("js-invisible");
-      |   toShow.classList.add("js-visible");
-      | };
-      | document.getElementById("couponType").addEventListener("change", showByCouponType, false);
-      | showByCouponType();

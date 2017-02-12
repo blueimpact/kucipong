@@ -33,6 +33,29 @@ const ENV = TARGET_ENV === 'production' ?
 
 // Common webpack config
 const commonConfig = {
+  entry: {
+    chat: [
+      path.join( __dirname, 'src/chat.js' )
+    ],
+    endUser: [
+      path.join( __dirname, 'src/endUser.js' )
+    ],
+    storeUser: [
+      path.join( __dirname, 'src/storeUser.js' )
+    ],
+    "storeUser_store_edit": [
+      path.join( __dirname, 'src/js/storeUser_store_edit.js' )
+    ],
+    "storeUser_store_coupon_id_edit": [
+      path.join( __dirname, 'src/js/storeUser_store_coupon_id_edit.js' )
+    ],
+    adminUser: [
+      path.join( __dirname, 'src/adminUser.js' )
+    ],
+    magicLogin: [
+      path.join( __dirname, 'src/magicLogin.js' )
+    ],
+  },
 
   // Directory to output compiled files
   output: {
@@ -140,7 +163,7 @@ const commonConfig = {
       filename: 'storeUser_store_coupon_id.html',
     }),
     new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
+      chunks: ['storeUser', 'storeUser_store_coupon_id_edit'],
       template: 'src/pug/storeUser_store_coupon_id_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon_id_edit.html',
@@ -199,32 +222,15 @@ if (TARGET_ENV === 'development') {
 
   module.exports = merge(commonConfig, {
 
-    entry: {
-      chat: [
-        'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/chat.js' )
-      ],
-      endUser: [
-        'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/endUser.js' )
-      ],
-      storeUser: [
-        'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/storeUser.js' )
-      ],
-      "storeUser_store_edit": [
-        'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/js/storeUser_store_edit.js' )
-      ],
-      adminUser: [
-        'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/adminUser.js' )
-      ],
-      magicLogin: [
-        'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/magicLogin.js' )
-      ],
-    },
+    entry:
+      Object.keys(commonConfig.entry).reduce((ret, k) =>
+        merge(ret, {
+          [k]:
+            [
+              'webpack-dev-server/client?http://localhost:8080',
+            ].concat(commonConfig.entry[k]),
+        })
+      , {}),
 
     devtool: 'source-map',
 
@@ -261,28 +267,6 @@ if (TARGET_ENV === 'production') {
   console.log('Building for prod...');
 
   module.exports = merge(commonConfig, {
-
-    entry: {
-      chat: [
-        path.join( __dirname, 'src/chat.js' )
-      ],
-      endUser: [
-        path.join( __dirname, 'src/endUser.js' )
-      ],
-      storeUser: [
-        path.join( __dirname, 'src/storeUser.js' )
-      ],
-      "storeUser_store_edit": [
-        'webpack-dev-server/client?http://localhost:8080',
-        path.join( __dirname, 'src/js/storeUser_store_edit.js' )
-      ],
-      adminUser: [
-        path.join( __dirname, 'src/adminUser.js' )
-      ],
-      magicLogin: [
-        path.join( __dirname, 'src/magicLogin.js' )
-      ],
-    },
 
     module: {
       loaders: [
