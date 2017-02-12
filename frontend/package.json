@@ -14,8 +14,8 @@
     "watch": "webpack --watch"
   },
   "devDependencies": {
-    "stylelint": "^7.1.0",
-    "stylelint-config-standard": "^12.0.0"
+    "stylelint": "^7.8.0",
+    "stylelint-config-standard": "^16.0.0"
   },
   "dependencies": {
     "autoprefixer": "^6.4.0",
