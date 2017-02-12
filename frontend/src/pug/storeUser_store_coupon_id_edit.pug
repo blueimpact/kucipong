@@ -75,7 +75,7 @@ include _layout
                   | \#{label CouponTypeOther}
 
 
-          #js-couponDiscount.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeDiscount}")
             .labeledRow
               label.labeledRow-header(for="discountPercent")
                 | 割引率 (ご購入総額から xx% OFF)
@@ -103,7 +103,7 @@ include _layout
                 )
                   | \#{fromMaybe mempty discountOtherConditions}
 
-          #js-couponGift.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeGift}")
             .labeledRow
               label.labeledRow-header(for="giftContent")
                 | プレゼント内容
@@ -139,7 +139,7 @@ include _layout
                 )
                   | \#{fromMaybe mempty giftOtherConditions}
 
-          #js-couponSet.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeSet}")
             .labeledRow
               label.labeledRow-header(for="setContent")
                 | セット内容
@@ -175,7 +175,7 @@ include _layout
                 )
                   | \#{fromMaybe mempty setOtherConditions}
 
-          #js-couponOther.js-invisible
+          .showOnFocus(id="type-\#{key CouponTypeOther}")
             .labeledRow
               label.labeledRow-header(for="otherContent")
                 | クーポン内容

@@ -129,10 +129,6 @@
   }
 }
 
-.js-invisible {
+.showOnFocus:not(:target) {
   display: none;
-}
-
-.js-visible {
-  display: block;
 }
