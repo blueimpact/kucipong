@@ -132,3 +132,7 @@
 .showOnFocus:not(:target) {
   display: none;
 }
+
+.icon.icon-fav.checkableIcon {
+  display: none;
+}
