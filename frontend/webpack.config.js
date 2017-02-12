@@ -12,23 +12,19 @@ console.log('Start Webpack process...');
 
 // Determine build env by npm command options
 const TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
-const ENV = TARGET_ENV === 'production' ?
+const ENV_VARS = TARGET_ENV === 'production' ?
   {
-    'apiRoot': JSON.stringify(
-      process.env.API_ROOT || 'http://kucipong.com/api/v0/'
-    ),
-    'googleMapApiKey': JSON.stringify(
+    'apiRoot':
+      process.env.API_ROOT || 'http://kucipong.com/api/v0/',
+    'googleMapApiKey':
       // Default key bellow is only available on `stage.kucipong.com`.
-      process.env.GOOGLE_MAP_API_KEY || 'AIzaSyA6yBv38YNHWzaAI5S7c27JfqkSFMFC-7g'
-    ),
+      process.env.GOOGLE_MAP_API_KEY || 'AIzaSyA6yBv38YNHWzaAI5S7c27JfqkSFMFC-7g',
   } :
   {
-    'apiRoot': JSON.stringify(
-      process.env.API_ROOT || 'http://localhost:8081/v0/'
-    ),
-    'googleMapApiKey': JSON.stringify(
-      process.env.GOOGLE_MAP_API_KEY || ''
-    ),
+    'apiRoot':
+      process.env.API_ROOT || 'http://localhost:8081/v0/',
+    'googleMapApiKey':
+      process.env.GOOGLE_MAP_API_KEY || '',
   };
 
 // Common webpack config
@@ -117,18 +113,21 @@ const commonConfig = {
       template: 'src/pug/endUser_coupon_id.pug',
       inject:   'body',
       filename: 'endUser_coupon_id.html',
+      data: ENV_VARS,
     }),
     new HtmlWebpackPlugin({
       chunks: ['endUser'],
       template: 'src/pug/endUser_store_id.pug',
       inject:   'body',
       filename: 'endUser_store_id.html',
+      data: ENV_VARS,
     }),
     new HtmlWebpackPlugin({
       chunks: ['endUser'],
       template: 'src/pug/endUser_store_id_coupon.pug',
       inject:   'body',
       filename: 'endUser_store_id_coupon.html',
+      data: ENV_VARS,
     }),
 
     // Compile store-user related pages
@@ -143,30 +142,35 @@ const commonConfig = {
       template: 'src/pug/storeUser_store.pug',
       inject:   'body',
       filename: 'storeUser_store.html',
+      data: ENV_VARS,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser', 'storeUser_store_edit'],
       template: 'src/pug/storeUser_store_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_edit.html',
+      data: ENV_VARS,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser'],
       template: 'src/pug/storeUser_store_coupon.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon.html',
+      data: ENV_VARS,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser'],
       template: 'src/pug/storeUser_store_coupon_id.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon_id.html',
+      data: ENV_VARS,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser', 'storeUser_store_coupon_id_edit'],
       template: 'src/pug/storeUser_store_coupon_id_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon_id_edit.html',
+      data: ENV_VARS,
     }),
 
     // Compile admin-user related pages
@@ -203,7 +207,12 @@ const commonConfig = {
 
     // Inject variables to JS file.
     new webpack.DefinePlugin({
-      'process.env': ENV,
+      'process.env':
+        Object.keys(ENV_VARS).reduce((o, k) =>
+          merge(o, {
+            [k]: JSON.stringify(ENV_VARS[k]),
+          }), {}
+        ),
     }),
   ],
 
