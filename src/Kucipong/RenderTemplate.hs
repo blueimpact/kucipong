@@ -25,7 +25,7 @@ fromParams
   :: Q Exp -- ^ @$(qdict) :: [('Text', 'Text')]@
   -> [Text]
   -> ScopeM ()
-fromParams qdict list = foldr f (pure ()) list
+fromParams qdict = foldr f (pure ())
   where
     f :: Text -> ScopeM () -> ScopeM ()
     f name scope = do

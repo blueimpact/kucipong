@@ -1,3 +1,4 @@
+- var data = htmlWebpackPlugin.options.data;
 include _layout
   body#main.wrapper
     include _storeHeader
@@ -64,8 +65,23 @@ include _layout
                     name="address" type="text"
                     value="\#{ fromMaybe mempty address }"
                   )
-                .storeBody_info_body_row-body-map(data-latitude="41.40243" data-longitude="2.17551")
-                  iframe.location_map-frame(src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6483.579410111866!2d139.6998074!3d35.6575525!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b59d79dd993%3A0xdef2b8ece045887e!2z5LiD6Lyq54S86IKJIOWuieWuiSDmuIvosLflupc!5e0!3m2!1sja!2sjp!4v1471871614830" frameborder="0" style="border:0" allowfullscreen)
+                .storeBody_info_body_row-body-map#js-map-frame-wrapper
+                  | %{ case address }
+                  | %{ of Just address }
+                  iframe#js-map-frame.location_map-frame(
+                    frameborder="0"
+                    allowfullscreen
+                    data-map-base-api='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q='
+                    src='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q=\#{address}'
+                  )
+                  | %{ of Nothing }
+                  iframe#js-map-frame.location_map-frame(
+                    frameborder="0"
+                    allowfullscreen
+                    data-map-base-api='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q='
+                    aria-hidden="true"
+                  )
+                  | %{ endcase }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 電話番号
