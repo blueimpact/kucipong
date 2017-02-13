@@ -1,4 +1,5 @@
 @import "common";
+@import "loading";
 
 .store {
   .storeSubmit {
@@ -135,4 +136,12 @@
 
 .icon.icon-fav.checkableIcon {
   display: none;
+}
+
+[aria-hidden="true"] {
+  display: none;
+}
+
+#js-map-frame-wrapper[aria-busy="true"] {
+  @include loading;
 }
