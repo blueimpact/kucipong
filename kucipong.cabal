@@ -140,6 +140,7 @@ library
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
+                     , PackageImports
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
@@ -178,6 +179,7 @@ executable kucipong
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
+                     , PackageImports
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
@@ -222,6 +224,7 @@ executable kucipong-add-admin
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
+                     , PackageImports
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
