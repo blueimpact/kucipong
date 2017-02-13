@@ -8,6 +8,7 @@ import Kucipong.Prelude
 data StoreError
   = StoreErrorBusinessCategoryDetailIncorrect
   | StoreErrorCouldNotSendEmail
+  | StoreErrorCouldNotUploadImage
   | StoreErrorNoImage
   | StoreErrorNoStoreEmail EmailAddress
   deriving (Show, Eq, Ord, Read)

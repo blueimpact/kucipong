@@ -10,7 +10,7 @@ import Control.Monad.Trans.Class ( MonadTrans )
 import Control.Monad.Trans.Control
     ( ComposeSt, MonadBaseControl(..), MonadTransControl(..)
     , defaultLiftBaseWith, defaultRestoreM )
-
+import Control.Monad.Trans.Resource (MonadResource(..))
 
 newtype KucipongCookieT m a = KucipongCookieT { unKucipongCookieT :: IdentityT m a }
     deriving
@@ -45,3 +45,6 @@ instance (MonadBaseControl b m) => MonadBaseControl b (KucipongCookieT m) where
     restoreM     = defaultRestoreM
     {-# INLINABLE liftBaseWith #-}
     {-# INLINABLE restoreM #-}
+
+instance MonadResource m => MonadResource (KucipongCookieT m) where
+  liftResourceT = lift . liftResourceT

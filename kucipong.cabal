@@ -44,7 +44,12 @@ library
                      , Kucipong.I18n.Instance
                      , Kucipong.I18n.Types
                      , Kucipong.LoginToken
+                     , Kucipong.Logger
                      , Kucipong.Monad
+                     , Kucipong.Monad.Aws
+                     , Kucipong.Monad.Aws.Class
+                     , Kucipong.Monad.Aws.Instance
+                     , Kucipong.Monad.Aws.Trans
                      , Kucipong.Monad.Cookie
                      , Kucipong.Monad.Cookie.Class
                      , Kucipong.Monad.Cookie.Instance
@@ -69,11 +74,13 @@ library
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , amazonka
+                     , amazonka-core
                      , amazonka-s3
                      , base64-bytestring
                      , blaze-markup
                      , classy-prelude
                      , clientsession
+                     , cryptonite
                      , data-default
                      , emailaddress
                      , envelope
@@ -139,6 +146,7 @@ library
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
+                     , PackageImports
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
@@ -177,6 +185,7 @@ executable kucipong
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
+                     , PackageImports
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
@@ -221,6 +230,7 @@ executable kucipong-add-admin
                      , NoImplicitPrelude
                      , NoMonomorphismRestriction
                      , OverloadedStrings
+                     , PackageImports
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards

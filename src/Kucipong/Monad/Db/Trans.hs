@@ -10,6 +10,7 @@ import Control.Monad.Trans.Class ( MonadTrans )
 import Control.Monad.Trans.Control
     ( ComposeSt, MonadBaseControl(..), MonadTransControl(..)
     , defaultLiftBaseWith, defaultRestoreM )
+import Control.Monad.Trans.Resource (MonadResource(..))
 
 newtype KucipongDbT m a = KucipongDbT { unKucipongDbT :: IdentityT m a }
     deriving
@@ -44,3 +45,6 @@ instance (MonadBaseControl b m) => MonadBaseControl b (KucipongDbT m) where
     restoreM     = defaultRestoreM
     {-# INLINABLE liftBaseWith #-}
     {-# INLINABLE restoreM #-}
+
+instance MonadResource m => MonadResource (KucipongDbT m) where
+  liftResourceT = lift . liftResourceT

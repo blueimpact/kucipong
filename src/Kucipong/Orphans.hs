@@ -15,13 +15,21 @@ import ClassyPrelude
 
 import Control.Monad.Logger (LoggingT, MonadLogger)
 import Control.Monad.Random (MonadRandom(..))
+import Control.Monad.Trans.Resource (ResourceT)
+import Data.Data (Data)
 import Numeric.Natural (Natural)
 import Language.Haskell.TH (Q, runIO)
 import Text.Blaze (Markup, ToMarkup(..), string)
-import Web.Spock (ActionCtxT)
+import Web.Spock (ActionCtxT, UploadedFile(..))
 
 instance MonadRandom m =>
          MonadRandom (LoggingT m) where
+  getRandom = lift getRandom
+  getRandomR = lift . getRandomR
+  getRandoms = lift getRandoms
+  getRandomRs = lift . getRandomRs
+
+instance MonadRandom m => MonadRandom (ResourceT m) where
   getRandom = lift getRandom
   getRandomR = lift . getRandomR
   getRandoms = lift getRandoms
@@ -37,3 +45,7 @@ instance MonadIO Q where
 instance ToMarkup Natural where
   toMarkup :: Natural -> Markup
   toMarkup = string . show
+
+deriving instance Data UploadedFile
+deriving instance Show UploadedFile
+

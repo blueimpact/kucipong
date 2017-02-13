@@ -7,6 +7,7 @@ import Kucipong.Prelude
 import Control.Monad.Trans ( MonadTrans )
 import Web.Spock ( ActionCtxT, CookieSettings )
 
+import Kucipong.Monad.Aws.Trans ( KucipongAwsT )
 import Kucipong.Monad.Db.Trans ( KucipongDbT )
 import Kucipong.Monad.SendEmail.Trans ( KucipongSendEmailT )
 import Kucipong.Session ( Admin, Session, Store )
@@ -58,6 +59,7 @@ class Monad m => MonadKucipongCookie m where
 instance MonadKucipongCookie m => MonadKucipongCookie (ActionCtxT ctx m)
 instance MonadKucipongCookie m => MonadKucipongCookie (ExceptT e m)
 instance MonadKucipongCookie m => MonadKucipongCookie (IdentityT m)
+instance MonadKucipongCookie m => MonadKucipongCookie (KucipongAwsT m)
 instance MonadKucipongCookie m => MonadKucipongCookie (KucipongDbT m)
 instance MonadKucipongCookie m => MonadKucipongCookie (KucipongSendEmailT m)
 instance MonadKucipongCookie m => MonadKucipongCookie (ReaderT r m)
