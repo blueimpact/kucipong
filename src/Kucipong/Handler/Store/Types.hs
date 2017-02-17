@@ -11,6 +11,7 @@ data StoreError
   | StoreErrorCouldNotUploadImage
   | StoreErrorNoImage
   | StoreErrorNoStoreEmail EmailAddress
+  | StoreErrorNotAnImage
   deriving (Show, Eq, Ord, Read)
 
 data StoreMsg
