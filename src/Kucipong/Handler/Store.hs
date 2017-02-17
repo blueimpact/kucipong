@@ -107,7 +107,12 @@ doLogin loginToken = do
 
 storeGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     , MonadLogger m
+     )
   => ActionCtxT (HVect xs) m ()
 storeGet = do
   (StoreSession email) <- getStoreEmail
@@ -124,6 +129,7 @@ storeGet = do
         , storeBusinessHours
         , storeRegularHoliday
         , storeUrl
+        , storeImage
         } <- fromMaybeM handleNoStoreError maybeStore
   let
     name = storeName
@@ -135,6 +141,7 @@ storeGet = do
     businessHourLines = fromMaybe [] (fmap lines storeBusinessHours)
     regularHoliday = storeRegularHoliday
     url = storeUrl
+  imageUrl <- traverse awsImageS3Url storeImage
   $(renderTemplateFromEnv "storeUser_store.html")
   where
     handleNoStoreError :: ActionCtxT (HVect xs) m a

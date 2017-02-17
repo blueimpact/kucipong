@@ -34,6 +34,15 @@ class Monad m => MonadKucipongAws m where
     => UploadedFile -> t n (Either FileUploadError Image)
   awsS3PutUploadedFile = lift . awsS3PutUploadedFile
 
+  awsImageS3Url :: Image -> m Text
+  default awsImageS3Url
+    :: ( MonadKucipongAws n
+       , MonadTrans t
+       , m ~ t n
+       )
+    => Image -> t n Text
+  awsImageS3Url = lift . awsImageS3Url
+
 instance MonadKucipongAws m => MonadKucipongAws (ActionCtxT ctx m)
 instance MonadKucipongAws m => MonadKucipongAws (ExceptT e m)
 instance MonadKucipongAws m => MonadKucipongAws (IdentityT m)

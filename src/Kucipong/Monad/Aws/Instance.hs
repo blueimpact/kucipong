@@ -19,7 +19,8 @@ import Network.AWS.S3
 import System.FilePath (replaceExtension, takeExtension)
 import Web.Spock (UploadedFile(..))
 
-import Kucipong.Aws (HasS3ImageBucketName, getAwsBucketM)
+import Kucipong.Aws
+       (HasS3ImageBucketName(..), S3ImageBucketName(..), getAwsBucketM)
 import Kucipong.Db (Image(..))
 import Kucipong.Monad.Aws.Class
        (FileUploadError(..), MonadKucipongAws(..))
@@ -48,6 +49,12 @@ instance ( HasEnv r
               & poACL .~ Just OPublicRead
               & poContentType .~ Just contentType
       const (Image s3FileName) <$> runReq putObjectReq
+
+  awsImageS3Url :: Image -> KucipongAwsT m Text
+  awsImageS3Url (Image s3FileName) = do
+    (S3ImageBucketName bucketName) <- reader getS3ImageBucketName
+    let path = bucketName <> "/" <> s3FileName
+    pure $ "https://s3-ap-northeast-1.amazonaws.com/" <> path
 
 -- | Run an AWS request and return an 'Error'.
 runReq
