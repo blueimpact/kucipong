@@ -63,6 +63,8 @@ instance I18n StoreError where
     "Failed to upload image. Please try again."
   label EnUS (StoreErrorNoStoreEmail email) =
     "Could not find store for email " <> tshow email <> "."
+  label EnUS StoreErrorNotAnImage =
+    "Uploaded file is not an image.  Please upload an image file."
 
 instance I18n StoreMsg where
   label EnUS StoreMsgSentVerificationEmail =

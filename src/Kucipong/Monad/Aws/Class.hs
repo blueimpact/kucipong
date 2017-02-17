@@ -15,9 +15,9 @@ import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
 
 data FileUploadError
   = AwsError Error
+  | FileContentTypeError
   | FileReadError IOException
   deriving (Generic, Show, Typeable)
-
 
 -- |
 -- Default implementations are used to easily derive instances for monads

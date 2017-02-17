@@ -220,6 +220,10 @@ storeEditPost = do
       $(logDebug) $ "got following aws error in storeEditPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorCouldNotUploadImage
+    handleFileUploadError uploadedFile FileContentTypeError = do
+      $(logDebug) "got a content type error in storeEditPost handler."
+      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
+      handleErr $ label def StoreErrorNotAnImage
     handleFileUploadError uploadedFile (FileReadError err) = do
       $(logDebug) $ "got following error trying to read the uploaded file " <>
         "in storeEditPost handler: " <> tshow err
