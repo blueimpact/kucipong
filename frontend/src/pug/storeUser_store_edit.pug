@@ -123,7 +123,9 @@ include _layout
                 input#storeImage(
                   name="image" type="file"
                 )
-                img.storeBody_info_body_row-body-image(src="./img/dummy.jpg")
+                img.storeBody_info_body_row-body-image(
+                  src="\#{fromMaybe mempty imageUrl}"
+                )
             .storeSubmit
               button.btn.outerBtn(type="submit")
                 | この内容で店舗情報を更新する

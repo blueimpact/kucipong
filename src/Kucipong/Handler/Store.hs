@@ -150,7 +150,11 @@ storeGet = do
 
 storeEditGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     )
   => ActionCtxT (HVect xs) m ()
 storeEditGet = do
   (StoreSession email) <- getStoreEmail
@@ -165,6 +169,7 @@ storeEditGet = do
     businessHourLines = maybe [] lines (maybeStore >>= storeBusinessHours)
     regularHoliday = (maybeStore >>= storeRegularHoliday)
     url = (maybeStore >>= storeUrl)
+  imageUrl <- traverse awsImageS3Url $ maybeStore >>= storeImage
   $(renderTemplateFromEnv "storeUser_store_edit.html")
 
 storeEditPost
@@ -239,6 +244,9 @@ storeEditPost = do
 
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
+      (StoreSession email) <- getStoreEmail
+      maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+      imageUrl <- traverse awsImageS3Url $ maybeStore >>= storeImage
       p <- params
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
       let errors = [errMsg]
