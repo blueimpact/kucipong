@@ -9,7 +9,10 @@ include _layout
         a.btn.outerBtn(href="\#{renderRoute storeEditR}") 店舗情報編集
       header.storeHeader
         .annotatedImageGroup
-          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="\#{ name }")
+          img.annotatedImageGroup-image(
+            src="\#{fromMaybe mempty imageUrl}"
+            alt="\#{ name }"
+          )
           span.annotatedImageGroup-annotation 画像は一例です
         .highlightedBlock
           h2.highlightedBlock.storeHeader-title
