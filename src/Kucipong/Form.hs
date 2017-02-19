@@ -80,6 +80,7 @@ data StoreEditForm = StoreEditForm
   , businessHours :: !(Maybe Text)
   , regularHoliday :: !(Maybe Text)
   , url :: !(Maybe Text)
+  , defaultImage :: !(Maybe Text)
   } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 instance FromForm StoreEditForm

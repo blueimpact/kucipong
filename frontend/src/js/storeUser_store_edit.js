@@ -46,13 +46,14 @@ mapFrame.addEventListener('load', function () {
 
 // On click add/delete image button.
 var uploadBtn = document.getElementById('storeImageLabel');
-var shouldUpdate = document.getElementById('storeImageShouldUpdate');
+// This field holds original image information.
+var defaultImage = document.getElementById('defaultImage');
 uploadBtn.addEventListener('click', function (eve) {
   if (uploadBtn.getAttribute('for') === 'storeImageSelector') {
     return;
   }
   uploadBtn.setAttribute('for', 'storeImageSelector');
-  shouldUpdate.value = 'true';
+  defaultImage.removeAttribute('name');
   eve.preventDefault();
 }, false);
 

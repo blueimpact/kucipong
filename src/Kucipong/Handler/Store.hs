@@ -18,8 +18,8 @@ import Web.Spock
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
-       (BusinessCategory(..), BusinessCategoryDetail(..), Key(..),
-        LoginTokenExpirationTime(..), Store(..),
+       (BusinessCategory(..), BusinessCategoryDetail(..), Image(..),
+        Key(..), LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken),
         isValidBusinessCategoryDetailFor, readBusinessCategory,
@@ -169,6 +169,7 @@ storeEditGet = do
     businessHourLines = maybe [] lines (maybeStore >>= storeBusinessHours)
     regularHoliday = (maybeStore >>= storeRegularHoliday)
     url = (maybeStore >>= storeUrl)
+    defaultImage = unImage <$> (maybeStore >>= storeImage)
   imageUrl <- traverse awsImageS3Url $ maybeStore >>= storeImage
   $(renderTemplateFromEnv "storeUser_store_edit.html")
 
@@ -192,15 +193,19 @@ storeEditPost = do
                 , businessHours
                 , regularHoliday
                 , url
+                , defaultImage
                 } <- getReqParamErr handleErr
-  filesHashMap <- files
-  let maybeUploadedFile = lookup "image" filesHashMap
-  s3ImageName <-
-    case maybeUploadedFile of
-      Just uploadedFile -> do
-        eitherS3ImageName <- awsS3PutUploadedFile uploadedFile
-        fromEitherOrM eitherS3ImageName $ handleFileUploadError uploadedFile
-      Nothing -> handleErr $ label def StoreErrorNoImage
+  s3ImageName <- case defaultImage of
+    Just img -> pure $ Image img
+    Nothing -> do
+      filesHashMap <- files
+      let maybeUploadedFile = lookup "image" filesHashMap
+      case maybeUploadedFile of
+        Just uploadedFile -> do
+          eitherS3ImageName <- awsS3PutUploadedFile uploadedFile
+          fromEitherOrM eitherS3ImageName $
+            handleFileUploadError uploadedFile
+        Nothing -> handleErr $ label def StoreErrorNoImage
   checkBusinessCategoryDetails businessCategory businessCategoryDetails
   void $
     dbUpsertStore
@@ -263,6 +268,7 @@ storeEditPost = do
           , "phoneNumber"
           , "regularHoliday"
           , "url"
+          , "defaultImage"
           ])
 
 storeAuthHook

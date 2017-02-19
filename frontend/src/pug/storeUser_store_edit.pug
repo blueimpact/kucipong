@@ -128,8 +128,8 @@ include _layout
                   img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
                     src="\#{fromMaybe mempty imageUrl}"
                   )
-                  input#storeImageShouldUpdate(
-                    name="updateImage" type="hidden" value="false"
+                  input#defaultImage(
+                    name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
                   )
             .storeSubmit
               button.btn.outerBtn(type="submit")
