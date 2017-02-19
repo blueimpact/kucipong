@@ -120,12 +120,17 @@ include _layout
               .storeBody_info_body_row-header
                 | 店舗イメージ画像
               .storeBody_info_body_row-body
-                input#storeImage(
-                  name="image" type="file"
-                )
-                img.storeBody_info_body_row-body-image(
-                  src="\#{fromMaybe mempty imageUrl}"
-                )
+                .uploaderWrapper
+                  input#storeImageSelector.uploaderCore(
+                    name="image" type="file" accept="image/*"
+                  )
+                  label#storeImageLabel.uploaderLabel(for="storeImage")
+                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
+                    src="\#{fromMaybe mempty imageUrl}"
+                  )
+                  input#storeImageShouldUpdate(
+                    name="updateImage" type="hidden" value="false"
+                  )
             .storeSubmit
               button.btn.outerBtn(type="submit")
                 | この内容で店舗情報を更新する
