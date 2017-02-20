@@ -2,13 +2,13 @@
 
 var resetSubcategories = function (key) {
   Array.prototype.slice.call(document.querySelectorAll('[data-subcategory-of]')).forEach(function (x) {
-    return x.style.display = 'none';
+    return x.setAttribute('aria-hidden', 'true');
   });
 };
 
 var setSubcategories = function (key) {
   resetSubcategories();
-  document.querySelector('[data-subcategory-of="' + key + '"]').style.display = 'flex';
+  document.querySelector('[data-subcategory-of="' + key + '"]').removeAttribute('aria-hidden', 'true');
 };
 
 var businessCategory = document.getElementById('storeBusinessCategory');

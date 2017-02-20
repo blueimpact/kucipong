@@ -33,20 +33,33 @@ include _layout
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の特徴
-              | %{ forall category <- allBusinessCategories }
-              .storeBody_info_body_row-body.checkboxGroup(data-subcategory-of="\#{key category}")
-                | %{ forall categoryDetail <- mappend (allBusinessCategoryDetails (Just category)) (allBusinessCategoryDetails Nothing) }
-                .checkboxWrapper
-                  input.checkbox(
-                    id="storeTags\#{key category}-\#{key categoryDetail}"
-                    type="checkbox" name="businessCategoryDetails"
-                    value="\#{key categoryDetail}"
-                    #{isChecked businessCategoryDetails categoryDetail}
-                  )
-                  label.checkboxLabel(for="storeTags\#{key category}-\#{key categoryDetail}")
-                    | \#{label categoryDetail}
+              .storeBody_info_body_row-body
+                .checkboxGroup
+                  | %{ forall categoryDetail <- (allBusinessCategoryDetails Nothing) }
+                  .checkboxWrapper
+                    input.checkbox(
+                      id="storeTagsCommon-\#{key categoryDetail}"
+                      type="checkbox" name="businessCategoryDetails"
+                      value="\#{key categoryDetail}"
+                      #{isChecked businessCategoryDetails categoryDetail}
+                    )
+                    label.checkboxLabel(for="storeTagsCommon-\#{key categoryDetail}")
+                      | \#{label categoryDetail}
+                  | %{ endforall }
+                | %{ forall category <- allBusinessCategories }
+                .checkboxGroup(data-subcategory-of="\#{key category}")
+                  | %{ forall categoryDetail <- (allBusinessCategoryDetails (Just category))  }
+                  .checkboxWrapper
+                    input.checkbox(
+                      id="storeTags\#{key category}-\#{key categoryDetail}"
+                      type="checkbox" name="businessCategoryDetails"
+                      value="\#{key categoryDetail}"
+                      #{isChecked businessCategoryDetails categoryDetail}
+                    )
+                    label.checkboxLabel(for="storeTags\#{key category}-\#{key categoryDetail}")
+                      | \#{label categoryDetail}
+                  | %{ endforall }
                 | %{ endforall }
-              | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の説明
