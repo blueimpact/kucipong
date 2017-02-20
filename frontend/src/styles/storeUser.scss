@@ -94,16 +94,16 @@
 }
 
 .checkboxGroup {
-  display: flex;
-  flex-wrap: wrap;
+  display: inline-block;
 
   .checkboxWrapper {
+    display: inline-block;
+
     .checkbox {
       display: none;
     }
 
     .checkboxLabel {
-      flex: 1;
       cursor: pointer;
       padding: 0.2em 0.5em;
       border-radius: 8px;
