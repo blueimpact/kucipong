@@ -25,7 +25,9 @@ include _layout
                 name="image" type="file"
                 accept="image/*"
               )
-              img.labeledRow-body-image(src="./img/dummy.jpg")
+              img.labeledRow-body-image(
+                src="\#{fromMaybe mempty maybeImageUrl}"
+              )
 
           .labeledRow
             label.labeledRow-header(for="validFrom")

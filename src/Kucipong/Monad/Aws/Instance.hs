@@ -50,11 +50,9 @@ instance ( HasEnv r
               & poContentType .~ Just contentType
       const (Image s3FileName) <$> runReq putObjectReq
 
-  awsImageS3Url :: Image -> KucipongAwsT m Text
-  awsImageS3Url (Image s3FileName) = do
-    (S3ImageBucketName bucketName) <- reader getS3ImageBucketName
-    let path = bucketName <> "/" <> s3FileName
-    pure $ "https://s3-ap-northeast-1.amazonaws.com/" <> path
+  awsGetBucketName :: KucipongAwsT m S3ImageBucketName
+  awsGetBucketName = reader getS3ImageBucketName
+
 
 -- | Run an AWS request and return an 'Error'.
 runReq

@@ -36,7 +36,7 @@ import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongCookie,
-        MonadKucipongDb(..), MonadKucipongSendEmail(..),
+        MonadKucipongDb(..), MonadKucipongSendEmail(..), awsImageS3Url,
         dbFindStoreByEmail, dbFindStoreLoginToken, dbUpsertStore)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)

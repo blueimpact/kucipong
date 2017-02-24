@@ -8,7 +8,8 @@ import Control.Monad.Trans (MonadTrans)
 import Network.AWS (Error)
 import Web.Spock (ActionCtxT, UploadedFile)
 
-import Kucipong.Db (Image)
+import Kucipong.Aws (S3ImageBucketName(..))
+import Kucipong.Db (Image(..))
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.Db.Trans (KucipongDbT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
@@ -34,14 +35,14 @@ class Monad m => MonadKucipongAws m where
     => UploadedFile -> t n (Either FileUploadError Image)
   awsS3PutUploadedFile = lift . awsS3PutUploadedFile
 
-  awsImageS3Url :: Image -> m Text
-  default awsImageS3Url
+  awsGetBucketName :: m S3ImageBucketName
+  default awsGetBucketName
     :: ( MonadKucipongAws n
        , MonadTrans t
        , m ~ t n
        )
-    => Image -> t n Text
-  awsImageS3Url = lift . awsImageS3Url
+    => t n S3ImageBucketName
+  awsGetBucketName = lift awsGetBucketName
 
 instance MonadKucipongAws m => MonadKucipongAws (ActionCtxT ctx m)
 instance MonadKucipongAws m => MonadKucipongAws (ExceptT e m)
@@ -50,3 +51,9 @@ instance MonadKucipongAws m => MonadKucipongAws (KucipongCookieT m)
 instance MonadKucipongAws m => MonadKucipongAws (KucipongDbT m)
 instance MonadKucipongAws m => MonadKucipongAws (KucipongSendEmailT m)
 instance MonadKucipongAws m => MonadKucipongAws (ReaderT r m)
+
+awsImageS3Url :: MonadKucipongAws m => Image -> m Text
+awsImageS3Url (Image s3FileName) = do
+  (S3ImageBucketName bucketName) <- awsGetBucketName
+  let path = bucketName <> "/" <> s3FileName
+  pure $ "https://s3-ap-northeast-1.amazonaws.com/" <> path

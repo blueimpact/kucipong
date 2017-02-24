@@ -26,8 +26,8 @@ import Kucipong.Handler.Store.Util (uploadedImageToS3)
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongDb(..),
-        dbFindCouponByEmailAndId, dbFindCouponsByEmail, dbFindStoreByEmail,
-        dbInsertCoupon, dbUpdateCoupon)
+        awsImageS3Url, dbFindCouponByEmailAndId, dbFindCouponsByEmail,
+        dbFindStoreByEmail, dbInsertCoupon, dbUpdateCoupon)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
@@ -48,6 +48,7 @@ couponNewGet = do
       , "couponType"
       , "validFrom"
       , "validUntil"
+      , "maybeImageUrl"
       , "discountPercent"
       , "discountMinimumPrice"
       , "discountOtherConditions"
@@ -81,18 +82,52 @@ couponGet couponKey = do
 
 couponEditGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     , MonadLogger m
+     )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponEditGet couponKey = do
   (StoreSession email) <- getStoreEmail
   maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
-  Entity _ (Coupon _ _ _ _ (Just -> title) (Just . couponTypeToText -> couponType) (fmap tshow -> validFrom) (fmap tshow -> validUntil) _ (fmap percentToText  -> discountPercent) (fmap priceToText -> discountMinimumPrice) discountOtherConditions giftContent (fmap priceToText -> giftReferencePrice) (fmap priceToText -> giftMinimumPrice) giftOtherConditions setContent (fmap priceToText -> setPrice) (fmap priceToText -> setReferencePrice) setOtherConditions otherContent otherConditions) <-
-    fromMaybeM (handleErr "couldn't find coupon") maybeCouponEntity
+  Entity
+    _
+    (Coupon
+      _
+      _
+      _
+      _
+      (Just -> title)
+      (Just . couponTypeToText -> couponType)
+      (fmap tshow -> validFrom)
+      (fmap tshow -> validUntil)
+      maybeImage
+      (fmap percentToText  -> discountPercent)
+      (fmap priceToText -> discountMinimumPrice)
+      discountOtherConditions
+      giftContent
+      (fmap priceToText -> giftReferencePrice)
+      (fmap priceToText -> giftMinimumPrice)
+      giftOtherConditions
+      setContent
+      (fmap priceToText -> setPrice)
+      (fmap priceToText -> setReferencePrice)
+      setOtherConditions
+      otherContent
+      otherConditions) <-
+        fromMaybeM (handleErr "couldn't find coupon") maybeCouponEntity
+  maybeImageUrl <- traverse awsImageS3Url maybeImage
   let action = renderRoute storeCouponVarEditR couponKey
   $(renderTemplateFromEnv "storeUser_store_coupon_id_edit.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
+      (StoreSession email) <- getStoreEmail
+      maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
+      let maybeImage = maybeCouponEntity >>= couponImage . entityVal
+      maybeImageUrl <- traverse awsImageS3Url maybeImage
       p <- params
       $(logDebug) $ "params: " <> tshow p
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
@@ -122,12 +157,21 @@ couponEditGet couponKey = do
 
 couponEditPost
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m, MonadLogger m)
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     , MonadLogger m
+     )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponEditPost couponKey = do
   (StoreSession email) <- getStoreEmail
   storeNewCouponForm <- getReqParamErr handleErr
   let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
+  s3ImageName <-
+    uploadedImageToS3
+      (handleErr $ label def StoreErrorNoImage)
+      handleFileUploadError
   void $
     dbUpdateCoupon
       couponKey
@@ -136,7 +180,7 @@ couponEditPost couponKey = do
       couponType
       (view _Wrapped validFrom)
       (view _Wrapped validUntil)
-      Nothing -- image
+      (Just s3ImageName)
       (view _Wrapped discountPercent)
       (view _Wrapped discountMinimumPrice)
       (view _Wrapped discountOtherConditions)
@@ -152,8 +196,29 @@ couponEditPost couponKey = do
       (view _Wrapped otherConditions)
   redirect $ renderRoute storeCouponVarR couponKey
   where
+    handleFileUploadError :: UploadedFile
+                          -> FileUploadError
+                          -> ActionCtxT (HVect xs) m a
+    handleFileUploadError uploadedFile (AwsError err) = do
+      $(logDebug) $ "got following aws error in couponEditPost handler: " <> tshow err
+      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
+      handleErr $ label def StoreErrorCouldNotUploadImage
+    handleFileUploadError uploadedFile FileContentTypeError = do
+      $(logDebug) "got a content type error in couponEditPost handler."
+      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
+      handleErr $ label def StoreErrorNotAnImage
+    handleFileUploadError uploadedFile (FileReadError err) = do
+      $(logDebug) $ "got following error trying to read the uploaded file " <>
+        "in couponEditPost handler: " <> tshow err
+      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
+      handleErr $ label def StoreErrorCouldNotUploadImage
+
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
+      (StoreSession email) <- getStoreEmail
+      maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
+      let maybeImage = maybeCouponEntity >>= couponImage . entityVal
+      maybeImageUrl <- traverse awsImageS3Url maybeImage
       p <- params
       $(logDebug) $ "params: " <> tshow p
       $(logDebug) $
@@ -262,6 +327,9 @@ couponPost = do
           , "couponType"
           , "validFrom"
           , "validUntil"
+          -- TODO: We should make sure the image url is filled in like normal
+          -- for the user when they resubmit the page.
+          , "maybeImageUrl"
           , "discountPercent"
           , "discountMinimumPrice"
           , "discountOtherConditions"
