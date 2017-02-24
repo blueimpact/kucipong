@@ -53,7 +53,10 @@ instance MonadKucipongAws m => MonadKucipongAws (KucipongSendEmailT m)
 instance MonadKucipongAws m => MonadKucipongAws (ReaderT r m)
 
 awsImageS3Url :: MonadKucipongAws m => Image -> m Text
-awsImageS3Url (Image s3FileName) = do
-  (S3ImageBucketName bucketName) <- awsGetBucketName
-  let path = bucketName <> "/" <> s3FileName
-  pure $ "https://s3-ap-northeast-1.amazonaws.com/" <> path
+awsImageS3Url image = do
+  bucketName <- awsGetBucketName
+  pure $ awsUrlFromImageAndBucket bucketName image
+
+awsUrlFromImageAndBucket :: S3ImageBucketName -> Image -> Text
+awsUrlFromImageAndBucket (S3ImageBucketName bucketName) (Image s3FileName) =
+  "https://s3-ap-northeast-1.amazonaws.com/" <> bucketName <> "/" <> s3FileName

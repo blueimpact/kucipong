@@ -26,8 +26,9 @@ import Kucipong.Handler.Store.Util (uploadedImageToS3)
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongDb(..),
-        awsImageS3Url, dbFindCouponByEmailAndId, dbFindCouponsByEmail,
-        dbFindStoreByEmail, dbInsertCoupon, dbUpdateCoupon)
+        awsGetBucketName, awsImageS3Url, awsUrlFromImageAndBucket, dbFindCouponByEmailAndId,
+        dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon,
+        dbUpdateCoupon)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Store, Session(..))
@@ -249,11 +250,17 @@ couponEditPost couponKey = do
 
 couponListGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     )
   => ActionCtxT (HVect xs) m ()
 couponListGet = do
   (StoreSession email) <- getStoreEmail
   couponEntities <- dbFindCouponsByEmail email
+  bucketName <- awsGetBucketName
+  let awsImageUrlFunc = fmap $ awsUrlFromImageAndBucket bucketName
   $(renderTemplateFromEnv "storeUser_store_coupon.html")
 
 couponPost
