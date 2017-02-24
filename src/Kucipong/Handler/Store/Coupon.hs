@@ -65,12 +65,18 @@ couponNewGet = do
 
 couponGet
   :: forall xs n m.
-     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponGet couponKey = do
   (StoreSession email) <- getStoreEmail
   maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
   maybeStoreEntity <- dbFindStoreByEmail email
+  let maybeImage = couponImage . entityVal =<< maybeCouponEntity
+  maybeImageUrl <- traverse awsImageS3Url maybeImage
   $(renderTemplateFromEnv "storeUser_store_coupon_id.html")
 
 couponEditGet
