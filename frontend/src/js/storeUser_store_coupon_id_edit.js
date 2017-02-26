@@ -11,8 +11,6 @@ couponType.addEventListener('change', function () {
 
 // Initialize
 if (!!couponType.value) {
-  window.location.replace('?top#type-' + couponType.value);
-}
-if (window.location.search === '?top') {
+  window.location.replace('#type-' + couponType.value);
   window.scrollTo(0, 0);
 }
