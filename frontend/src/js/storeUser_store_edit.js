@@ -39,3 +39,37 @@ mapFrame.addEventListener('load', function () {
   mapFrameWrapper.removeAttribute('aria-busy');
   mapFrame.removeAttribute('aria-hidden');
 });
+
+/* ======================
+ *  Image uploader
+ * ====================== */
+
+// On click add/delete image button.
+var uploadBtn = document.getElementById('storeImageLabel');
+// This field holds original image information.
+var defaultImage = document.getElementById('defaultImage');
+uploadBtn.addEventListener('click', function (eve) {
+  if (uploadBtn.getAttribute('for') === 'storeImageSelector') {
+    return;
+  }
+  uploadBtn.setAttribute('for', 'storeImageSelector');
+  defaultImage.removeAttribute('name');
+  eve.preventDefault();
+}, false);
+
+// On load new image.
+var selector = document.getElementById('storeImageSelector');
+var preview = document.getElementById('storeImage');
+selector.addEventListener('change', function (eve) {
+  var imgFiles = Array.prototype.slice.call(eve.target.files).filter(function (f) {
+    return f.type.match('image.*');
+  });
+  imgFiles.slice(0, 1).forEach(function (f) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      uploadBtn.setAttribute('for', 'storeImage');
+    };
+    reader.readAsDataURL(f);
+  });
+}, false);
