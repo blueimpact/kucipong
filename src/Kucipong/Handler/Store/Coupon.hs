@@ -41,7 +41,7 @@ couponNewGet
   => ActionCtxT (HVect xs) m ()
 couponNewGet = do
   let p = [] :: [(Text, Text)]
-      action = renderRoute storeCouponR
+      action = renderRoute storeCouponCreateR
   $(renderTemplate "storeUser_store_coupon_id_edit.html" $
     fromParams
       [|p|]
@@ -362,7 +362,7 @@ storeCouponComponent
   => SpockCtxT (HVect (Session Kucipong.Session.Store : xs)) m ()
 storeCouponComponent = do
   get storeCouponR couponListGet
-  post storeCouponR couponPost
+  post storeCouponCreateR couponPost
   get storeCouponCreateR couponNewGet
   get storeCouponVarR couponGet
   get storeCouponVarEditR couponEditGet
