@@ -1,17 +1,15 @@
-.PHONY: build clean npm-install watch
+.PHONY: build clean yarn-install watch
 all: build
 
-build: npm-install
-	npm run build
+build: yarn-install
+	yarn run build
 
 clean:
 	rm -rf dist
 
-npm-install:
-	if [ ! -d "node_modules" ] ; then \
-		npm install ; \
-	fi
+yarn-install:
+	yarn install
 
-watch: npm-install
-	npm start
+watch: yarn-install
+	yarn start
 
