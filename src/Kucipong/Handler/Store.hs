@@ -6,14 +6,14 @@ module Kucipong.Handler.Store
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromEitherOrM, fromMaybeM)
+import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
 import Data.List (nub)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Web.Spock
-       (ActionCtxT, UploadedFile(..), files, getContext, params, prehook,
+       (ActionCtxT, UploadedFile(..), getContext, params, prehook,
         redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
@@ -31,11 +31,12 @@ import Kucipong.Handler.Route
        (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
+import Kucipong.Handler.Store.Util (uploadedImageToS3)
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongCookie,
-        MonadKucipongDb(..), MonadKucipongSendEmail(..),
+        MonadKucipongDb(..), MonadKucipongSendEmail(..), awsImageS3Url,
         dbFindStoreByEmail, dbFindStoreLoginToken, dbUpsertStore)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
@@ -195,18 +196,13 @@ storeEditPost = do
                 , url
                 , defaultImage
                 } <- getReqParamErr handleErr
+  checkBusinessCategoryDetails businessCategory businessCategoryDetails
   s3ImageName <- case defaultImage of
     Just img -> pure $ Image img
     Nothing -> do
-      filesHashMap <- files
-      let maybeUploadedFile = lookup "image" filesHashMap
-      case maybeUploadedFile of
-        Just uploadedFile -> do
-          eitherS3ImageName <- awsS3PutUploadedFile uploadedFile
-          fromEitherOrM eitherS3ImageName $
-            handleFileUploadError uploadedFile
-        Nothing -> handleErr $ label def StoreErrorNoImage
-  checkBusinessCategoryDetails businessCategory businessCategoryDetails
+      uploadedImageToS3
+        (handleErr $ label def StoreErrorNoImage)
+        handleFileUploadError
   void $
     dbUpsertStore
       email

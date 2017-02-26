@@ -36,6 +36,7 @@ library
                      , Kucipong.Handler.Store
                      , Kucipong.Handler.Store.Coupon
                      , Kucipong.Handler.Store.Types
+                     , Kucipong.Handler.Store.Util
                      , Kucipong.Handler.Static
                      , Kucipong.Handler.Static.TH
                      , Kucipong.Host

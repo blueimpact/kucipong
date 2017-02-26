@@ -9,7 +9,10 @@
           label.checkableIcon-icon(for="js-fav-3")
 
     .annotatedImageGroup
-      img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
+      img.annotatedImageGroup-image(
+        src="\#{fromMaybe mempty maybeImageUrl}"
+        alt="七輪焼き肉・安安"
+      )
       span.annotatedImageGroup-annotation 画像は一例です
     .card_body
       .card_body_title
