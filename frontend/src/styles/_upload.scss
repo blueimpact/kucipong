@@ -1,0 +1,71 @@
+$base-size: 4.5em;
+$line-width: 0.1;
+$line-length: 0.8;
+$line-color: #fff;
+$background-color: #ff5858;
+$background-color2: #07b8eb;
+$easeInOutBack: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+$white: #fff;
+
+.uploaderWrapper {
+  position: relative;
+  font-size: $base-size;
+  min-height: 1em;
+}
+
+.uploaderCore {
+  display: none;
+}
+
+.uploaderImg {
+  max-height: 200vh;
+  transition: max-height 1.2s ease;
+}
+
+.uploaderLabel {
+  display: block;
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  background-color: $white;
+  color: black;
+  position: absolute;
+  top: 0;
+  left: calc(100% - 1em);
+  cursor: pointer;
+
+  &::before, &::after{
+    display: block;
+    content: '';
+    transform: rotate(-45deg);
+    background-color: $background-color;
+    position: absolute;
+    width: calc(#{$line-width} * 1em);
+    height: calc(#{$line-length} * 1em);
+    border-radius: calc(#{$line-width} * 1em / 2);
+    left: calc(1em / 2 - #{$line-width} * 1em / 2);
+    top: calc(1em / 2 - #{$line-length} * 1em / 2);
+  }
+
+  &::after {
+    transform: rotate(45deg);
+  }
+
+  &, &::before, &::after {
+    transition: all 0.8s $easeInOutBack 0.1s;
+  }
+
+  &[for="storeImageSelector"] {
+    transform: rotate(-45deg);
+    left:0;
+    background-color: $background-color2;
+
+    &::before, &::after {
+      background-color: $white;
+    }
+
+    & ~ .uploaderImg {
+      max-height: 0;
+    }
+  }
+}
