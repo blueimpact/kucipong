@@ -326,7 +326,7 @@ couponPost = do
       $(logDebug) $ "params: " <> tshow p
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
       let errors = [errMsg]
-          action = renderRoute storeCouponR
+          action = renderRoute storeCouponCreateR
       $(renderTemplate "storeUser_store_coupon_id_edit.html" $
         fromParams
           [|p|]
