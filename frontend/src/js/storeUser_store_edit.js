@@ -44,6 +44,9 @@ mapFrame.addEventListener('load', function () {
  *  Image uploader
  * ====================== */
 
+var preview = document.getElementById('storeImage');
+var defaultUrl = preview.src;
+
 // On click add/delete image button.
 var uploadBtn = document.getElementById('storeImageLabel');
 // This field holds original image information.
@@ -57,9 +60,16 @@ uploadBtn.addEventListener('click', function (eve) {
   eve.preventDefault();
 }, false);
 
+// On click reset image button.
+var resetBtn = document.getElementById('resetImage');
+resetBtn.addEventListener('click', function (eve) {
+  defaultImage.setAttribute('name', 'defaultImage');
+  preview.src = defaultUrl;
+  uploadBtn.setAttribute('for', 'storeImage');
+}, false);
+
 // On load new image.
 var selector = document.getElementById('storeImageSelector');
-var preview = document.getElementById('storeImage');
 selector.addEventListener('change', function (eve) {
   var imgFiles = Array.prototype.slice.call(eve.target.files).filter(function (f) {
     return f.type.match('image.*');

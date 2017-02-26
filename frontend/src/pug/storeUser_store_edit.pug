@@ -138,6 +138,8 @@ include _layout
                     name="image" type="file" accept="image/*"
                   )
                   label#storeImageLabel.uploaderLabel(for="storeImage")
+                  button.uploaderReset#resetImage(type="button")
+                    | Restore initial image.
                   img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
                     src="\#{fromMaybe mempty imageUrl}"
                   )
