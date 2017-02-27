@@ -4,13 +4,12 @@ module Kucipong.Handler.Store.Coupon where
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromMaybeM)
+import Control.FromSum (fromEitherMM, fromMaybeM)
 import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist.Sql (Entity(..), fromSqlKey)
-import Web.Spock
-       (ActionCtxT, UploadedFile(..), params, redirect, renderRoute)
+import Web.Spock (ActionCtxT, params, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
@@ -22,7 +21,8 @@ import Kucipong.Handler.Route
        (storeCouponR, storeCouponCreateR, storeCouponVarR,
         storeCouponVarEditR, storeR)
 import Kucipong.Handler.Store.Types (StoreError(..))
-import Kucipong.Handler.Store.Util (uploadedImageToS3)
+import Kucipong.Handler.Store.Util
+       (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongDb(..),
@@ -170,9 +170,7 @@ couponEditPost couponKey = do
   storeNewCouponForm <- getReqParamErr handleErr
   let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
   s3ImageName <-
-    uploadedImageToS3
-      (handleErr $ label def StoreErrorNoImage)
-      handleFileUploadError
+    fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
     dbUpdateCoupon
       couponKey
@@ -181,7 +179,7 @@ couponEditPost couponKey = do
       couponType
       (view _Wrapped validFrom)
       (view _Wrapped validUntil)
-      (Just s3ImageName)
+      s3ImageName
       (view _Wrapped discountPercent)
       (view _Wrapped discountMinimumPrice)
       (view _Wrapped discountOtherConditions)
@@ -197,18 +195,18 @@ couponEditPost couponKey = do
       (view _Wrapped otherConditions)
   redirect $ renderRoute storeCouponVarR couponKey
   where
-    handleFileUploadError :: UploadedFile
-                          -> FileUploadError
-                          -> ActionCtxT (HVect xs) m a
-    handleFileUploadError uploadedFile (AwsError err) = do
+    handleFileUploadErr
+      :: UploadImgErr
+      -> ActionCtxT (HVect xs) m a
+    handleFileUploadErr (UploadImgErr uploadedFile (AwsError err)) = do
       $(logDebug) $ "got following aws error in couponEditPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorCouldNotUploadImage
-    handleFileUploadError uploadedFile FileContentTypeError = do
+    handleFileUploadErr (UploadImgErr uploadedFile FileContentTypeError) = do
       $(logDebug) "got a content type error in couponEditPost handler."
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorNotAnImage
-    handleFileUploadError uploadedFile (FileReadError err) = do
+    handleFileUploadErr (UploadImgErr uploadedFile (FileReadError err)) = do
       $(logDebug) $ "got following error trying to read the uploaded file " <>
         "in couponEditPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
@@ -277,9 +275,7 @@ couponPost = do
   storeNewCouponForm <- getReqParamErr handleErr
   let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
   s3ImageName <-
-    uploadedImageToS3
-      (handleErr $ label def StoreErrorNoImage)
-      handleFileUploadError
+    fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
     dbInsertCoupon
       email
@@ -287,7 +283,7 @@ couponPost = do
       couponType
       (view _Wrapped validFrom)
       (view _Wrapped validUntil)
-      (Just s3ImageName)
+      s3ImageName
       (view _Wrapped discountPercent)
       (view _Wrapped discountMinimumPrice)
       (view _Wrapped discountOtherConditions)
@@ -303,18 +299,18 @@ couponPost = do
       (view _Wrapped otherConditions)
   redirect $ renderRoute storeCouponR
   where
-    handleFileUploadError :: UploadedFile
-                          -> FileUploadError
-                          -> ActionCtxT (HVect xs) m a
-    handleFileUploadError uploadedFile (AwsError err) = do
+    handleFileUploadErr
+      :: UploadImgErr
+      -> ActionCtxT (HVect xs) m a
+    handleFileUploadErr (UploadImgErr uploadedFile (AwsError err)) = do
       $(logDebug) $ "got following aws error in couponPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorCouldNotUploadImage
-    handleFileUploadError uploadedFile FileContentTypeError = do
+    handleFileUploadErr (UploadImgErr uploadedFile FileContentTypeError) = do
       $(logDebug) "got a content type error in couponPost handler."
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorNotAnImage
-    handleFileUploadError uploadedFile (FileReadError err) = do
+    handleFileUploadErr (UploadImgErr uploadedFile (FileReadError err)) = do
       $(logDebug) $ "got following error trying to read the uploaded file " <>
         "in couponPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
