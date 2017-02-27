@@ -44,22 +44,38 @@ mapFrame.addEventListener('load', function () {
  *  Image uploader
  * ====================== */
 
-// On click add/delete image button.
+var preview = document.getElementById('storeImage');
+var defaultUrl = preview.src;
+var selector = document.getElementById('storeImageSelector');
 var uploadBtn = document.getElementById('storeImageLabel');
+var resetBtn = document.getElementById('resetImage');
 // This field holds original image information.
 var defaultImage = document.getElementById('defaultImage');
+
+// On click add/delete image button.
 uploadBtn.addEventListener('click', function (eve) {
   if (uploadBtn.getAttribute('for') === 'storeImageSelector') {
     return;
   }
   uploadBtn.setAttribute('for', 'storeImageSelector');
   defaultImage.removeAttribute('name');
+  selector.value = '';
+  selector.type = '';
+  selector.type = 'file';
   eve.preventDefault();
 }, false);
 
+// On click reset image button.
+resetBtn.addEventListener('click', function (eve) {
+  defaultImage.setAttribute('name', 'defaultImage');
+  preview.src = defaultUrl;
+  uploadBtn.setAttribute('for', 'storeImage');
+  selector.value = '';
+  selector.type = '';
+  selector.type = 'file';
+}, false);
+
 // On load new image.
-var selector = document.getElementById('storeImageSelector');
-var preview = document.getElementById('storeImage');
 selector.addEventListener('change', function (eve) {
   var imgFiles = Array.prototype.slice.call(eve.target.files).filter(function (f) {
     return f.type.match('image.*');
