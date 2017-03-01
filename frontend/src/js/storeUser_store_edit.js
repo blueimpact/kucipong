@@ -62,6 +62,7 @@ uploadBtn.addEventListener('click', function (eve) {
   selector.value = '';
   selector.type = '';
   selector.type = 'file';
+  selector.removeAttribute('name');
   eve.preventDefault();
 }, false);
 
@@ -73,6 +74,7 @@ resetBtn.addEventListener('click', function (eve) {
   selector.value = '';
   selector.type = '';
   selector.type = 'file';
+  selector.removeAttribute('name');
 }, false);
 
 // On load new image.
@@ -88,4 +90,5 @@ selector.addEventListener('change', function (eve) {
     };
     reader.readAsDataURL(f);
   });
+  selector.name = 'image';
 }, false);

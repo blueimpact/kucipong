@@ -6,15 +6,14 @@ module Kucipong.Handler.Store
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromMaybeM)
+import Control.FromSum (fromEitherMM, fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
 import Data.List (nub)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Web.Spock
-       (ActionCtxT, UploadedFile(..), getContext, params, prehook,
-        redirect, renderRoute)
+       (ActionCtxT, getContext, params, prehook, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
@@ -31,7 +30,8 @@ import Kucipong.Handler.Route
        (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
-import Kucipong.Handler.Store.Util (uploadedImageToS3)
+import Kucipong.Handler.Store.Util
+       (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
@@ -197,19 +197,15 @@ storeEditPost = do
                 , defaultImage
                 } <- getReqParamErr handleErr
   checkBusinessCategoryDetails businessCategory businessCategoryDetails
-  s3ImageName <- case defaultImage of
-    Just img -> pure $ Image img
-    Nothing -> do
-      uploadedImageToS3
-        (handleErr $ label def StoreErrorNoImage)
-        handleFileUploadError
+  s3ImageName <-
+    fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
     dbUpsertStore
       email
       name
       businessCategory
       (nub businessCategoryDetails)
-      (Just s3ImageName)
+      s3ImageName
       salesPoint
       address
       phoneNumber
@@ -218,26 +214,27 @@ storeEditPost = do
       url
   redirect $ renderRoute storeR
   where
-    checkBusinessCategoryDetails :: BusinessCategory
-                                 -> [BusinessCategoryDetail]
-                                 -> ActionCtxT (HVect xs) m ()
+    checkBusinessCategoryDetails
+      :: BusinessCategory
+      -> [BusinessCategoryDetail]
+      -> ActionCtxT (HVect xs) m ()
     checkBusinessCategoryDetails busiCat busiCatDets
       | all (isValidBusinessCategoryDetailFor busiCat) busiCatDets = pure ()
       | otherwise =
         handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect
 
-    handleFileUploadError :: UploadedFile
-                          -> FileUploadError
-                          -> ActionCtxT (HVect xs) m a
-    handleFileUploadError uploadedFile (AwsError err) = do
+    handleFileUploadErr
+      :: UploadImgErr
+      -> ActionCtxT (HVect xs) m a
+    handleFileUploadErr (UploadImgErr uploadedFile (AwsError err)) = do
       $(logDebug) $ "got following aws error in storeEditPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorCouldNotUploadImage
-    handleFileUploadError uploadedFile FileContentTypeError = do
+    handleFileUploadErr (UploadImgErr uploadedFile FileContentTypeError) = do
       $(logDebug) "got a content type error in storeEditPost handler."
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorNotAnImage
-    handleFileUploadError uploadedFile (FileReadError err) = do
+    handleFileUploadErr (UploadImgErr uploadedFile (FileReadError err)) = do
       $(logDebug) $ "got following error trying to read the uploaded file " <>
         "in storeEditPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile

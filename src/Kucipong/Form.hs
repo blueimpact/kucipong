@@ -107,6 +107,7 @@ data StoreNewCouponForm = StoreNewCouponForm
   , setOtherConditions :: !(MaybeEmpty Text)
   , otherContent :: !(MaybeEmpty Text)
   , otherConditions :: !(MaybeEmpty Text)
+  , defaultImage :: !(Maybe Text)
   } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 $(makeLensesFor
@@ -123,6 +124,7 @@ $(makeLensesFor
     , ("setOtherConditions", "setOtherConditionsLens")
     , ("otherContent", "otherContentLens")
     , ("otherConditions", "otherConditionsLens")
+    , ("defaultImage", "defaultImageLens")
     ]
     ''StoreNewCouponForm)
 
