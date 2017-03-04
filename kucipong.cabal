@@ -148,6 +148,7 @@ library
                      , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PackageImports
+                     , PatternSynonyms
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
@@ -187,6 +188,7 @@ executable kucipong
                      , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PackageImports
+                     , PatternSynonyms
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
@@ -232,6 +234,7 @@ executable kucipong-add-admin
                      , NoMonomorphismRestriction
                      , OverloadedStrings
                      , PackageImports
+                     , PatternSynonyms
                      , PolyKinds
                      , RankNTypes
                      , RecordWildCards
