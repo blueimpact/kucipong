@@ -135,9 +135,9 @@ include _layout
               .storeBody_info_body_row-body
                 .uploaderWrapper
                   input#storeImageSelector.uploaderCore(
-                    type="file" accept="image/*"
+                    name="image" type="file" accept="image/*"
                   )
-                  label#storeImageLabel.uploaderLabel(for="storeImage")
+                  label#storeImageLabel.uploaderLabel
                   button.uploaderReset#resetImage(type="button")
                     | Restore initial image.
                   img#storeImage.uploaderImg.storeBody_info_body_row-body-image(

@@ -51,17 +51,21 @@ var uploadBtn = document.getElementById('storeImageLabel');
 var resetBtn = document.getElementById('resetImage');
 // This field holds original image information.
 var defaultImage = document.getElementById('defaultImage');
-
-// On click add/delete image button.
-uploadBtn.addEventListener('click', function (eve) {
-  if (uploadBtn.getAttribute('for') === 'storeImageSelector') {
-    return;
-  }
-  uploadBtn.setAttribute('for', 'storeImageSelector');
-  defaultImage.name = null;
+var clearSelector = function () {
   selector.value = '';
   selector.type = '';
   selector.type = 'file';
+};
+
+// On click add/delete image button.
+uploadBtn.addEventListener('click', function (eve) {
+  var isAddBtn = uploadBtn.getAttribute('for') === 'storeImageSelector';
+  if (isAddBtn) {
+    return;
+  }
+  uploadBtn.setAttribute('for', 'storeImageSelector');
+  defaultImage.removeAttribute('name');
+  clearSelector();
   eve.preventDefault();
 }, false);
 
@@ -69,10 +73,8 @@ uploadBtn.addEventListener('click', function (eve) {
 resetBtn.addEventListener('click', function (eve) {
   defaultImage.name = 'defaultImage';
   preview.src = defaultUrl;
-  uploadBtn.setAttribute('for', 'storeImage');
-  selector.value = '';
-  selector.type = '';
-  selector.type = 'file';
+  uploadBtn.removeAttribute('for');
+  clearSelector();
 }, false);
 
 // On load new image.
@@ -84,7 +86,7 @@ selector.addEventListener('change', function (eve) {
     var reader = new FileReader();
     reader.onload = function (e) {
       preview.src = e.target.result;
-      uploadBtn.setAttribute('for', 'storeImage');
+      uploadBtn.removeAttribute('for');
     };
     reader.readAsDataURL(f);
   });
