@@ -64,13 +64,13 @@ uploadBtn.addEventListener('click', function (eve) {
     return;
   }
   uploadBtn.setAttribute('for', 'storeImageSelector');
-  defaultImage.removeAttribute('name');
+  !!defaultImage && defaultImage.removeAttribute('name');
   clearSelector();
   eve.preventDefault();
 }, false);
 
 // On click reset image button.
-resetBtn.addEventListener('click', function (eve) {
+!!resetBtn && resetBtn.addEventListener('click', function (eve) {
   defaultImage.name = 'defaultImage';
   preview.src = defaultUrl;
   uploadBtn.removeAttribute('for');
