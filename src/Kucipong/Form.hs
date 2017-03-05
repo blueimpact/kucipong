@@ -18,7 +18,7 @@ import Web.HttpApiData (FromHttpApiData(..))
 
 import Kucipong.Db
        (BusinessCategory(..), BusinessCategoryDetail(..), CouponType(..),
-        Percent(..), Price(..))
+        Image(..), Percent(..), Price(..))
 
 newtype MaybeEmpty a = MaybeEmpty
   { unMaybeEmpty :: Maybe a
@@ -80,7 +80,7 @@ data StoreEditForm = StoreEditForm
   , businessHours :: !(Maybe Text)
   , regularHoliday :: !(Maybe Text)
   , url :: !(Maybe Text)
-  , defaultImage :: !(Maybe Text)
+  , defaultImage :: !(Maybe Image)
   } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 instance FromForm StoreEditForm
@@ -107,7 +107,7 @@ data StoreNewCouponForm = StoreNewCouponForm
   , setOtherConditions :: !(MaybeEmpty Text)
   , otherContent :: !(MaybeEmpty Text)
   , otherConditions :: !(MaybeEmpty Text)
-  , defaultImage :: !(Maybe Text)
+  , defaultImage :: !(Maybe Image)
   } deriving (Data, Eq, Generic, Read, Show, Typeable)
 
 $(makeLensesFor

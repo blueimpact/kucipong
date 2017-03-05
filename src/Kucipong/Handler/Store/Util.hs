@@ -1,7 +1,7 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Kucipong.Handler.Store.Util
-  where
+  ( uploadImgToS3WithDef
+  , UploadImgErr(..)
+  ) where
 
 import Kucipong.Prelude
 
@@ -10,21 +10,6 @@ import Web.Spock (ActionCtxT, UploadedFile(..), files)
 
 import Kucipong.Db (Image(..))
 import Kucipong.Monad (FileUploadError(..), MonadKucipongAws(..))
-
--- uploadedImageToS3
---   :: forall xs m.
---      (MonadIO m, MonadKucipongAws m)
---   => (forall a. ActionCtxT (HVect xs) m a)
---   -- ^ Error handler for when the @\"image\"@ isn't uploaded.
---   -> (forall a. UploadedFile -> FileUploadError -> ActionCtxT (HVect xs) m a)
---   -- ^ Error handler for when an error occurs in the 'awsS3PutUploadedFile'
---   -- call.
---   -> ActionCtxT (HVect xs) m Image
--- uploadedImageToS3 noImageHandler uploadErrorHandler = do
---   filesHashMap <- files
---   uploadedFile <- fromMaybeM noImageHandler $ lookup "image" filesHashMap
---   eitherS3ImageName <- awsS3PutUploadedFile uploadedFile
---   fromEitherOrM eitherS3ImageName $ uploadErrorHandler uploadedFile
 
 data UploadImgErr = UploadImgErr UploadedFile FileUploadError
   deriving (Show, Typeable)
@@ -35,33 +20,87 @@ data UploadImgErr = UploadImgErr UploadedFile FileUploadError
 --
 -- The return type of this function is somewhat complex.
 --
--- If the 'Maybe' 'Text' argument is 'Just', then that will be converted to an
--- 'Image' and returned as an 'Right' ('Just' 'Image').
+-- If the default 'Image' url argument ('Maybe' 'Text') is 'Nothing', and the
+-- user has not uploaded a file called @\"image\"@, then this function will
+-- return @'Right' 'Nothing'@.  This indicates that the user doesn\'t want to
+-- use an image.
 --
--- If the 'Maybe' 'Text' argument is 'Nothing', then the following will happen:
+-- If the default 'Image' url argument ('Maybe' 'Text') is @'Just' \"\"@, and
+-- the user has not uploaded a file called @\"image\"@, then this function will
+-- return @'Right' 'Nothing'@.  This also indicates that the user doesn\'t want
+-- to use an image.
 --
--- First, look for an uploaded file with a filename of @\"image\".  If it
+-- If the default 'Image' url argument ('Maybe' 'Text') is @'Just' imageName@
+-- (where @imagename@ is anything other than the empty string), and the user
+-- has not uploaded a file called @\"image\"@, then this function will return
+-- @'Right' ('Just' @imageName@), with the @imageName@ being the default
+-- 'Image' url.
+--
+-- If the user has uploaded a file called @\"image\"@, then this function will
+-- try to upload it to S3.  If it fails, it will return @'Left' 'UploadImgErr'@.
+-- If it succeeds, it will return @'Right' ('Just' image)@.
 -- doesn't exist, then return 'Right' 'Nothing'.
---
--- If it does exist, then try to upload it to S3.
---
--- If it was successfully uploaded to S3, then return it's 'Image' url as
--- 'Right' ('Just' 'Image').  If it failed to be uploaded, then return 'Left'
--- 'UploadImgErr'.
 uploadImgToS3WithDef
   :: forall xs m.
      (MonadIO m, MonadKucipongAws m)
-  => Maybe Text -- ^ Default 'Image' url to use if 'Just'.  Not used if
-                -- 'Nothing'.
+  => Maybe Image -- ^ Default 'Image' url.
   -> ActionCtxT (HVect xs) m (Either UploadImgErr (Maybe Image))
-uploadImgToS3WithDef (Just image) = pure . Right . Just $ Image image
-uploadImgToS3WithDef Nothing = do
+uploadImgToS3WithDef maybeDefaultImage = do
   filesHashMap <- files
-  case lookup "image" filesHashMap of
-    Nothing -> pure $ Right Nothing
-    Just uploadedFile -> do
-      eitherRes <- awsS3PutUploadedFile uploadedFile
-      either
-        (pure . Left . UploadImgErr uploadedFile)
-        (pure . Right . Just)
-        eitherRes
+  let maybeUploadedImage = lookupImage filesHashMap
+  print maybeDefaultImage
+  print maybeUploadedImage
+  print filesHashMap
+  handleImages maybeDefaultImage maybeUploadedImage
+  where
+    handleImages
+      :: Maybe Image
+      -> Maybe UploadedFile
+      -> ActionCtxT (HVect xs) m (Either UploadImgErr (Maybe Image))
+    handleImages Nothing Nothing =
+      pure $ Right Nothing
+    handleImages (Just (Image "")) Nothing =
+      pure $ Right Nothing
+    handleImages (Just defaultImage) Nothing =
+      pure . Right $ Just defaultImage
+    handleImages _ (Just uploadedImage) =
+      awsS3PutUploadedFile uploadedImage >>=
+      either (pure . Left . UploadImgErr uploadedImage) (pure . Right . Just)
+
+-- | Lookup a file called @\"image\"@ in the uploaded files 'HashMap'.
+--
+-- If there no file called @\"image\"@, then return 'Nothing'.
+--
+-- >>> lookupImage $ mapFromList []
+-- Nothing
+--
+-- If there is a file called @\"image\"@, but it matches the
+-- 'EmptyUploadedFile' pattern, then return 'Nothing'.
+--
+-- >>> let uf_name = "\"\""
+-- >>> let uf_contentType = "application/octet-stream"
+-- >>> let uf_tempLocation = ""
+-- >>> let uploadedFile = UploadedFile{..}
+-- >>> lookupImage $ mapFromList [("image", uploadedFile)]
+-- Nothing
+--
+-- If there is a file called @\"image\"@, and it doesn't match the
+-- 'EmptyUploadedfile' pattern (that is, it is a real uploaded file), then
+-- return 'Just' of that file.
+--
+-- >>> let uf_name = "name.jpg"
+-- >>> let uf_contentType = "image/jpg"
+-- >>> let uf_tempLocation = "somelocation.file"
+-- >>> let uploadedFile = UploadedFile{..}
+-- >>> lookupImage $ mapFromList [("image", uploadedFile)]
+-- Just ...
+lookupImage :: HashMap Text UploadedFile -> Maybe UploadedFile
+lookupImage filesHashMap = lookup "image" filesHashMap >>= \case
+  EmptyUploadedFile -> Nothing
+  uploadedfile -> Just uploadedfile
+
+-- | This pattern matches an 'UploadedFile' where the user hasn't actually
+-- uploaded a file.
+pattern EmptyUploadedFile :: UploadedFile
+pattern EmptyUploadedFile <-
+  UploadedFile {uf_name = "\"\"", uf_contentType = "application/octet-stream"}

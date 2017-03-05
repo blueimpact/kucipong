@@ -114,6 +114,7 @@ newtype Image = Image
   { unImage :: Text
   } deriving ( Data
              , Eq
+             , FromHttpApiData
              , FromJSON
              , Generic
              , Ord
@@ -121,6 +122,7 @@ newtype Image = Image
              , PersistFieldSql
              , Read
              , Show
+             , ToHttpApiData
              , ToJSON
              , Typeable
              )
