@@ -13,12 +13,12 @@ include _layout
           action="\#{renderRoute adminStoreDeleteR}"
         )
           .row
-            | 「\#{storeName}」を削除しますか？
+            | 「\#{fromMaybe "(no store name)" storeName}」を削除しますか？
           .labeledRow
             label.labeledRow-header(for="storeEmail")
 
               | 確認のため
-              span.strong \#{storeName}
+              span.strong \#{fromMaybe "(no store name)" storeName}
               | と入力してください
             .labeledRow-body
               input#storeName(

@@ -11,12 +11,12 @@ include _layout
         .annotatedImageGroup
           img.annotatedImageGroup-image(
             src="\#{fromMaybe mempty imageUrl}"
-            alt="\#{ name }"
+            alt!='\#{fromMaybe "(no name)" name}'
           )
           span.annotatedImageGroup-annotation 画像は一例です
         .highlightedBlock
           h2.highlightedBlock.storeHeader-title
-            | \#{ name }
+            | \#{fromMaybe "(no name)" name}
       .storeBody
         .storeBody_description
           p \#{ fromMaybe mempty salesPoint }
@@ -31,7 +31,7 @@ include _layout
               .storeBody_info_body_row-header
                 | カテゴリ
               .storeBody_info_body_row-body
-                | \#{ label businessCategory }
+                | \#{ label (fromMaybe Gourmet businessCategory) }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の特徴

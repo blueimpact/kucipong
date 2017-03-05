@@ -30,11 +30,10 @@ emailToAdminKey :: EmailAddress -> Key Admin
 emailToAdminKey = AdminKey
 
 emailToStoreKey :: EmailAddress -> Key Store
-emailToStoreKey = StoreKey . StoreEmailKey
+emailToStoreKey = StoreKey
 
-emailToStoreEmailKey :: EmailAddress -> Key StoreEmail
-emailToStoreEmailKey = StoreEmailKey
-
+storeKeyToEmail :: Key Store -> EmailAddress
+storeKeyToEmail = unStoreKey
 
 -- | Type class for getting the 'EntityField' from a record responsible for the
 -- 'CreatedTime', 'DeletedTime', and 'UpdatedTime'.

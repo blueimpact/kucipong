@@ -11,9 +11,7 @@ import Database.Persist.Sql
 import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
-       (Admin, AdminLoginToken, BusinessCategory(..),
-        BusinessCategoryDetail(..), DbSafeError, Image, Key, Store,
-        StoreEmail, StoreLoginToken)
+       (Admin, AdminLoginToken, Key, Store, StoreLoginToken)
 import Kucipong.Monad.Aws.Trans ( KucipongAwsT )
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
@@ -78,69 +76,13 @@ class Monad m => MonadKucipongDb m where
   --  For Store
   -- ===========
 
-  dbCreateStore
-      :: Key StoreEmail
-      -- ^ 'Key' for the 'StoreEmail'
-      -> Text
-      -- ^ 'Store' name
-      -> BusinessCategory
-      -- ^ 'Store' category
-      -> [BusinessCategoryDetail]
-      -- ^ 'Store' category detail
-      -> Maybe Image
-      -- ^ 'Image' for the 'Store'
-      -> Maybe Text
-      -- ^ Sales Point for the 'Store'
-      -> Maybe Text
-      -- ^ Address for the 'Store'
-      -> Maybe Text
-      -- ^ Phone number for the 'Store'
-      -> Maybe Text
-      -- ^ Business hours for the 'Store'
-      -> Maybe Text
-      -- ^ Regular holiday for the 'Store'
-      -> Maybe Text
-      -- ^ url for the 'Store'
-      -> m (Entity Store)
-  default dbCreateStore
-      :: ( MonadKucipongDb n
-         , MonadTrans t
-         , m ~ t n
-         )
-      => Key StoreEmail -> Text -> BusinessCategory -> [BusinessCategoryDetail] -> Maybe Image
-      -> Maybe Text -> Maybe Text -> Maybe Text -> Maybe Text
-      -> Maybe Text -> Maybe Text -> t n (Entity Store)
-  dbCreateStore email name category catdet image salesPoint address phoneNumber
-          businessHours regularHoliday url = lift $
-      dbCreateStore
-          email
-          name
-          category
-          catdet
-          image
-          salesPoint
-          address
-          phoneNumber
-          businessHours
-          regularHoliday
-          url
-
-  dbCreateStoreEmail :: EmailAddress -> m (Either DbSafeError (Entity StoreEmail))
-  default dbCreateStoreEmail
-      :: ( MonadKucipongDb n
-         , MonadTrans t
-         , m ~ t n
-         )
-      => EmailAddress -> t n (Either DbSafeError (Entity StoreEmail))
-  dbCreateStoreEmail = lift . dbCreateStoreEmail
-
-  dbCreateStoreMagicLoginToken :: Key StoreEmail -> m (Entity StoreLoginToken)
+  dbCreateStoreMagicLoginToken :: Key Store -> m (Entity StoreLoginToken)
   default dbCreateStoreMagicLoginToken
       :: ( MonadKucipongDb n
          , MonadTrans t
          , m ~ t n
          )
-      => Key StoreEmail -> t n (Entity StoreLoginToken)
+      => Key Store -> t n (Entity StoreLoginToken)
   dbCreateStoreMagicLoginToken = lift . dbCreateStoreMagicLoginToken
 
   dbDeleteStoreIfNameMatches
@@ -161,6 +103,7 @@ class Monad m => MonadKucipongDb m where
   -- ======= --
   -- Generic --
   -- ======= --
+
   dbFindByKey
     :: (PersistRecordBackend record SqlBackend)
     => Key record -> m (Maybe (Entity record))
@@ -186,6 +129,20 @@ class Monad m => MonadKucipongDb m where
     => (UTCTime -> record)
     -> t n (Entity record)
   dbInsert = lift . dbInsert
+
+  dbInsertUnique
+    :: (PersistRecordBackend record SqlBackend)
+    => (UTCTime -> record)
+    -> m (Maybe (Entity record))
+  default dbInsertUnique
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       , PersistRecordBackend record SqlBackend
+       )
+    => (UTCTime -> record)
+    -> t n (Maybe (Entity record))
+  dbInsertUnique = lift . dbInsertUnique
 
   dbSelectFirst
     :: (PersistRecordBackend record SqlBackend)

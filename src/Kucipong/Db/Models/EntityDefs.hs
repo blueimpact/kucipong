@@ -42,12 +42,12 @@ kucipongEntityDefs = [persistLowerCase|
         deriving Typeable
 
     Store json
-        storeEmail              StoreEmailId
+        email                   EmailAddress
         created                 CreatedTime
         updated                 UpdatedTime
         deleted                 DeletedTime Maybe
-        name                    Text
-        businessCategory        BusinessCategory
+        name                    Text Maybe
+        businessCategory        BusinessCategory Maybe
         businessCategoryDetails [BusinessCategoryDetail]
         image                   Image Maybe
         salesPoint              Text Maybe
@@ -57,18 +57,6 @@ kucipongEntityDefs = [persistLowerCase|
         regularHoliday          Text Maybe
         url                     Text Maybe
 
-        Primary storeEmail
-
-        deriving Eq
-        deriving Show
-        deriving Typeable
-
-    StoreEmail
-        email                   EmailAddress
-        created                 CreatedTime
-        updated                 UpdatedTime
-        deleted                 DeletedTime Maybe
-
         Primary email
 
         deriving Eq
@@ -76,21 +64,21 @@ kucipongEntityDefs = [persistLowerCase|
         deriving Typeable
 
     StoreLoginToken
-        email                   StoreEmailId
+        storeEmail              StoreId
         created                 CreatedTime
         updated                 UpdatedTime
         deleted                 DeletedTime Maybe
         loginToken              LoginToken
         expirationTime          LoginTokenExpirationTime
 
-        Primary email
+        Primary storeEmail
 
         deriving Eq
         deriving Show
         deriving Typeable
 
     Coupon
-        storeEmail              StoreEmailId
+        storeEmail              StoreId
         created                 CreatedTime
         updated                 UpdatedTime
         deleted                 DeletedTime Maybe

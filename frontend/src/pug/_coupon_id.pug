@@ -2,7 +2,13 @@
 .coupon
   .card
     .card_header
-      h2.card_header_text \#{maybe "(no title)" (storeName . entityVal) maybeStoreEntity}
+      h2.card_header_text
+        | %{ case maybeStoreEntity }
+        | %{ of Just storeEntity }
+        | \#{fromMaybe "(no title)" (storeName (entityVal storeEntity))}
+        | %{ of Nothing }
+        | (no title)
+        | %{ endcase }
       .card_header_icon
         .icon.icon-fav.checkableIcon
           input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{fromSqlKey couponKey}")
@@ -110,7 +116,13 @@
       | No address is set
       | %{ endcase }
   .aboutStore
-    a.btn.outerBtn(href="\#{renderRoute storeR}") \#{maybe "(no title)" (storeName . entityVal) maybeStoreEntity}
+    a.btn.outerBtn(href="\#{renderRoute storeR}")
+      | %{ case maybeStoreEntity }
+      | %{ of Just storeEntity }
+      | \#{fromMaybe "(no title)" (storeName (entityVal storeEntity))}
+      | %{ of Nothing }
+      | (no title)
+      | %{ endcase }
   .moreContents
     | %{ case couponCouponType coupon }
     | %{ of CouponTypeDiscount }
