@@ -69,7 +69,7 @@ $white: #fff;
     transition: all 0.8s $easeInOutBack 0.1s;
   }
 
-  &[for="storeImageSelector"] {
+  &[for] {
     transform: rotate(-45deg);
     left:0;
     background-color: $background-color2;

@@ -13,8 +13,8 @@ import Web.Spock (ActionCtxT, params, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
-       (Coupon(..), CouponType(..), Key(..), Store(..), couponTypeToText,
-        percentToText, priceToText)
+       (Coupon(..), CouponType(..), Image(..), Key(..), Store(..),
+        couponTypeToText, percentToText, priceToText)
 import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Route
@@ -63,6 +63,7 @@ couponNewGet = do
       , "setOtherConditions"
       , "otherContent"
       , "otherConditions"
+      , "defaultImage"
       ])
 
 couponGet
@@ -120,7 +121,9 @@ couponEditGet couponKey = do
       otherConditions) <-
         fromMaybeM (handleErr "couldn't find coupon") maybeCouponEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
-  let action = renderRoute storeCouponVarEditR couponKey
+  let
+    action = renderRoute storeCouponVarEditR couponKey
+    defaultImage = unImage <$> maybeImage
   $(renderTemplateFromEnv "storeUser_store_coupon_id_edit.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -154,6 +157,7 @@ couponEditGet couponKey = do
           , "setOtherConditions"
           , "otherContent"
           , "otherConditions"
+          , "defaultImage"
           ])
 
 couponEditPost
@@ -244,6 +248,7 @@ couponEditPost couponKey = do
           , "setOtherConditions"
           , "otherContent"
           , "otherConditions"
+          , "defaultImage"
           ])
 
 couponListGet
@@ -346,6 +351,7 @@ couponPost = do
           , "setOtherConditions"
           , "otherContent"
           , "otherConditions"
+          , "defaultImage"
           ])
 
 storeCouponComponent

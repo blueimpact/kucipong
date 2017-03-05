@@ -21,13 +21,26 @@ include _layout
             label.labeledRow-header(for="image")
               | イメージ画像
             .labeledRow-body
-              input#couponImage(
-                name="image" type="file"
-                accept="image/*"
-              )
-              img.labeledRow-body-image(
-                src="\#{fromMaybe mempty maybeImageUrl}"
-              )
+              .uploaderWrapper
+                input#couponImageSelector.uploaderCore(
+                  name="image" type="file" accept="image/*"
+                )
+                input#defaultImage(
+                  name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
+                )
+                | %{ case maybeImageUrl }
+                | %{ of Just iUrl }
+                label#couponImageLabel.uploaderLabel
+                button.uploaderReset#resetImage(type="button")
+                  | Restore initial image.
+                img#couponImage.uploaderImg.storeBody_info_body_row-body-image(
+                  src="\#{iUrl}"
+                )
+                | %{ of Nothing }
+                label#couponImageLabel.uploaderLabel(for="couponImageSelector")
+                img#couponImage.uploaderImg.storeBody_info_body_row-body-image(
+                )
+                | %{ endcase }
 
           .labeledRow
             label.labeledRow-header(for="validFrom")
