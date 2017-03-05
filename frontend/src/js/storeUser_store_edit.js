@@ -58,23 +58,21 @@ uploadBtn.addEventListener('click', function (eve) {
     return;
   }
   uploadBtn.setAttribute('for', 'storeImageSelector');
-  defaultImage.removeAttribute('name');
+  defaultImage.name = null;
   selector.value = '';
   selector.type = '';
   selector.type = 'file';
-  selector.removeAttribute('name');
   eve.preventDefault();
 }, false);
 
 // On click reset image button.
 resetBtn.addEventListener('click', function (eve) {
-  defaultImage.setAttribute('name', 'defaultImage');
+  defaultImage.name = 'defaultImage';
   preview.src = defaultUrl;
   uploadBtn.setAttribute('for', 'storeImage');
   selector.value = '';
   selector.type = '';
   selector.type = 'file';
-  selector.removeAttribute('name');
 }, false);
 
 // On load new image.
@@ -90,5 +88,4 @@ selector.addEventListener('change', function (eve) {
     };
     reader.readAsDataURL(f);
   });
-  selector.name = 'image';
 }, false);
