@@ -135,17 +135,24 @@ include _layout
               .storeBody_info_body_row-body
                 .uploaderWrapper
                   input#storeImageSelector.uploaderCore(
-                    type="file" accept="image/*"
-                  )
-                  label#storeImageLabel.uploaderLabel(for="storeImage")
-                  button.uploaderReset#resetImage(type="button")
-                    | Restore initial image.
-                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
-                    src="\#{fromMaybe mempty imageUrl}"
+                    name="image" type="file" accept="image/*"
                   )
                   input#defaultImage(
                     name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
                   )
+                  | %{ case imageUrl }
+                  | %{ of Just iUrl }
+                  label#storeImageLabel.uploaderLabel
+                  button.uploaderReset#resetImage(type="button")
+                    | Restore initial image.
+                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
+                    src="\#{iUrl}"
+                  )
+                  | %{ of Nothing }
+                  label#storeImageLabel.uploaderLabel(for="storeImageSelector")
+                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
+                  )
+                  | %{ endcase }
             .storeSubmit
               button.btn.outerBtn(type="submit")
                 | この内容で店舗情報を更新する
