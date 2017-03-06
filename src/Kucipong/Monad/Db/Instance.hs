@@ -147,6 +147,9 @@ instance ( MonadBaseControl IO m
       -- database to the name the user passed in.
       --
       -- If the store name from the database is 'Nothing', and the name passed
+      -- in by the user is @(no store name)@, then delete the store.
+      --
+      -- If the store name from the database is 'Nothing', and the name passed
       -- in by the user is @\"\"@, then delete the store.
       --
       -- If the store name from the database is 'Nothing', and the name passed
@@ -169,6 +172,8 @@ instance ( MonadBaseControl IO m
         -> UTCTime
         -- ^ Current time.
         -> ReaderT SqlBackend m StoreDeleteResult
+      deleteBasedOnName Nothing "(no store name)" storeKey _ currTime =
+        doDelete storeKey currTime
       deleteBasedOnName Nothing "" storeKey _ currTime =
         doDelete storeKey currTime
       deleteBasedOnName Nothing nameFromUser _ store _ =

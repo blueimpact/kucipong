@@ -22,9 +22,12 @@ include _layout
               | と入力してください
             .labeledRow-body
               input#storeName(
-                name="storeName" type="text"
-                required
+                name="storeName"
+                type="text"
               )
+          input#defaultImage(
+            name="storeEmail" type="hidden" value="\#{storeEmail}"
+                )
           .submitRow
             button.btn.outerBtn(type="submit")
               | この店舗ユーザを削除

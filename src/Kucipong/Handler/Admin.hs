@@ -10,6 +10,7 @@ import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
+import Text.EmailAddress (toText)
 import Web.Spock
        (ActionCtxT, getContext, redirect, renderRoute, setStatus)
 import Web.Spock.Core (SpockCtxT, get, post, prehook)
@@ -162,8 +163,9 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ Store {storeName}) <-
+  (Entity (StoreKey storeEmailAddress) Store {storeName}) <-
     fromMaybeOrM maybeStoreEntity . handleErr $ label def AdminErrorNoStoreEmail
+  let storeEmail = toText storeEmailAddress
   $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -189,6 +191,7 @@ storeDeletePost = do
     res@(StoreDeleteErrDoesNotExist _) -> handleErr $ label def res
     res@(StoreDeleteErrNameDoesNotMatch Store {storeName} _) ->
       let errors = [label def res]
+          storeEmail = toText storeEmailParam
       in $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
