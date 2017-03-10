@@ -31,7 +31,7 @@ include _layout
               .storeBody_info_body_row-header
                 | カテゴリ
               .storeBody_info_body_row-body
-                | \#{ label (fromMaybe Gourmet businessCategory) }
+                | \#{ label (fromMaybe minBound businessCategory) }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の特徴
