@@ -61,11 +61,11 @@ loginPost
 loginPost = do
   (StoreLoginForm email) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail email
-  (Entity (StoreKey storeEmailKey) _) <-
+  (Entity storeKey _) <-
     fromMaybeM
       (handleErr $ label def (StoreErrorNoStoreEmail email))
       maybeStoreEntity
-  (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeEmailKey
+  (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeKey
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail email (storeLoginTokenLoginToken storeLoginToken)
   let messages = [label def StoreMsgSentVerificationEmail]
@@ -90,7 +90,7 @@ doLogin
   => LoginToken -> ActionCtxT ctx m ()
 doLogin loginToken = do
   maybeStoreLoginTokenEntity <- dbFindStoreLoginToken loginToken
-  (Entity (StoreLoginTokenKey (StoreEmailKey storeEmail)) storeLoginToken) <-
+  (Entity (StoreLoginTokenKey (StoreKey storeEmail)) storeLoginToken) <-
     fromMaybeM noStoreLoginTokenError maybeStoreLoginTokenEntity
   -- check date on store login token
   now <- currentTime
@@ -161,8 +161,8 @@ storeEditGet = do
   (StoreSession email) <- getStoreEmail
   maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
   let
-    name = (storeName <$> maybeStore)
-    businessCategory = (storeBusinessCategory <$> maybeStore)
+    name = (maybeStore >>= storeName)
+    businessCategory = (maybeStore >>= storeBusinessCategory)
     businessCategoryDetails = concat (storeBusinessCategoryDetails <$> maybeStore)
     salesPoint = (maybeStore >>= storeSalesPoint)
     address = (maybeStore >>= storeAddress)
@@ -215,10 +215,13 @@ storeEditPost = do
   redirect $ renderRoute storeR
   where
     checkBusinessCategoryDetails
-      :: BusinessCategory
+      :: Maybe BusinessCategory
       -> [BusinessCategoryDetail]
       -> ActionCtxT (HVect xs) m ()
-    checkBusinessCategoryDetails busiCat busiCatDets
+    checkBusinessCategoryDetails Nothing [] = pure ()
+    checkBusinessCategoryDetails Nothing _ =
+        handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect
+    checkBusinessCategoryDetails (Just busiCat) busiCatDets
       | all (isValidBusinessCategoryDetailFor busiCat) busiCatDets = pure ()
       | otherwise =
         handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect

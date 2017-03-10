@@ -10,19 +10,18 @@ import Control.Monad.Time (MonadTime(..))
 import Database.Persist.Sql
        (Entity(..), Filter, PersistRecordBackend, PersistStoreRead,
         SelectOpt, SqlBackend, Update, (==.), (=.), get, insert,
-        insertEntity, repsert, selectFirst, selectList, update, updateGet,
-        updateWhere)
+        insertEntity, insertUnique, repsert, selectFirst, selectList,
+        update, updateGet, updateWhere)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
        (Admin(..), AdminLoginToken(..), BusinessCategory(..),
         BusinessCategoryDetail(..), Coupon(..), CouponType(..),
-        CreatedTime(..), DeletedTime(..), DbSafeError(..), EntityField(..),
+        CreatedTime(..), DeletedTime(..), EntityField(..),
         EntityDateFields(..), Image, Key(..), LoginTokenExpirationTime(..),
-        Percent(..), Price(..), Store(..), StoreEmail(..),
-        StoreLoginToken(..), UpdatedTime(..), emailToAdminKey,
-        emailToStoreEmailKey, emailToStoreKey, runDb, runDbCurrTime,
-        runDbSafe)
+        Percent(..), Price(..), Store(..), StoreLoginToken(..),
+        UpdatedTime(..), emailToAdminKey, emailToStoreKey, runDb,
+        runDbCurrTime)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class
        (MonadKucipongDb(..), StoreDeleteResult(..))
@@ -108,59 +107,7 @@ instance ( MonadBaseControl IO m
   -- ===========
   --  For Store
   -- ===========
-  dbCreateStore
-    :: Key StoreEmail
-      -- ^ 'Key' for the 'StoreEmail'
-    -> Text
-      -- ^ 'Store' name
-    -> BusinessCategory
-      -- ^ 'Store' category
-    -> [BusinessCategoryDetail]
-      -- ^ 'Store' category detail
-    -> Maybe Image
-      -- ^ 'Image' for the 'Store'
-    -> Maybe Text
-      -- ^ Sales Point for the 'Store'
-    -> Maybe Text
-      -- ^ Address for the 'Store'
-    -> Maybe Text
-      -- ^ Phone number for the 'Store'
-    -> Maybe Text
-      -- ^ Business hours for the 'Store'
-    -> Maybe Text
-      -- ^ Regular holiday for the 'Store'
-    -> Maybe Text
-      -- ^ url for the 'Store'
-    -> KucipongDbT m (Entity Store)
-  dbCreateStore storeEmailKey name category catdets image salesPoint address phoneNumber
-          businessHours regularHoliday url = lift go
-    where
-      go :: m (Entity Store)
-      go = do
-          currTime <- currentTime
-          let store =
-                  Store storeEmailKey (CreatedTime currTime)
-                      (UpdatedTime currTime) Nothing name category catdets
-                      image salesPoint address phoneNumber businessHours
-                      regularHoliday url
-          runDb $ repsertEntity (StoreKey storeEmailKey) store
-
-  dbCreateStoreEmail :: EmailAddress
-                     -> KucipongDbT m (Either DbSafeError (Entity StoreEmail))
-  dbCreateStoreEmail email = lift go
-    where
-      go :: m (Either DbSafeError (Entity StoreEmail))
-      go = do
-        currTime <- currentTime
-        let storeEmail =
-              StoreEmail
-                email
-                (CreatedTime currTime)
-                (UpdatedTime currTime)
-                Nothing
-        runDbSafe $ insertEntity storeEmail
-
-  dbCreateStoreMagicLoginToken :: Key StoreEmail
+  dbCreateStoreMagicLoginToken :: Key Store
                                -> KucipongDbT m (Entity StoreLoginToken)
   dbCreateStoreMagicLoginToken storeEmailKey = lift go
     where
@@ -192,12 +139,59 @@ instance ( MonadBaseControl IO m
           let storeKey = emailToStoreKey email
           maybeStore <- get storeKey
           case maybeStore of
-            Just store
-              | storeName store == name -> do
-                update storeKey [StoreDeleted =. Just (DeletedTime currTime)]
-                pure StoreDeleteSuccess
-              | otherwise -> pure $ StoreDeleteErrNameDoesNotMatch store name
             Nothing -> pure $ StoreDeleteErrDoesNotExist email
+            Just store ->
+              deleteBasedOnName (storeName store) name storeKey store currTime
+
+      -- | Delete the store after comparing the name of the store from the
+      -- database to the name the user passed in.
+      --
+      -- If the store name from the database is 'Nothing', and the name passed
+      -- in by the user is @(no store name)@, then delete the store.
+      --
+      -- If the store name from the database is 'Nothing', and the name passed
+      -- in by the user is @\"\"@, then delete the store.
+      --
+      -- If the store name from the database is 'Nothing', and the name passed
+      -- in by the user is not @\"\"@, then return
+      -- 'StoreDeleteErrNameDoesNotMatch'.
+      --
+      -- If the store name from the database is 'Just', and the name matches
+      -- the name entered by the user, then delete the store.
+      --
+      -- If the store name from the database is 'Just', and it does not match
+      -- the name entered by the user, then return
+      -- 'StoreDeleteErrNameDoesNotMatch'.
+      deleteBasedOnName
+        :: Maybe Text
+        -- ^ Store name from the database.
+        -> Text
+        -- ^ Store name entered by the user.
+        -> Key Store
+        -> Store
+        -> UTCTime
+        -- ^ Current time.
+        -> ReaderT SqlBackend m StoreDeleteResult
+      deleteBasedOnName Nothing "(no store name)" storeKey _ currTime =
+        doDelete storeKey currTime
+      deleteBasedOnName Nothing "" storeKey _ currTime =
+        doDelete storeKey currTime
+      deleteBasedOnName Nothing nameFromUser _ store _ =
+        pure $ StoreDeleteErrNameDoesNotMatch store nameFromUser
+      deleteBasedOnName (Just nameFromDb) nameFromUser storeKey store currTime
+        | nameFromDb == nameFromUser =
+          doDelete storeKey currTime
+        | otherwise =
+          pure $ StoreDeleteErrNameDoesNotMatch store nameFromUser
+
+      doDelete :: Key Store -> UTCTime -> ReaderT SqlBackend m StoreDeleteResult
+      doDelete storeKey currTime = do
+        update
+          storeKey
+          [ StoreDeleted =. Just (DeletedTime currTime)
+          , StoreUpdated =. UpdatedTime currTime
+          ]
+        pure StoreDeleteSuccess
 
 
   -- ======= --
@@ -225,6 +219,20 @@ instance ( MonadBaseControl IO m
         runDbCurrTime $ \currTime -> do
           let newRecord = recordCreator currTime
           insertEntity newRecord
+
+  dbInsertUnique
+    :: forall record.
+       (PersistRecordBackend record SqlBackend)
+    => (UTCTime -> record)
+    -> KucipongDbT m (Maybe (Entity record))
+  dbInsertUnique recordCreator = lift go
+    where
+      go :: m (Maybe (Entity record))
+      go =
+        runDbCurrTime $ \currTime -> do
+          let newRecord = recordCreator currTime
+          maybeKey <- insertUnique newRecord
+          pure $ fmap (\key -> Entity key newRecord) maybeKey
 
   dbSelectFirst
     :: forall record.
@@ -302,6 +310,17 @@ dbInsertWithTime recordCreator =
   dbInsert $ \currTime ->
     recordCreator (CreatedTime currTime) (UpdatedTime currTime) Nothing
 
+dbInsertUniqueWithTime
+  :: forall m record.
+     ( MonadKucipongDb m
+     , PersistRecordBackend record SqlBackend
+     )
+  => (CreatedTime -> UpdatedTime -> Maybe DeletedTime -> record)
+  -> m (Maybe (Entity record))
+dbInsertUniqueWithTime recordCreator =
+  dbInsertUnique $ \currTime ->
+    recordCreator (CreatedTime currTime) (UpdatedTime currTime) Nothing
+
 dbSelectFirstNotDeleted
   :: forall m record.
      ( EntityDateFields record
@@ -370,10 +389,69 @@ dbFindAdmin = dbFindByKeyNotDeleted . emailToAdminKey
 -- Store --
 -----------
 
+dbCreateStore
+  :: MonadKucipongDb m
+  => EmailAddress
+  -> Maybe Text
+    -- ^ 'Store' name
+  -> Maybe BusinessCategory
+    -- ^ 'Store' category
+  -> [BusinessCategoryDetail]
+    -- ^ 'Store' category detail
+  -> Maybe Image
+    -- ^ 'Image' for the 'Store'
+  -> Maybe Text
+    -- ^ Sales Point for the 'Store'
+  -> Maybe Text
+    -- ^ Address for the 'Store'
+  -> Maybe Text
+    -- ^ Phone number for the 'Store'
+  -> Maybe Text
+    -- ^ Business hours for the 'Store'
+  -> Maybe Text
+    -- ^ Regular holiday for the 'Store'
+  -> Maybe Text
+    -- ^ url for the 'Store'
+  -> m (Maybe (Entity Store))
+dbCreateStore email name category catdets image salesPoint address phoneNumber businessHours regularHoliday url =
+  dbInsertUniqueWithTime $ \created updated deleted ->
+    Store
+      email
+      created
+      updated
+      deleted
+      name
+      category
+      catdets
+      image
+      salesPoint
+      address
+      phoneNumber
+      businessHours
+      regularHoliday
+      url
+
+dbCreateInitStore
+  :: MonadKucipongDb m
+  => EmailAddress -> m (Maybe (Entity Store))
+dbCreateInitStore email =
+  dbCreateStore
+    email
+    Nothing
+    Nothing
+    []
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+
 dbFindStoreByEmail
   :: MonadKucipongDb m
   => EmailAddress -> m (Maybe (Entity Store))
-dbFindStoreByEmail = dbFindByKeyNotDeleted . StoreKey . StoreEmailKey
+dbFindStoreByEmail = dbFindByKeyNotDeleted . emailToStoreKey
 
 dbFindStoreLoginToken
   :: MonadKucipongDb m
@@ -384,8 +462,8 @@ dbFindStoreLoginToken loginToken =
 dbUpsertStore
   :: MonadKucipongDb m
   => EmailAddress
-  -> Text
-  -> BusinessCategory
+  -> Maybe Text
+  -> Maybe BusinessCategory
   -> [BusinessCategoryDetail]
   -> Maybe Image
   -> Maybe Text
@@ -398,7 +476,7 @@ dbUpsertStore
 dbUpsertStore email name businessCategory businessCategoryDetails image salesPoint address phoneNumber businessHours regularHoliday url =
   dbUpsertWithTime (emailToStoreKey email) $ \createdTime updatedTime deletedTime ->
     Store
-      (emailToStoreEmailKey email)
+      email
       createdTime
       updatedTime
       deletedTime
@@ -442,7 +520,7 @@ dbInsertCoupon
 dbInsertCoupon email title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbInsertWithTime $ \createdTime updatedTime deletedTime ->
     Coupon
-      (emailToStoreEmailKey email)
+      (emailToStoreKey email)
       createdTime
       updatedTime
       deletedTime
@@ -470,14 +548,14 @@ dbFindCouponByEmailAndId
   => EmailAddress -> Key Coupon -> m (Maybe (Entity Coupon))
 dbFindCouponByEmailAndId email couponKey =
   dbSelectFirstNotDeleted
-    [CouponStoreEmail ==. emailToStoreEmailKey email, CouponId ==. couponKey]
+    [CouponStoreEmail ==. emailToStoreKey email, CouponId ==. couponKey]
     []
 
 dbFindCouponsByEmail
   :: MonadKucipongDb m
   => EmailAddress -> m [Entity Coupon]
 dbFindCouponsByEmail email =
-  dbSelectList [CouponStoreEmail ==. emailToStoreEmailKey email] []
+  dbSelectList [CouponStoreEmail ==. emailToStoreKey email] []
 
 dbUpdateCoupon
   :: MonadKucipongDb m
@@ -504,7 +582,7 @@ dbUpdateCoupon
   -> m ()
 dbUpdateCoupon couponKey email title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbUpdateWithTime
-    [CouponId ==. couponKey, CouponStoreEmail ==. emailToStoreEmailKey email]
+    [CouponId ==. couponKey, CouponStoreEmail ==. emailToStoreKey email]
     [ CouponTitle =. title
     , CouponCouponType =. couponType
     , CouponValidFrom =. validFrom

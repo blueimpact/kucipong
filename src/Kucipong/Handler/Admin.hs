@@ -4,23 +4,23 @@ module Kucipong.Handler.Admin where
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromEitherM, fromMaybeM, fromMaybeOrM)
+import Control.FromSum (fromMaybeM, fromMaybeOrM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types (forbidden403)
-import Text.Heterocephalus (overwrite)
+import Text.EmailAddress (toText)
 import Web.Spock
        (ActionCtxT, getContext, redirect, renderRoute, setStatus)
 import Web.Spock.Core (SpockCtxT, get, post, prehook)
 
 import Kucipong.Db
-       (DbSafeError(..), Key(..), LoginTokenExpirationTime(..),
+       (Key(..), LoginTokenExpirationTime(..),
         AdminLoginToken(adminLoginTokenExpirationTime,
                         adminLoginTokenLoginToken),
-        Store(Store, storeName), StoreEmail(storeEmailEmail),
-        StoreLoginToken(storeLoginTokenLoginToken))
+        Store(Store, storeName),
+        StoreLoginToken(storeLoginTokenLoginToken), storeKeyToEmail)
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (AdminLoginForm(AdminLoginForm),
@@ -35,10 +35,10 @@ import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (MonadKucipongCookie, MonadKucipongDb(..),
-        MonadKucipongSendEmail(..), StoreDeleteResult(..), dbFindAdmin,
-        dbFindAdminLoginToken, dbFindStoreByEmail)
-import Kucipong.RenderTemplate
-       (renderTemplate, renderTemplateFromEnv)
+        MonadKucipongSendEmail(..), StoreDeleteResult(..),
+        dbCreateInitStore, dbFindAdmin, dbFindAdminLoginToken,
+        dbFindStoreByEmail)
+import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
        (ContainsAdminSession, getAdminCookie, getAdminEmail,
@@ -121,13 +121,13 @@ storeCreatePost
   => ActionCtxT (HVect xs) m ()
 storeCreatePost = do
   (AdminStoreCreateForm storeEmailParam) <- getReqParamErr handleErr
-  eitherStoreEmailEntity <- dbCreateStoreEmail storeEmailParam
-  (Entity storeEmailKey storeEmail) <-
-    fromEitherM handleCreateStoreFail eitherStoreEmailEntity
-  (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeEmailKey
+  maybeStoreEntity <- dbCreateInitStore storeEmailParam
+  (Entity storeKey _) <-
+    fromMaybeM handleCreateStoreFail maybeStoreEntity
+  (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeKey
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail
-      (storeEmailEmail storeEmail)
+      (storeKeyToEmail storeKey)
       (storeLoginTokenLoginToken storeLoginToken)
   redirect $ renderRoute adminStoreCreateR
   where
@@ -137,11 +137,11 @@ storeCreatePost = do
         "got following error in admin storeCreatePost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv "adminUser_admin_store_create.html")
-    handleCreateStoreFail :: DbSafeError -> ActionCtxT (HVect xs) m a
-    handleCreateStoreFail DbSafeUniquenessViolation =
+
+    handleCreateStoreFail :: ActionCtxT (HVect xs) m a
+    handleCreateStoreFail =
       handleErr $ label def AdminErrorStoreWithSameEmailExists
-    handleCreateStoreFail _ =
-      handleErr $ label def AdminErrorStoreCreateDbProblem
+
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
       $(logDebug) $
@@ -163,10 +163,10 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity _ Store {storeName}) <-
+  (Entity (StoreKey storeEmailAddress) Store {storeName}) <-
     fromMaybeOrM maybeStoreEntity . handleErr $ label def AdminErrorNoStoreEmail
-  $(renderTemplate "adminUser_admin_store_delete_confirm.html" $
-    overwrite "storeName" [|storeName|])
+  let storeEmail = toText storeEmailAddress
+  $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
@@ -189,11 +189,10 @@ storeDeletePost = do
       let messages = [label def res]
       in $(renderTemplateFromEnv "adminUser_admin_store_create.html")
     res@(StoreDeleteErrDoesNotExist _) -> handleErr $ label def res
-    res@(StoreDeleteErrNameDoesNotMatch realStore _) ->
-      let storeName' = storeName realStore
-          errors = [label def res]
-      in $(renderTemplate "adminUser_admin_store_delete_confirm.html" $
-        overwrite "storeName" [|storeName'|])
+    res@(StoreDeleteErrNameDoesNotMatch Store {storeName} _) ->
+      let errors = [label def res]
+          storeEmail = toText storeEmailParam
+      in $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do

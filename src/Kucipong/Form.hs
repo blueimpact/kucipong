@@ -71,8 +71,8 @@ data StoreLoginForm = StoreLoginForm
 instance FromForm StoreLoginForm
 
 data StoreEditForm = StoreEditForm
-  { name :: !Text
-  , businessCategory :: !BusinessCategory
+  { name :: !(Maybe Text)
+  , businessCategory :: !(Maybe BusinessCategory)
   , businessCategoryDetails :: ![BusinessCategoryDetail]
   , salesPoint :: !(Maybe Text)
   , address :: !(Maybe Text)

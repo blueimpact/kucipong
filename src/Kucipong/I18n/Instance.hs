@@ -47,7 +47,7 @@ instance I18n StoreDeleteResult where
   label EnUS StoreDeleteSuccess = "Successfully deleted store."
   label EnUS (StoreDeleteErrNameDoesNotMatch realStore given) =
     "Entered store name \"" <> given <> "\" does not match the real store name \"" <>
-    storeName realStore <>
+    fromMaybe "" (storeName realStore) <>
     "\"."
   label EnUS (StoreDeleteErrDoesNotExist email) =
     "Store with email address of \"" <> toText email <> "\" does not exist."
