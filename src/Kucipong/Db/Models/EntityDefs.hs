@@ -57,28 +57,26 @@ kucipongEntityDefs = [persistLowerCase|
         regularHoliday          Text Maybe
         url                     Text Maybe
 
-        Primary email
-
         deriving Eq
         deriving Show
         deriving Typeable
 
     StoreLoginToken
-        storeEmail              StoreId
+        storeId                 StoreId
         created                 CreatedTime
         updated                 UpdatedTime
         deleted                 DeletedTime Maybe
         loginToken              LoginToken
         expirationTime          LoginTokenExpirationTime
 
-        Primary storeEmail
+        Primary storeId
 
         deriving Eq
         deriving Show
         deriving Typeable
 
     Coupon
-        storeEmail              StoreId
+        storeId                 StoreId
         created                 CreatedTime
         updated                 UpdatedTime
         deleted                 DeletedTime Maybe

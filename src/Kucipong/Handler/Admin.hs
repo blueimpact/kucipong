@@ -19,8 +19,8 @@ import Kucipong.Db
        (Key(..), LoginTokenExpirationTime(..),
         AdminLoginToken(adminLoginTokenExpirationTime,
                         adminLoginTokenLoginToken),
-        Store(Store, storeName),
-        StoreLoginToken(storeLoginTokenLoginToken), storeKeyToEmail)
+        Store(Store, storeName, storeEmail),
+        StoreLoginToken(storeLoginTokenLoginToken))
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (AdminLoginForm(AdminLoginForm),
@@ -122,12 +122,12 @@ storeCreatePost
 storeCreatePost = do
   (AdminStoreCreateForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbCreateInitStore storeEmailParam
-  (Entity storeKey _) <-
+  (Entity storeKey Store{storeEmail}) <-
     fromMaybeM handleCreateStoreFail maybeStoreEntity
   (Entity _ storeLoginToken) <- dbCreateStoreMagicLoginToken storeKey
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail
-      (storeKeyToEmail storeKey)
+      storeEmail
       (storeLoginTokenLoginToken storeLoginToken)
   redirect $ renderRoute adminStoreCreateR
   where
@@ -163,9 +163,8 @@ storeDeleteConfirmPost
 storeDeleteConfirmPost = do
   (AdminStoreDeleteConfirmForm storeEmailParam) <- getReqParamErr handleErr
   maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
-  (Entity (StoreKey storeEmailAddress) Store {storeName}) <-
+  (Entity _ Store {storeName, storeEmail}) <-
     fromMaybeOrM maybeStoreEntity . handleErr $ label def AdminErrorNoStoreEmail
-  let storeEmail = toText storeEmailAddress
   $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
@@ -189,9 +188,8 @@ storeDeletePost = do
       let messages = [label def res]
       in $(renderTemplateFromEnv "adminUser_admin_store_create.html")
     res@(StoreDeleteErrDoesNotExist _) -> handleErr $ label def res
-    res@(StoreDeleteErrNameDoesNotMatch Store {storeName} _) ->
+    res@(StoreDeleteErrNameDoesNotMatch Store {storeName, storeEmail} _) ->
       let errors = [label def res]
-          storeEmail = toText storeEmailParam
       in $(renderTemplateFromEnv "adminUser_admin_store_delete_confirm.html")
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a

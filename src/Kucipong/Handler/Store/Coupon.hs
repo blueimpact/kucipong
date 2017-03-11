@@ -26,14 +26,15 @@ import Kucipong.Handler.Store.Util
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongDb(..),
-        awsGetBucketName, awsImageS3Url, awsUrlFromImageAndBucket, dbFindCouponByEmailAndId,
-        dbFindCouponsByEmail, dbFindStoreByEmail, dbInsertCoupon,
-        dbUpdateCoupon)
+        awsGetBucketName, awsImageS3Url, awsUrlFromImageAndBucket,
+        dbFindCouponByStoreKeyAndCouponKey, dbFindCouponsByStoreKey,
+        dbFindStoreByStoreKey, dbInsertCoupon, dbUpdateCoupon)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
-import Kucipong.Session (Store, Session(..))
+import Kucipong.Session (Store, Session)
 import Kucipong.Spock
-       (ContainsStoreSession, getReqParamErr, getStoreEmail)
+       (pattern StoreSession, ContainsStoreSession, getReqParamErr,
+        getStoreKey)
 
 couponNewGet
   :: forall xs m.
@@ -75,9 +76,9 @@ couponGet
      )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponGet couponKey = do
-  (StoreSession email) <- getStoreEmail
-  maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
-  maybeStoreEntity <- dbFindStoreByEmail email
+  (StoreSession storeKey) <- getStoreKey
+  maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
+  maybeStoreEntity <- dbFindStoreByStoreKey storeKey
   let maybeImage = couponImage . entityVal =<< maybeCouponEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
   $(renderTemplateFromEnv "storeUser_store_coupon_id.html")
@@ -92,8 +93,8 @@ couponEditGet
      )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponEditGet couponKey = do
-  (StoreSession email) <- getStoreEmail
-  maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
+  (StoreSession storeKey) <- getStoreKey
+  maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
   Entity
     _
     (Coupon
@@ -128,8 +129,8 @@ couponEditGet couponKey = do
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      (StoreSession email) <- getStoreEmail
-      maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
+      (StoreSession storeKey) <- getStoreKey
+      maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
       let maybeImage = maybeCouponEntity >>= couponImage . entityVal
       maybeImageUrl <- traverse awsImageS3Url maybeImage
       p <- params
@@ -170,7 +171,7 @@ couponEditPost
      )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponEditPost couponKey = do
-  (StoreSession email) <- getStoreEmail
+  (StoreSession storeKey) <- getStoreKey
   storeNewCouponForm <- getReqParamErr handleErr
   let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
   s3ImageName <-
@@ -178,7 +179,7 @@ couponEditPost couponKey = do
   void $
     dbUpdateCoupon
       couponKey
-      email
+      storeKey
       title
       couponType
       (view _Wrapped validFrom)
@@ -218,8 +219,8 @@ couponEditPost couponKey = do
 
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      (StoreSession email) <- getStoreEmail
-      maybeCouponEntity <- dbFindCouponByEmailAndId email couponKey
+      (StoreSession storeKey) <- getStoreKey
+      maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
       let maybeImage = maybeCouponEntity >>= couponImage . entityVal
       maybeImageUrl <- traverse awsImageS3Url maybeImage
       p <- params
@@ -260,8 +261,8 @@ couponListGet
      )
   => ActionCtxT (HVect xs) m ()
 couponListGet = do
-  (StoreSession email) <- getStoreEmail
-  couponEntities <- dbFindCouponsByEmail email
+  (StoreSession storeKey) <- getStoreKey
+  couponEntities <- dbFindCouponsByStoreKey storeKey
   bucketName <- awsGetBucketName
   let awsImageUrlFunc = fmap $ awsUrlFromImageAndBucket bucketName
   $(renderTemplateFromEnv "storeUser_store_coupon.html")
@@ -276,14 +277,14 @@ couponPost
      )
   => ActionCtxT (HVect xs) m ()
 couponPost = do
-  (StoreSession email) <- getStoreEmail
+  (StoreSession storeKey) <- getStoreKey
   storeNewCouponForm <- getReqParamErr handleErr
   let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
   s3ImageName <-
     fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
     dbInsertCoupon
-      email
+      storeKey
       title
       couponType
       (view _Wrapped validFrom)
