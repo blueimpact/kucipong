@@ -37,7 +37,9 @@ couponGet couponKey = do
   $(renderTemplateFromEnv "endUser_coupon_id.html")
   where
     handleErr :: Text -> ActionCtxT ctx m a
-    handleErr errMsg = undefined
+    handleErr errMsg = do
+      let errors = [errMsg]
+      $(renderTemplateFromEnv "endUser_category.html")
 
 consumerComponent
   :: forall m.
