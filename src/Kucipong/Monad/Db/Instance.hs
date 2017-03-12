@@ -603,6 +603,15 @@ dbUpdateCoupon couponKey email title couponType validFrom validUntil image disco
     , CouponOtherConditions =. otherConditions
     ]
 
+--------------
+-- Consumer --
+--------------
+
+dbFindCouponById
+  :: MonadKucipongDb m
+  => Key Coupon -> m (Maybe (Entity Coupon))
+dbFindCouponById couponKey = dbSelectFirstNotDeleted [CouponId ==. couponKey] []
+
 -------------
 -- Helpers --
 -------------

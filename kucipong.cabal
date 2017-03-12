@@ -32,6 +32,7 @@ library
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
                      , Kucipong.Handler.Admin.Types
+                     , Kucipong.Handler.Consumer
                      , Kucipong.Handler.Route
                      , Kucipong.Handler.Store
                      , Kucipong.Handler.Store.Coupon
