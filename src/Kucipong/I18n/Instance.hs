@@ -14,6 +14,7 @@ import Kucipong.Db.Models.Base
         FashionDetail(..), GourmetDetail(..), GadgetDetail(..),
         TravelingDetail(..), foldAllBusinessCategoryDetail)
 import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
+import Kucipong.Handler.Consumer.Types (ConsumerError(..))
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.Monad.Db.Class (StoreDeleteResult(..))
 
@@ -42,6 +43,10 @@ instance I18n AdminError where
 instance I18n AdminMsg where
   label EnUS AdminMsgSentVerificationEmail =
     "We have sent you an email with verification URL."
+
+instance I18n ConsumerError where
+  label EnUS ConsumerErrorCouldNotFindCoupon =
+    "Could not find coupon. The coupon you requested is not available or URL is invalid."
 
 instance I18n StoreDeleteResult where
   label EnUS StoreDeleteSuccess = "Successfully deleted store."
