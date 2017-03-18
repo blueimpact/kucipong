@@ -41,6 +41,9 @@ staticR = "static"
 storeR :: Path '[] 'Open
 storeR = "store"
 
+consumerR :: Path '[] 'Open
+consumerR = ""
+
 ----------------
 -- Full paths --
 ----------------
@@ -83,3 +86,6 @@ storeLoginR = storeR <//> loginR
 
 storeLoginVarR :: Path '[LoginToken] 'Open
 storeLoginVarR = storeR <//> loginR <//> var
+
+consumerCouponVarR :: Path '[Key Coupon] 'Open
+consumerCouponVarR = consumerR <//> couponR <//> var

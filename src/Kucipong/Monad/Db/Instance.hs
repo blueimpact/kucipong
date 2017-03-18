@@ -9,9 +9,9 @@ import Control.Monad.Random (MonadRandom(..))
 import Control.Monad.Time (MonadTime(..))
 import Database.Persist.Sql
        (Entity(..), Filter, PersistRecordBackend, PersistStoreRead,
-        SelectOpt, SqlBackend, Update, (==.), (=.), get, insert,
-        insertEntity, insertUnique, repsert, selectFirst, selectList,
-        update, updateGet, updateWhere)
+        SelectOpt, SqlBackend, Update, (==.), (=.), (>=.), (<=.), (||.),
+        get, insert, insertEntity, insertUnique, repsert, selectFirst,
+        selectList, update, updateGet, updateWhere)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
@@ -602,6 +602,22 @@ dbUpdateCoupon couponKey email title couponType validFrom validUntil image disco
     , CouponOtherContent =. otherContent
     , CouponOtherConditions =. otherConditions
     ]
+
+--------------
+-- Consumer --
+--------------
+
+dbFindPublicCouponById
+  :: forall m.
+     (MonadKucipongDb m, MonadIO m)
+  => Key Coupon -> m (Maybe (Entity Coupon))
+dbFindPublicCouponById couponKey = do
+  today <- liftIO (utctDay <$> getCurrentTime)
+  dbSelectFirstNotDeleted
+    ([CouponId ==. couponKey] ++
+     ([CouponValidFrom <=. Just today] ||. [CouponValidFrom ==. Nothing]) ++
+     ([CouponValidUntil >=. Just today] ||. [CouponValidUntil ==. Nothing]))
+    []
 
 -------------
 -- Helpers --
