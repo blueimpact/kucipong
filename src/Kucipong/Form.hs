@@ -60,6 +60,12 @@ data AdminStoreDeleteForm = AdminStoreDeleteForm
 
 instance FromForm AdminStoreDeleteForm
 
+data AdminStoreLoginForm = AdminStoreLoginForm
+  { storeEmail :: !EmailAddress
+  } deriving (Data, Eq, Generic, Read, Show, Typeable)
+
+instance FromForm AdminStoreLoginForm
+
 -----------
 -- Store --
 -----------
