@@ -86,6 +86,15 @@ class Monad m => MonadKucipongDb m where
       => Key Store -> t n (Entity StoreLoginToken)
   dbCreateStoreMagicLoginToken = lift . dbCreateStoreMagicLoginToken
 
+  dbCreateInitStore :: EmailAddress -> m (Maybe (Entity Store))
+  default dbCreateInitStore
+      :: ( MonadKucipongDb n
+         , MonadTrans t
+         , m ~ t n
+         )
+      => EmailAddress -> t n (Maybe (Entity Store))
+  dbCreateInitStore = lift . dbCreateInitStore
+
   dbDeleteStoreIfNameMatches
     :: EmailAddress
     -- ^ 'EmailAddress' for the 'Store'

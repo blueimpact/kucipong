@@ -126,6 +126,36 @@ instance ( MonadBaseControl IO m
         runDb $ repsert (StoreLoginTokenKey storeEmailKey) newStoreLoginTokenVal
         pure $ Entity (StoreLoginTokenKey storeEmailKey) newStoreLoginTokenVal
 
+  dbCreateInitStore :: EmailAddress -> KucipongDbT m (Maybe (Entity Store))
+  dbCreateInitStore email = lift go
+    where
+      go :: m (Maybe (Entity Store))
+      go = do
+        currTime <- currentTime
+        runDb $ do
+          maybeStore <- selectFirst [StoreEmail ==. email, StoreDeleted ==. Nothing] []
+          case maybeStore of
+            Just _ -> pure Nothing
+            Nothing -> do
+              let newStore =
+                    Store
+                      email
+                      (CreatedTime currTime)
+                      (UpdatedTime currTime)
+                      Nothing
+                      Nothing
+                      Nothing
+                      []
+                      Nothing
+                      Nothing
+                      Nothing
+                      Nothing
+                      Nothing
+                      Nothing
+                      Nothing
+              maybeKey <- insertUnique newStore
+              pure $ fmap (\key -> Entity key newStore) maybeKey
+
   dbDeleteStoreIfNameMatches
     :: EmailAddress
     -> Text
@@ -135,7 +165,7 @@ instance ( MonadBaseControl IO m
       go :: m StoreDeleteResult
       go =
         runDbCurrTime $ \currTime -> do
-          maybeStoreEntity <- selectFirst [StoreEmail ==. email] []
+          maybeStoreEntity <- selectFirst [StoreEmail ==. email, StoreDeleted ==. Nothing] []
           case maybeStoreEntity of
             Nothing -> pure $ StoreDeleteErrDoesNotExist email
             Just (Entity storeKey store) ->
@@ -385,65 +415,6 @@ dbFindAdmin = dbFindByKeyNotDeleted . emailToAdminKey
 -----------
 -- Store --
 -----------
-
-dbCreateStore
-  :: MonadKucipongDb m
-  => EmailAddress
-  -> Maybe Text
-    -- ^ 'Store' name
-  -> Maybe BusinessCategory
-    -- ^ 'Store' category
-  -> [BusinessCategoryDetail]
-    -- ^ 'Store' category detail
-  -> Maybe Image
-    -- ^ 'Image' for the 'Store'
-  -> Maybe Text
-    -- ^ Sales Point for the 'Store'
-  -> Maybe Text
-    -- ^ Address for the 'Store'
-  -> Maybe Text
-    -- ^ Phone number for the 'Store'
-  -> Maybe Text
-    -- ^ Business hours for the 'Store'
-  -> Maybe Text
-    -- ^ Regular holiday for the 'Store'
-  -> Maybe Text
-    -- ^ url for the 'Store'
-  -> m (Maybe (Entity Store))
-dbCreateStore email name category catdets image salesPoint address phoneNumber businessHours regularHoliday url =
-  dbInsertUniqueWithTime $ \created updated deleted ->
-    Store
-      email
-      created
-      updated
-      deleted
-      name
-      category
-      catdets
-      image
-      salesPoint
-      address
-      phoneNumber
-      businessHours
-      regularHoliday
-      url
-
-dbCreateInitStore
-  :: MonadKucipongDb m
-  => EmailAddress -> m (Maybe (Entity Store))
-dbCreateInitStore email =
-  dbCreateStore
-    email
-    Nothing
-    Nothing
-    []
-    Nothing
-    Nothing
-    Nothing
-    Nothing
-    Nothing
-    Nothing
-    Nothing
 
 dbFindStoreByStoreKey
   :: MonadKucipongDb m
