@@ -108,6 +108,13 @@ doLoginGet loginToken = do
       let errors = [label def AdminErrorTokenExpired]
       $(renderTemplateFromEnv "adminUser_login.html")
 
+-- | Return the store create page for an admin.
+loginAsStoreGet
+  :: forall xs m.
+     MonadIO m
+  => ActionCtxT (HVect xs) m ()
+loginAsStoreGet = $(renderTemplateFromEnv "adminUser_admin_store_login.html")
+
 loginAsStorePost
   :: forall xs m.
      ( MonadIO m
@@ -129,8 +136,7 @@ loginAsStorePost = do
       $(logDebug) $
         "got following error in admin loginAsStorePost handler: " <> errMsg
       let errors = [errMsg]
-      undefined
-      -- $(renderTemplateFromEnv "adminUser_admin_store_delete.html")
+      $(renderTemplateFromEnv "adminUser_admin_store_login.html")
 
 -- | Return the store create page for an admin.
 storeCreateGet
@@ -259,5 +265,5 @@ adminComponent = do
     get adminStoreDeleteR storeDeleteGet
     post adminStoreDeleteR storeDeletePost
     post adminStoreDeleteConfirmR storeDeleteConfirmPost
-    -- get adminStoreLoginR loginAsStoreGet
+    get adminStoreLoginR loginAsStoreGet
     post adminStoreLoginR loginAsStorePost
