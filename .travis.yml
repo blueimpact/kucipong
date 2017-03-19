@@ -65,7 +65,7 @@ script:
   time yarn run build
   cd ../
   # TODO: haddock fails with ghc-8.0.1.  Reenable haddock when we get lts-8.
-  time travis_wait 30 stack --no-terminal --jobs 1 test --no-run-tests --bench --no-run-benchmarks # --haddock --no-haddock-deps
+  time stack --no-terminal --jobs 1 test --no-run-tests --bench --no-run-benchmarks # --haddock --no-haddock-deps
   set +ex
 - |
   set -ex
