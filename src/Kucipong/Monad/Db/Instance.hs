@@ -20,8 +20,7 @@ import Kucipong.Db
         CreatedTime(..), DeletedTime(..), EntityField(..),
         EntityDateFields(..), Image, Key(..), LoginTokenExpirationTime(..),
         Percent(..), Price(..), Store(..), StoreLoginToken(..),
-        UpdatedTime(..), emailToAdminKey, emailToStoreKey, runDb,
-        runDbCurrTime)
+        UpdatedTime(..), emailToAdminKey, runDb, runDbCurrTime)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class
        (MonadKucipongDb(..), StoreDeleteResult(..))
@@ -136,11 +135,10 @@ instance ( MonadBaseControl IO m
       go :: m StoreDeleteResult
       go =
         runDbCurrTime $ \currTime -> do
-          let storeKey = emailToStoreKey email
-          maybeStore <- get storeKey
-          case maybeStore of
+          maybeStoreEntity <- selectFirst [StoreEmail ==. email] []
+          case maybeStoreEntity of
             Nothing -> pure $ StoreDeleteErrDoesNotExist email
-            Just store ->
+            Just (Entity storeKey store) ->
               deleteBasedOnName (storeName store) name storeKey store currTime
 
       -- | Delete the store after comparing the name of the store from the
@@ -192,7 +190,6 @@ instance ( MonadBaseControl IO m
           , StoreUpdated =. UpdatedTime currTime
           ]
         pure StoreDeleteSuccess
-
 
   -- ======= --
   -- Generic --
@@ -448,10 +445,15 @@ dbCreateInitStore email =
     Nothing
     Nothing
 
+dbFindStoreByStoreKey
+  :: MonadKucipongDb m
+  => Key Store -> m (Maybe (Entity Store))
+dbFindStoreByStoreKey = dbFindByKeyNotDeleted
+
 dbFindStoreByEmail
   :: MonadKucipongDb m
   => EmailAddress -> m (Maybe (Entity Store))
-dbFindStoreByEmail = dbFindByKeyNotDeleted . emailToStoreKey
+dbFindStoreByEmail email = dbSelectFirstNotDeleted [StoreEmail ==. email] []
 
 dbFindStoreLoginToken
   :: MonadKucipongDb m
@@ -459,9 +461,9 @@ dbFindStoreLoginToken
 dbFindStoreLoginToken loginToken =
   dbSelectFirstNotDeleted [StoreLoginTokenLoginToken ==. loginToken] []
 
-dbUpsertStore
+dbUpdateStore
   :: MonadKucipongDb m
-  => EmailAddress
+  => Key Store
   -> Maybe Text
   -> Maybe BusinessCategory
   -> [BusinessCategoryDetail]
@@ -472,24 +474,21 @@ dbUpsertStore
   -> Maybe Text
   -> Maybe Text
   -> Maybe Text
-  -> m (Entity Store)
-dbUpsertStore email name businessCategory businessCategoryDetails image salesPoint address phoneNumber businessHours regularHoliday url =
-  dbUpsertWithTime (emailToStoreKey email) $ \createdTime updatedTime deletedTime ->
-    Store
-      email
-      createdTime
-      updatedTime
-      deletedTime
-      name
-      businessCategory
-      businessCategoryDetails
-      image
-      salesPoint
-      address
-      phoneNumber
-      businessHours
-      regularHoliday
-      url
+  -> m ()
+dbUpdateStore storeKey name businessCategory businessCategoryDetails image salesPoint address phoneNumber businessHours regularHoliday url =
+  dbUpdateWithTime
+    [StoreId ==. storeKey]
+    [ StoreName =. name
+    , StoreBusinessCategory =. businessCategory
+    , StoreBusinessCategoryDetails =. businessCategoryDetails
+    , StoreImage =. image
+    , StoreSalesPoint =. salesPoint
+    , StoreAddress =. address
+    , StorePhoneNumber =. phoneNumber
+    , StoreBusinessHours =. businessHours
+    , StoreRegularHoliday =. regularHoliday
+    , StoreUrl =. url
+    ]
 
 ------------
 -- Coupon --
@@ -497,7 +496,7 @@ dbUpsertStore email name businessCategory businessCategoryDetails image salesPoi
 
 dbInsertCoupon
   :: MonadKucipongDb m
-  => EmailAddress
+  => Key Store
   -> Text
   -> CouponType
   -> Maybe Day
@@ -517,10 +516,10 @@ dbInsertCoupon
   -> Maybe Text
   -> Maybe Text
   -> m (Entity Coupon)
-dbInsertCoupon email title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbInsertCoupon storeKey title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbInsertWithTime $ \createdTime updatedTime deletedTime ->
     Coupon
-      (emailToStoreKey email)
+      storeKey
       createdTime
       updatedTime
       deletedTime
@@ -543,24 +542,24 @@ dbInsertCoupon email title couponType validFrom validUntil image discountPercent
       otherContent
       otherConditions
 
-dbFindCouponByEmailAndId
+dbFindCouponByStoreKeyAndCouponKey
   :: MonadKucipongDb m
-  => EmailAddress -> Key Coupon -> m (Maybe (Entity Coupon))
-dbFindCouponByEmailAndId email couponKey =
+  => Key Store -> Key Coupon -> m (Maybe (Entity Coupon))
+dbFindCouponByStoreKeyAndCouponKey storeKey couponKey =
   dbSelectFirstNotDeleted
-    [CouponStoreEmail ==. emailToStoreKey email, CouponId ==. couponKey]
+    [CouponStoreId ==. storeKey, CouponId ==. couponKey]
     []
 
-dbFindCouponsByEmail
+dbFindCouponsByStoreKey
   :: MonadKucipongDb m
-  => EmailAddress -> m [Entity Coupon]
-dbFindCouponsByEmail email =
-  dbSelectList [CouponStoreEmail ==. emailToStoreKey email] []
+  => Key Store -> m [Entity Coupon]
+dbFindCouponsByStoreKey storeKey =
+  dbSelectList [CouponStoreId ==. storeKey] []
 
 dbUpdateCoupon
   :: MonadKucipongDb m
   => Key Coupon
-  -> EmailAddress
+  -> Key Store
   -> Text
   -> CouponType
   -> Maybe Day
@@ -580,9 +579,9 @@ dbUpdateCoupon
   -> Maybe Text
   -> Maybe Text
   -> m ()
-dbUpdateCoupon couponKey email title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbUpdateWithTime
-    [CouponId ==. couponKey, CouponStoreEmail ==. emailToStoreKey email]
+    [CouponId ==. couponKey, CouponStoreId ==. storeKey]
     [ CouponTitle =. title
     , CouponCouponType =. couponType
     , CouponValidFrom =. validFrom

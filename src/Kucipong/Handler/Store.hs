@@ -37,13 +37,14 @@ import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongCookie,
         MonadKucipongDb(..), MonadKucipongSendEmail(..), awsImageS3Url,
-        dbFindStoreByEmail, dbFindStoreLoginToken, dbUpsertStore)
+        dbFindStoreByEmail, dbFindStoreByStoreKey, dbFindStoreLoginToken,
+        dbUpdateStore)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
-import Kucipong.Session (Store, Session(..))
+import Kucipong.Session (Store, Session)
 import Kucipong.Spock
-       (ContainsStoreSession, getReqParamErr, getStoreCookie,
-        getStoreEmail, setStoreCookie)
+       (pattern StoreSession, ContainsStoreSession, getReqParamErr,
+        getStoreCookie, getStoreKey, setStoreCookie)
 
 -- | Handler for returning the store login page.
 loginGet
@@ -90,14 +91,14 @@ doLogin
   => LoginToken -> ActionCtxT ctx m ()
 doLogin loginToken = do
   maybeStoreLoginTokenEntity <- dbFindStoreLoginToken loginToken
-  (Entity (StoreLoginTokenKey (StoreKey storeEmail)) storeLoginToken) <-
+  (Entity (StoreLoginTokenKey storeKey) storeLoginToken) <-
     fromMaybeM noStoreLoginTokenError maybeStoreLoginTokenEntity
   -- check date on store login token
   now <- currentTime
   let (LoginTokenExpirationTime expirationTime) =
         storeLoginTokenExpirationTime storeLoginToken
   when (now > expirationTime) tokenExpiredError
-  setStoreCookie storeEmail
+  setStoreCookie storeKey
   redirect $ renderRoute storeR
   where
     noStoreLoginTokenError :: ActionCtxT ctx m a
@@ -112,15 +113,11 @@ storeGet
      , MonadIO m
      , MonadKucipongAws m
      , MonadKucipongDb m
-     , MonadLogger m
      )
   => ActionCtxT (HVect xs) m ()
 storeGet = do
-  (StoreSession email) <- getStoreEmail
-  $(logDebug) $ "email: " <> tshow email
-  maybeStoreEntity <- dbFindStoreByEmail email
-  $(logDebug) $ "maybeStoreEntity: " <> tshow maybeStoreEntity
-  maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+  (StoreSession storeKey) <- getStoreKey
+  maybeStore <- fmap entityVal <$> dbFindStoreByStoreKey storeKey
   Store { storeName
         , storeSalesPoint
         , storeBusinessCategory
@@ -139,7 +136,7 @@ storeGet = do
     salesPoint = storeSalesPoint
     address = storeAddress
     phoneNumber = storePhoneNumber
-    businessHourLines = fromMaybe [] (fmap lines storeBusinessHours)
+    businessHourLines = maybe [] lines storeBusinessHours
     regularHoliday = storeRegularHoliday
     url = storeUrl
   imageUrl <- traverse awsImageS3Url storeImage
@@ -158,8 +155,8 @@ storeEditGet
      )
   => ActionCtxT (HVect xs) m ()
 storeEditGet = do
-  (StoreSession email) <- getStoreEmail
-  maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+  (StoreSession storeKey) <- getStoreKey
+  maybeStore <- fmap entityVal <$> dbFindStoreByStoreKey storeKey
   let
     name = (maybeStore >>= storeName)
     businessCategory = (maybeStore >>= storeBusinessCategory)
@@ -184,7 +181,7 @@ storeEditPost
      )
   => ActionCtxT (HVect xs) m ()
 storeEditPost = do
-  (StoreSession email) <- getStoreEmail
+  (StoreSession storeKey) <- getStoreKey
   StoreEditForm { name
                 , businessCategory
                 , businessCategoryDetails
@@ -200,8 +197,8 @@ storeEditPost = do
   s3ImageName <-
     fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
-    dbUpsertStore
-      email
+    dbUpdateStore
+      storeKey
       name
       businessCategory
       (nub businessCategoryDetails)
@@ -245,8 +242,8 @@ storeEditPost = do
 
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      (StoreSession email) <- getStoreEmail
-      maybeStore <- fmap entityVal <$> dbFindStoreByEmail email
+      (StoreSession storeKey) <- getStoreKey
+      maybeStore <- fmap entityVal <$> dbFindStoreByStoreKey storeKey
       imageUrl <- traverse awsImageS3Url $ maybeStore >>= storeImage
       p <- params
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
@@ -254,7 +251,7 @@ storeEditPost = do
           businessCategory =
             readBusinessCategory =<< lookup "businessCategory" p
           businessCategoryDetails = businessCategoryDetailsFromParams p
-          businessHourLines = maybe [] (lines) $ lookup "businessHours" p
+          businessHourLines = maybe [] lines $ lookup "businessHours" p
       $(renderTemplate "storeUser_store_edit.html" $
         fromParams
           [|p|]

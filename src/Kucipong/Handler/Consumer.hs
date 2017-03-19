@@ -18,7 +18,7 @@ import Kucipong.Handler.Route (consumerCouponVarR, storeR)
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (MonadKucipongAws(..), MonadKucipongDb(..), awsImageS3Url,
-        dbFindByKey, dbFindPublicCouponById)
+        dbFindStoreByStoreKey, dbFindPublicCouponById)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 
 couponGet
@@ -29,7 +29,7 @@ couponGet couponKey = do
   maybeCouponEntity <- dbFindPublicCouponById couponKey
   Entity _ coupon <-
     fromMaybeM (handleErr $ label def ConsumerErrorCouldNotFindCoupon) maybeCouponEntity
-  maybeStoreEntity <- dbFindByKey (couponStoreEmail coupon)
+  maybeStoreEntity <- dbFindStoreByStoreKey $ couponStoreId coupon
   let maybeImage = couponImage . entityVal =<< maybeCouponEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
   -- TODO

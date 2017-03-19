@@ -8,31 +8,32 @@ module Kucipong.Spock
     , ContainsAdminSession
     , getAdminEmail
     , ContainsStoreSession
-    , getStoreEmail
+    , getStoreKey
+    , pattern StoreSession
     ) where
 
 import Kucipong.Prelude
 
-import Data.HVect ( HVect, ListContains, findFirst )
-import Web.Spock ( ActionCtxT, cookie, getContext, setCookie )
+import Data.HVect (HVect, ListContains, findFirst)
+import Database.Persist.Sql (fromSqlKey, toSqlKey)
+import Web.Spock (ActionCtxT, cookie, getContext, setCookie)
 
-import Kucipong.Monad ( MonadKucipongCookie(..) )
-import Kucipong.Session ( Admin, Session(AdminSession, StoreSession), Store )
+import Kucipong.Db (Key)
+import qualified Kucipong.Db as Db
+import Kucipong.Monad (MonadKucipongCookie(..))
+import Kucipong.Session
+       (Admin, Session(AdminSession, StoreSessionRaw), Store)
 import Kucipong.Spock.ReqParam
 
 setAdminCookie
-    :: ( MonadIO m
-       , MonadKucipongCookie m
-       )
-    => EmailAddress -> ActionCtxT ctx m ()
+  :: (MonadIO m, MonadKucipongCookie m)
+  => EmailAddress -> ActionCtxT ctx m ()
 setAdminCookie = setCookieGeneric "adminEmail" . AdminSession
 
 setStoreCookie
-    :: ( MonadIO m
-       , MonadKucipongCookie m
-       )
-    => EmailAddress -> ActionCtxT ctx m ()
-setStoreCookie = setCookieGeneric "storeEmail" . StoreSession
+  :: (MonadIO m, MonadKucipongCookie m)
+  => Key Db.Store -> ActionCtxT ctx m ()
+setStoreCookie = setCookieGeneric "storeEmail" . StoreSessionRaw . fromSqlKey
 
 setCookieGeneric
     :: ( MonadIO m
@@ -77,12 +78,15 @@ getAdminEmail = findFirst <$> getContext
 
 type ContainsAdminSession n xs = ListContains n (Session Admin) xs
 
-getStoreEmail
+getStoreKey
     :: forall n xs m
      . ( ContainsStoreSession n xs
        , MonadIO m
        )
     => ActionCtxT (HVect xs) m (Session Store)
-getStoreEmail = findFirst <$> getContext
+getStoreKey = findFirst <$> getContext
 
 type ContainsStoreSession n xs = ListContains n (Session Store) xs
+
+pattern StoreSession :: Key Db.Store -> Session Store
+pattern StoreSession storeKey <- StoreSessionRaw (toSqlKey -> storeKey)

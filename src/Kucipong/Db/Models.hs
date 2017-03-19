@@ -29,12 +29,6 @@ share [ mkPersist sqlSettings { mpsGenerateLenses = False }
 emailToAdminKey :: EmailAddress -> Key Admin
 emailToAdminKey = AdminKey
 
-emailToStoreKey :: EmailAddress -> Key Store
-emailToStoreKey = StoreKey
-
-storeKeyToEmail :: Key Store -> EmailAddress
-storeKeyToEmail = unStoreKey
-
 -- | Type class for getting the 'EntityField' from a record responsible for the
 -- 'CreatedTime', 'DeletedTime', and 'UpdatedTime'.
 --

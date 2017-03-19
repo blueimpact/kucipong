@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
 
 module Kucipong.Monad.Db.Class where
@@ -87,7 +88,7 @@ class Monad m => MonadKucipongDb m where
 
   dbDeleteStoreIfNameMatches
     :: EmailAddress
-    -- ^ 'Key' for the 'Store'
+    -- ^ 'EmailAddress' for the 'Store'
     -> Text
     -- ^ Name of the 'Store'.
     -> m StoreDeleteResult
@@ -97,8 +98,8 @@ class Monad m => MonadKucipongDb m where
        , m ~ t n
        )
     => EmailAddress -> Text -> t n StoreDeleteResult
-  dbDeleteStoreIfNameMatches email name =
-    lift $ dbDeleteStoreIfNameMatches email name
+  dbDeleteStoreIfNameMatches storeKey name =
+    lift $ dbDeleteStoreIfNameMatches storeKey name
 
   -- ======= --
   -- Generic --
@@ -195,6 +196,22 @@ class Monad m => MonadKucipongDb m where
     -> (UTCTime -> Maybe record -> record)
     -> t n (Entity record)
   dbUpsert key recordCreator = lift (dbUpsert key recordCreator)
+
+  -- This can be used if ActionCtxT gets an instance of MonadTransControl.
+  -- https://github.com/agrafix/Spock/issues/116
+  -- dbRun :: ReaderT SqlBackend m a -> m a
+  -- default dbRun
+  --   :: forall n t a.
+  --      ( MonadKucipongDb n
+  --      , MonadTransControl t
+  --      , Monad n
+  --      , m ~ t n
+  --      )
+  --   => ReaderT SqlBackend m a -> m a
+  -- dbRun readerT =
+  --   let liftWithFunc =
+  --         liftWith $ \run -> dbRun . ReaderT $ run . runReaderT readerT
+  --   in liftWithFunc >>= restoreT . pure
 
 instance MonadKucipongDb m => MonadKucipongDb (ActionCtxT ctx m)
 instance MonadKucipongDb m => MonadKucipongDb (ExceptT e m)
