@@ -78,134 +78,70 @@ const commonConfig = {
   },
 
   plugins: [
-    // Compile chat page
-    new HtmlWebpackPlugin({
-      chunks: ['chat'],
-      template: 'src/pug/chat.pug',
-      inject:   'body',
-      filename: 'static/chat.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['chat'],
-      template: 'src/style-guide/chat.html',
-      inject:   'body',
-      filename: 'style-guide_chat.html',
-    }),
-
-    // Compile end-user related pages
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_category.pug',
-      inject:   'body',
-      filename: 'endUser_category.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_coupon_id.pug',
-      inject:   'body',
-      filename: 'endUser_coupon_id.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_store_id.pug',
-      inject:   'body',
-      filename: 'endUser_store_id.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_store_id_coupon.pug',
-      inject:   'body',
-      filename: 'endUser_store_id_coupon.html',
-      data: ENV,
-    }),
-
-    // Compile store-user related pages
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_login.pug',
-      inject:   'body',
-      filename: 'storeUser_login.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_store.pug',
-      inject:   'body',
-      filename: 'storeUser_store.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser', 'storeUser_store_edit'],
-      template: 'src/pug/storeUser_store_edit.pug',
-      inject:   'body',
-      filename: 'storeUser_store_edit.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_store_coupon.pug',
-      inject:   'body',
-      filename: 'storeUser_store_coupon.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_store_coupon_id.pug',
-      inject:   'body',
-      filename: 'storeUser_store_coupon_id.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser', 'storeUser_store_coupon_id_edit'],
-      template: 'src/pug/storeUser_store_coupon_id_edit.pug',
-      inject:   'body',
-      filename: 'storeUser_store_coupon_id_edit.html',
-      data: ENV,
-    }),
-
-    // Compile admin-user related pages
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_login.pug',
-      inject:   'body',
-      filename: 'adminUser_login.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_create.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_create.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_delete.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_delete.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_delete_confirm.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_delete_confirm.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_login.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_login.html',
-    }),
-
-    // Inject variables to JS file.
-    new webpack.DefinePlugin({
-      'process.env':
-        Object.keys(ENV).reduce((o, k) =>
-          merge(o, {
-            [k]: JSON.stringify(ENV[k]),
-          }), {}
-        ),
-    }),
-  ],
+      // Chat page
+      {
+        chunks: ['chat'],
+        template: 'chat',
+        outputDir: 'static',
+      },
+    ].concat(
+      [
+        // Pages for end users.
+        'endUser_category',
+        'endUser_coupon_id',
+        'endUser_store_id',
+        'endUser_store_id_coupon',
+      ].map((template) => ({
+        chunks: ['endUser'],
+        template
+      }))
+    ).concat(
+      // Pages for store users.
+      [
+        'storeUser_login',
+        'storeUser_store',
+        'storeUser_store_edit',
+        'storeUser_store_coupon',
+        'storeUser_store_coupon_id',
+        'storeUser_store_coupon_id_edit',
+      ].map((template) => ({
+        chunks: ['storeUser'],
+        template
+      }))
+    ).concat(
+      // Pages for admin users
+      [
+        'adminUser_login',
+        'adminUser_admin_store_create',
+        'adminUser_admin_store_delete',
+        'adminUser_admin_store_delete_confirm',
+        'adminUser_admin_store_login',
+      ].map((template) => ({
+        chunks: ['adminUser'],
+        template
+      }))
+    ).map((o) =>
+      new HtmlWebpackPlugin({
+        chunks: o.chunks,
+        template: `${o.directory || 'src/pug'}/${o.template}.pug`,
+        inject:   'body',
+        filename: `${o.outputDir || '.'}/${o.template}.html`,
+        data: ENV,
+        hash: true,
+      })
+    ).concat(
+      [
+        // Inject variables to JS file.
+        new webpack.DefinePlugin({
+          'process.env':
+            Object.keys(ENV).reduce((o, k) =>
+              merge(o, {
+                [k]: JSON.stringify(ENV[k]),
+              }), {}
+            ),
+        }),
+      ]
+    ),
 };
 
 // Settings for `npm start`
