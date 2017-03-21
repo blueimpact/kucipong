@@ -1,4 +1,5 @@
 module Components.Conversation.Types exposing (..)
+
 {-| Types for `Components.Conversation`
 
 # Common
@@ -8,9 +9,7 @@ module Components.Conversation.Types exposing (..)
 @docs TalkKey
 -}
 
-
 import Dict exposing (Dict)
-
 import Components.SubmitArea.Types exposing (..)
 import Components.TalkArea.Types exposing (..)
 
@@ -28,4 +27,5 @@ type alias Question =
   }
 
 
-type alias TalkKey = String
+type alias TalkKey =
+  String

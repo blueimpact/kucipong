@@ -1,22 +1,22 @@
-port module Components.Conversation exposing
-  ( Model
-  , Msg
-    ( LoadInitialQuestion
-    , LoadNextQuestion
-    , OnLoadNextQuestion
-    , OnErrorLoadNextQuestion
-    , PutDefaultUserSettings
+port module Components.Conversation
+  exposing
+    ( Model
+    , Msg
+      ( LoadInitialQuestion
+      , LoadNextQuestion
+      , OnLoadNextQuestion
+      , OnErrorLoadNextQuestion
+      , PutDefaultUserSettings
+      )
+    , init
+    , update
+    , subscriptions
     )
-  , init
-  , update
-  , subscriptions
-  )
+
 {-| Module for loading new conversations
 -}
 
-
 import Dict
-
 import Components.Conversation.Types exposing (..)
 import Components.SubmitArea.Types exposing (..)
 import Components.TalkArea.Types exposing (..)
@@ -27,10 +27,11 @@ import Util exposing (cmdSucceed)
 -- MODEL
 
 
-type alias Model = Conversation
+type alias Model =
+  Conversation
 
 
-init : (Model, Cmd Msg)
+init : ( Model, Cmd Msg )
 init =
   ( { getTalkKey = "hello"
     , dict = dict
@@ -54,7 +55,7 @@ type Msg
   | PutDefaultUserSettings UserSettings
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
   case message of
     LoadInitialQuestion ->
@@ -63,19 +64,27 @@ update message model =
         case Dict.get model.getTalkKey model.dict of
           Nothing ->
             OnErrorLoadNextQuestion
+
           Just q ->
             OnLoadNextQuestion q
       )
+
     LoadNextQuestion input ->
       let
         maybeNext =
           Dict.get model.getTalkKey model.dict
-          `Maybe.andThen` \q ->
-            Just (q.next input)
-          `Maybe.andThen` \next ->
-            Dict.get next model.dict
-          `Maybe.andThen` \q' ->
-            Just (q', next)
+            |> Maybe.andThen
+              (\q ->
+                Just (q.next input)
+                  |> Maybe.andThen
+                    (\next ->
+                      Dict.get next model.dict
+                        |> Maybe.andThen
+                          (\q_ ->
+                            Just ( q_, next )
+                          )
+                    )
+              )
       in
         case maybeNext of
           Nothing ->
@@ -83,7 +92,7 @@ update message model =
             , cmdSucceed OnErrorLoadNextQuestion
             )
 
-          Just (q, key) ->
+          Just ( q, key ) ->
             ( { model
               | getTalkKey = key
               }
@@ -122,23 +131,25 @@ subscriptions model =
 putDefaultUserSettings : UserSettings -> Model -> Model
 putDefaultUserSettings settings model =
   { model
-  | dict =
-    Dict.update "tags"
-      (Maybe.map
-        (\tags ->
-          { tags
-          | submitType =
-            case tags.submitType of
-              MultiSelect c ->
-                MultiSelect
-                  { c
-                  | inputs = List.map toString settings.tags
-                  }
-              a -> a
-          }
+    | dict =
+      Dict.update "tags"
+        (Maybe.map
+          (\tags ->
+            { tags
+              | submitType =
+                case tags.submitType of
+                  MultiSelect c ->
+                    MultiSelect
+                      { c
+                        | inputs = List.map toString settings.tags
+                      }
+
+                  a ->
+                    a
+            }
+          )
         )
-      )
-      model.dict
+        model.dict
   }
 
 
@@ -147,15 +158,16 @@ putDefaultUserSettings settings model =
 
 
 dict : Dict.Dict String Question
-dict = Dict.fromList
-  [ ( "hello"
-    , { question =
+dict =
+  Dict.fromList
+    [ ( "hello"
+      , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "kucipong は、我輩がご主人様（あなた）のために、ご主人様にピッタリなクーポンを見つけ出すサービスですにゃ"
-              }
+            , value = "kucipong は、我輩がご主人様（あなた）のために、ご主人様にピッタリなクーポンを見つけ出すサービスですにゃ"
+            }
             ]
           ]
         }
@@ -166,15 +178,15 @@ dict = Dict.fromList
           }
       , next = always "area0"
       }
-    )
-  , ( "area0"
-    , { question =
+      )
+    , ( "area0"
+      , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "まずは、ご主人様の主な活動エリアの住所や建物名を教えてほしいですにゃ"
-              }
+            , value = "まずは、ご主人様の主な活動エリアの住所や建物名を教えてほしいですにゃ"
+            }
             ]
           ]
         }
@@ -190,15 +202,15 @@ dict = Dict.fromList
           }
       , next = always "moreArea"
       }
-    )
-  , ( "moreArea"
-    , { question =
+      )
+    , ( "moreArea"
+      , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "職場付近など、他にもエリアを登録しますかにゃ？？"
-              }
+            , value = "職場付近など、他にもエリアを登録しますかにゃ？？"
+            }
             ]
           ]
         }
@@ -214,23 +226,27 @@ dict = Dict.fromList
               }
             ]
           }
-      , next = \v ->
-        case v of
-          (SelectList { input }) ->
-            if input == "yes"
-               then "area"
-               else "tags"
-          _ -> "tags"
+      , next =
+        \v ->
+          case v of
+            SelectList { input } ->
+              if input == "yes" then
+                "area"
+              else
+                "tags"
+
+            _ ->
+              "tags"
       }
-    )
-  , ( "area"
-    , { question =
+      )
+    , ( "area"
+      , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "登録したいエリアを教えてほしいにゃん"
-              }
+            , value = "登録したいエリアを教えてほしいにゃん"
+            }
             ]
           ]
         }
@@ -246,15 +262,15 @@ dict = Dict.fromList
           }
       , next = always "moreArea"
       }
-    )
-  , ( "tags"
-    , { question =
+      )
+    , ( "tags"
+      , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "ご主人様の興味がある分野を教えてほしいにゃん！！"
-              }
+            , value = "ご主人様の興味がある分野を教えてほしいにゃん！！"
+            }
             ]
           ]
         }
@@ -297,18 +313,18 @@ dict = Dict.fromList
           }
       , next = always "closing"
       }
-    )
-  , ( "closing"
-    , { question =
+      )
+    , ( "closing"
+      , { question =
         { speaker = AI
         , feeling = Just FeelNormal
         , balloons =
           [ [ { ptag = PlainParagraph
-              , value = "これでご主人様にぴったりなクーポンを探せるにゃ！"
-              }
+            , value = "これでご主人様にぴったりなクーポンを探せるにゃ！"
+            }
             , { ptag = PlainParagraph
-              , value = "これからも、ご主人様の行動にあわせて、吾輩も賢くなっていくから、期待しててにゃん！！"
-              }
+            , value = "これからも、ご主人様の行動にあわせて、吾輩も賢くなっていくから、期待しててにゃん！！"
+            }
             ]
           ]
         }
@@ -319,5 +335,5 @@ dict = Dict.fromList
           }
       , next = always "end"
       }
-    )
-  ]
+      )
+    ]

@@ -1,10 +1,7 @@
-// Thanks to [moarwick](https://github.com/moarwick/elm-webpack-starter)
-
 const path              = require('path');
 const webpack           = require('webpack');
 const merge             = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const autoprefixer      = require('autoprefixer');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
@@ -12,23 +9,21 @@ console.log('Start Webpack process...');
 
 // Determine build env by npm command options
 const TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
-const ENV_VARS = TARGET_ENV === 'production' ?
-  {
-    'apiRoot':
-      process.env.API_ROOT || 'http://kucipong.com/api/v0/',
-    'googleMapApiKey':
-      // Default key bellow is only available on `stage.kucipong.com`.
-      process.env.GOOGLE_MAP_API_KEY || 'AIzaSyA6yBv38YNHWzaAI5S7c27JfqkSFMFC-7g',
-  } :
-  {
-    'apiRoot':
-      process.env.API_ROOT || 'http://localhost:8081/v0/',
-    'googleMapApiKey':
-      process.env.GOOGLE_MAP_API_KEY || '',
-  };
+const ENV = {
+  'googleMapApiKey':
+    process.env.GOOGLE_MAP_API_KEY ||
+      // This API key is only available on `stage.kucipong.com`.
+      'AIzaSyA6yBv38YNHWzaAI5S7c27JfqkSFMFC-7g',
+};
 
 // Common webpack config
 const commonConfig = {
+
+  output: {
+    path: path.resolve(__dirname, 'dist/'),
+    filename: '/static/[name].js',
+  },
+
   entry: {
     chat: [
       path.join( __dirname, 'src/chat.js' )
@@ -39,49 +34,45 @@ const commonConfig = {
     storeUser: [
       path.join( __dirname, 'src/storeUser.js' )
     ],
+    adminUser: [
+      path.join( __dirname, 'src/adminUser.js' )
+    ],
     "storeUser_store_edit": [
       path.join( __dirname, 'src/js/storeUser_store_edit.js' )
     ],
     "storeUser_store_coupon_id_edit": [
       path.join( __dirname, 'src/js/storeUser_store_coupon_id_edit.js' )
     ],
-    adminUser: [
-      path.join( __dirname, 'src/adminUser.js' )
-    ],
-    magicLogin: [
-      path.join( __dirname, 'src/magicLogin.js' )
-    ],
-  },
-
-  // Directory to output compiled files
-  output: {
-    path: path.resolve(__dirname, 'dist/'),
-    filename: '/static/[name]-[hash].js',
   },
 
   resolve: {
-    modulesDirectories: ['node_modules'],
-    extensions: ['', '.js', '.elm'],
-    root: [
+    extensions: ['.js', '.elm'],
+    modules: [
+      'node_modules',
       path.resolve('src/elm'),
-    ]
+    ],
   },
 
   module: {
-    noParse: /\.elm$/,
-    loaders: [
+    rules: [
       {
-        test: /\.(eot|ttf|woff|woff2|svg|png|jpg)$/,
-        loader: 'file-loader',
-        query: { name: "/static/[name]-[hash].[ext]" }
+        test: /\.(eot|ttf|woff|woff2|svg)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: "/static/[name]-[hash].[ext]",
+            },
+          },
+        ]
       },
       {
         test: /\.pug$/,
-        loader: 'pug',
+        use: 'pug-loader',
       },
       {
         test: /\.(jpg|jpeg|png)$/,
-        loader: 'url'
+        use: 'url-loader'
       },
     ]
   },
@@ -113,21 +104,21 @@ const commonConfig = {
       template: 'src/pug/endUser_coupon_id.pug',
       inject:   'body',
       filename: 'endUser_coupon_id.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
     new HtmlWebpackPlugin({
       chunks: ['endUser'],
       template: 'src/pug/endUser_store_id.pug',
       inject:   'body',
       filename: 'endUser_store_id.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
     new HtmlWebpackPlugin({
       chunks: ['endUser'],
       template: 'src/pug/endUser_store_id_coupon.pug',
       inject:   'body',
       filename: 'endUser_store_id_coupon.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
 
     // Compile store-user related pages
@@ -142,35 +133,35 @@ const commonConfig = {
       template: 'src/pug/storeUser_store.pug',
       inject:   'body',
       filename: 'storeUser_store.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser', 'storeUser_store_edit'],
       template: 'src/pug/storeUser_store_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_edit.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser'],
       template: 'src/pug/storeUser_store_coupon.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser'],
       template: 'src/pug/storeUser_store_coupon_id.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon_id.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
     new HtmlWebpackPlugin({
       chunks: ['storeUser', 'storeUser_store_coupon_id_edit'],
       template: 'src/pug/storeUser_store_coupon_id_edit.pug',
       inject:   'body',
       filename: 'storeUser_store_coupon_id_edit.html',
-      data: ENV_VARS,
+      data: ENV,
     }),
 
     // Compile admin-user related pages
@@ -208,112 +199,106 @@ const commonConfig = {
     // Inject variables to JS file.
     new webpack.DefinePlugin({
       'process.env':
-        Object.keys(ENV_VARS).reduce((o, k) =>
+        Object.keys(ENV).reduce((o, k) =>
           merge(o, {
-            [k]: JSON.stringify(ENV_VARS[k]),
+            [k]: JSON.stringify(ENV[k]),
           }), {}
         ),
     }),
   ],
+};
 
-  postcss: () => [
-    require('stylelint'),
-    autoprefixer({ browsers: ['last 2 versions'] }),
-    require('postcss-flexbugs-fixes'),
-    require('postcss-reporter')({ clearMessages: true }),
-  ],
-
-}
-
-// Additional webpack settings for local env (when invoked by 'npm start')
+// Settings for `npm start`
 if (TARGET_ENV === 'development') {
   console.log('Serving locally...');
 
   module.exports = merge(commonConfig, {
 
-    entry:
-      Object.keys(commonConfig.entry).reduce((ret, k) =>
-        merge(ret, {
-          [k]:
-            [
-              'webpack-dev-server/client?http://localhost:8080',
-            ].concat(commonConfig.entry[k]),
-        })
-      , {}),
-
     devtool: 'source-map',
-
     devServer: {
       contentBase: 'src',
-      inline:   true,
-      progress: true,
+      inline: true,
+      port: ENV.port,
+      host: ENV.host,
     },
 
     module: {
-      loaders: [
+      rules: [
         {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
-          loader:  'elm-hot!elm-webpack?verbose=true&warn=true',
+          use: [
+            {
+              loader: 'elm-hot-loader',
+            },
+            { loader: 'elm-webpack-loader',
+              options: {
+                verbose: true,
+                warn: true,
+              },
+            },
+          ],
         },
         {
           test: /\.(css|scss)$/,
-          loaders: [
-            'style',
-            'css',
-            'resolve-url',
-            'sass',
-            'postcss',
-          ]
-        }
-      ]
-    }
+          use: [
+            'style-loader',
+            'css-loader',
+            'resolve-url-loader',
+            'sass-loader',
+            'postcss-loader',
+          ],
+        },
+      ],
+    },
   });
 }
 
-// Additional webpack settings for prod env (when invoked via 'npm run build')
+// Settings for `npm run build`.
 if (TARGET_ENV === 'production') {
   console.log('Building for prod...');
 
   module.exports = merge(commonConfig, {
 
     module: {
-      loaders: [
+      rules: [
         {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
-          loader:  'elm-webpack',
+          loader:  'elm-webpack-loader',
         },
         {
           test: /\.(css|scss)$/,
-          loader: ExtractTextPlugin.extract('style', [
-            'css',
-            'resolve-url',
-            'sass',
-            'postcss',
-          ])
-        }
-      ]
+          use: ExtractTextPlugin.extract({
+            fallback: 'style-loader',
+            use: [
+              'css-loader',
+              'resolve-url-loader',
+              'sass-loader',
+              'postcss-loader',
+            ],
+          }),
+        },
+      ],
     },
 
     plugins: [
       new CopyWebpackPlugin([
-        {
-          from: 'src/favicon.ico'
-        },
+        // {
+        //   from: 'src/favicon.ico'
+        // },
       ]),
 
-      new webpack.optimize.OccurenceOrderPlugin(),
-
       // Extract CSS into a separate file
-      new ExtractTextPlugin( '/static/[name]-[hash].css', { allChunks: true } ),
+      new ExtractTextPlugin({
+        filename: '/static/[name].css', disable: false, allChunks: true
+      }),
 
       // Minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({
           minimize:   true,
           compressor: { warnings: false }
-          // mangle:  true
       }),
-    ]
+    ],
   });
 }

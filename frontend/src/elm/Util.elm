@@ -8,7 +8,6 @@ module Util
     , cmdSucceed
     )
 
-
 import Html exposing (Attribute)
 import Html.Attributes exposing (property)
 import Html.Events exposing (..)
@@ -34,7 +33,8 @@ onInputInt def tagger =
 
 
 intValue : Int -> Attribute msg
-intValue = intProperty "value"
+intValue =
+  intProperty "value"
 
 
 intProperty : String -> Int -> Attribute msg
@@ -44,4 +44,4 @@ intProperty name int =
 
 cmdSucceed : a -> Cmd a
 cmdSucceed a =
-  Task.perform identity identity (Task.succeed a)
+  Task.perform identity (Task.succeed a)

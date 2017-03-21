@@ -1,36 +1,36 @@
-module Components.TalkArea exposing
-  ( Model
-  , Msg
-    ( PushTalkBlock
-    , PushNewAITalk
-    , PushNewUserString
+module Components.TalkArea
+  exposing
+    ( Model
+    , Msg
+      ( PushTalkBlock
+      , PushNewAITalk
+      , PushNewUserString
+      )
+    , update
+    , init
+    , view
+    , subscriptions
     )
-  , update
-  , init
-  , view
-  , subscriptions
-  )
 
 import Dom.Scroll as Dom
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import List
 import List.Extra as List
-import Maybe.Extra exposing ((?), isJust, mapDefault)
+import Maybe.Extra exposing ((?), isJust, unwrap)
 import String
 import Task
-
 import Components.TalkArea.Types exposing (..)
-
 
 
 -- MODEL
 
 
-type alias Model = List TalkBlock
+type alias Model =
+  List TalkBlock
 
 
-init : (Model, Cmd Msg)
+init : ( Model, Cmd Msg )
 init =
   ( []
   , Cmd.none
@@ -40,23 +40,32 @@ init =
 showSpeaker : Speaker -> String
 showSpeaker speaker =
   case speaker of
-    AI -> "ai"
-    User -> "user"
+    AI ->
+      "ai"
+
+    User ->
+      "user"
 
 
 paragraphTagToClassName : ParagraphTag -> String
 paragraphTagToClassName ptag =
   case ptag of
     -- TODO
-    _ -> ""
+    _ ->
+      ""
 
 
 showFeeling : Feeling -> String
 showFeeling feeling =
   case feeling of
-    FeelNormal -> "feelNormal"
-    FeelBad -> "feelBad"
-    FeelGood -> "feelGood"
+    FeelNormal ->
+      "feelNormal"
+
+    FeelBad ->
+      "feelBad"
+
+    FeelGood ->
+      "feelGood"
 
 
 
@@ -70,7 +79,7 @@ type Msg
   | None
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     PushTalkBlock tb ->
@@ -78,13 +87,15 @@ update msg model =
         Nothing ->
           push tb model
 
-        Just {speaker, feeling, balloons} ->
+        Just { speaker, feeling, balloons } ->
           if speaker == tb.speaker && feeling == tb.feeling then
             push
               { tb
-              | balloons = balloons ++ tb.balloons
+                | balloons = balloons ++ tb.balloons
               }
-              <| List.init model ? []
+            <|
+              List.init model
+                ? []
           else
             push tb model
       , scrollToNewMsg
@@ -96,18 +107,20 @@ update msg model =
       )
 
     PushNewUserString str ->
-      ( model ++ List.singleton
+      ( model
+        ++ List.singleton
           { speaker = User
           , feeling = Nothing
           , balloons =
             [ [ { ptag = PlainParagraph
-                , value = str
-                }
+              , value = str
+              }
               ]
             ]
           }
       , scrollToNewMsg
       )
+
     None ->
       ( model
       , Cmd.none
@@ -120,41 +133,44 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div [class "output-area"]
-    <| List.map renderTalkBlock model
+  div [ class "output-area" ] <|
+    List.map renderTalkBlock model
 
 
 renderTalkBlock : TalkBlock -> Html Msg
 renderTalkBlock tb =
   div
     [ classList
-      [ ("input-group", True)
-      , (showSpeaker tb.speaker, True)
+      [ ( "input-group", True )
+      , ( showSpeaker tb.speaker, True )
       ]
     ]
     [ div
       [ classList
-        [ ("img", tb.speaker == AI)
-        , (mapDefault "" showFeeling tb.feeling, isJust tb.feeling)
+        [ ( "img", tb.speaker == AI )
+        , ( unwrap "" showFeeling tb.feeling, isJust tb.feeling )
         ]
-      ] []
-    , div [class "message-area"]
-      <| List.map renderTalkBody tb.balloons
+      ]
+      []
+    , div [ class "message-area" ] <|
+      List.map renderTalkBody tb.balloons
     ]
 
 
 renderTalkBody : TalkBody -> Html Msg
 renderTalkBody tb =
-  div [class "message-balloon"]
-    <| List.map renderTalkParagraph tb
+  div [ class "message-balloon" ] <|
+    List.map renderTalkParagraph tb
 
 
 renderTalkParagraph : TalkParagraph -> Html Msg
 renderTalkParagraph tp =
-  p [ classList
-    [ (paragraphTagToClassName tp.ptag, tp.ptag /= PlainParagraph)
+  p
+    [ classList
+      [ ( paragraphTagToClassName tp.ptag, tp.ptag /= PlainParagraph )
+      ]
     ]
-  ] [text tp.value]
+    [ text tp.value ]
 
 
 
@@ -176,20 +192,21 @@ userTalk : String -> TalkBlock
 userTalk talk =
   { speaker = User
   , feeling = Nothing
-  , balloons = List.singleton
-    <| List.map (TalkParagraph PlainParagraph)
-    <| String.split "\n" talk
+  , balloons =
+    List.singleton <|
+      List.map (TalkParagraph PlainParagraph) <|
+        String.split "\n" talk
   }
 
 
-
 {-| Push an element after last element of given List
-    Note that this operation requires O(N) time.
+  Note that this operation requires O(N) time.
 -}
 push : a -> List a -> List a
-push x xs = xs ++ List.singleton x
+push x xs =
+  xs ++ List.singleton x
 
 
 scrollToNewMsg : Cmd Msg
 scrollToNewMsg =
-  Task.perform (always None) (always None) <| Dom.toBottom "js-body"
+  Task.attempt (always None) <| Dom.toBottom "js-body"
