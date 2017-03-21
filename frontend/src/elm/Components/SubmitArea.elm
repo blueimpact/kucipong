@@ -1,7 +1,7 @@
 module Components.SubmitArea
   exposing
     ( Model
-    , Msg (OnSubmit)
+    , Msg(OnSubmit)
     , init
     , update
     , view
@@ -12,22 +12,20 @@ import Date
 import Date.Extra as Date
 import Date.Extra.Facts as Date
 import Html exposing (..)
-import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import List.Extra as List
 import Regex
-
 import Components.Geocode as Geocode
 import Components.SubmitArea.Types exposing (..)
-import Util exposing
-  ( onChange
-  , onChangeInt
-  , onInputInt
-  , intValue
-  , cmdSucceed
-  )
-
+import Util
+  exposing
+    ( onChange
+    , onChangeInt
+    , onInputInt
+    , intValue
+    , cmdSucceed
+    )
 
 
 -- MODEL
@@ -39,10 +37,11 @@ type alias Model =
   }
 
 
-init : (Model, Cmd Msg)
+init : ( Model, Cmd Msg )
 init =
   let
-    (mGeocode, cGeocode) = Geocode.init
+    ( mGeocode, cGeocode ) =
+      Geocode.init
   in
     ( { inputField = InputNone
       , geocode = mGeocode
@@ -88,7 +87,7 @@ type Msg
   | Geocode Geocode.Msg
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     OnSubmit input ->
@@ -100,404 +99,459 @@ update msg model =
 
     OnInputString c val ->
       ( { model
-        | inputField = InputString
-          { c | input = val }
+        | inputField =
+          InputString
+            { c | input = val }
         }
       , Cmd.none
       )
 
     OnInputEmail c val ->
       ( { model
-        | inputField = InputEmail
-          { c | input = val }
+        | inputField =
+          InputEmail
+            { c | input = val }
         }
       , Cmd.none
       )
 
     OnInputPhoneNumber c val ->
       ( { model
-        | inputField = InputPhoneNumber
-          { c | input = val }
+        | inputField =
+          InputPhoneNumber
+            { c | input = val }
         }
       , Cmd.none
       )
 
     OnInputPostalCode c val ->
       ( { model
-        | inputField = InputPostalCode
-          { c | input = val }
+        | inputField =
+          InputPostalCode
+            { c | input = val }
         }
       , Cmd.none
       )
 
     OnInputFamilyName c fam ->
       ( { model
-        | inputField = InputName
-          { c | input =
-            { family = fam
-            , given = c.input.given
+        | inputField =
+          InputName
+            { c
+              | input =
+                { family = fam
+                , given = c.input.given
+                }
             }
-          }
         }
       , Cmd.none
       )
 
     OnInputGivenName c given ->
       ( { model
-        | inputField = InputName
-          { c | input =
-            { family = c.input.family
-            , given = given
+        | inputField =
+          InputName
+            { c
+              | input =
+                { family = c.input.family
+                , given = given
+                }
             }
-          }
         }
       , Cmd.none
       )
 
     OnInputRange c v ->
       ( { model
-        | inputField = InputRange
-          { c | input = v
-          }
+        | inputField =
+          InputRange
+            { c
+              | input = v
+            }
         }
       , Cmd.none
       )
 
     OnInputPlaceRegion c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
-      ( { model
-        | inputField = InputPlace
-          { c
-          | input =
-            { input
-            | region = val
-            }
+        ( { model
+          | inputField =
+            InputPlace
+              { c
+                | input =
+                  { input
+                    | region = val
+                  }
+              }
           }
-        }
-      , Cmd.none
-      )
+        , Cmd.none
+        )
 
     OnInputPlaceLocality c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
-      ( { model
-        | inputField = InputPlace
-          { c
-          | input =
-            { input
-            | locality = val
-            }
+        ( { model
+          | inputField =
+            InputPlace
+              { c
+                | input =
+                  { input
+                    | locality = val
+                  }
+              }
           }
-        }
-      , Cmd.none
-      )
+        , Cmd.none
+        )
 
     OnInputPlaceStreetAddress c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
-      ( { model
-        | inputField = InputPlace
-          { c
-          | input =
-            { input
-            | streetAddress = val
-            }
+        ( { model
+          | inputField =
+            InputPlace
+              { c
+                | input =
+                  { input
+                    | streetAddress = val
+                  }
+              }
           }
-        }
-      , Cmd.none
-      )
+        , Cmd.none
+        )
 
     OnInputPlaceExtendedAddress c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
-      ( { model
-        | inputField = InputPlace
-          { c
-          | input =
-            { input
-            | extendedAddress = val
-            }
+        ( { model
+          | inputField =
+            InputPlace
+              { c
+                | input =
+                  { input
+                    | extendedAddress = val
+                  }
+              }
           }
-        }
-      , Cmd.none
-      )
+        , Cmd.none
+        )
 
     OnInputPlaceBuilding c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
-      ( { model
-        | inputField = InputPlace
-          { c
-          | input =
-            { input
-            | building = val
-            }
+        ( { model
+          | inputField =
+            InputPlace
+              { c
+                | input =
+                  { input
+                    | building = val
+                  }
+              }
           }
-        }
-      , Cmd.none
-      )
+        , Cmd.none
+        )
 
     OnSelectDateYear c year ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDate
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromCalendarDate
-                    year
-                    (Date.month i)
-                    (Date.day i)
-                )
-                input
-            }
+          | inputField =
+            InputDate
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromCalendarDate
+                        year
+                        (Date.month i)
+                        (Date.day i)
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectDateMonth c month ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDate
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromCalendarDate
-                    (Date.year i)
-                    (Date.monthFromMonthNumber month)
-                    (Date.day i)
-                )
-                input
-            }
+          | inputField =
+            InputDate
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromCalendarDate
+                        (Date.year i)
+                        (Date.monthFromMonthNumber month)
+                        (Date.day i)
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectDateDay c day ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDate
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromCalendarDate
-                    (Date.year i)
-                    (Date.month i)
-                    day
-                )
-                input
-            }
+          | inputField =
+            InputDate
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromCalendarDate
+                        (Date.year i)
+                        (Date.month i)
+                        day
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectDateTimeYear c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDateTime
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromParts
-                    val
-                    (Date.month i)
-                    (Date.day i)
-                    (Date.hour i)
-                    (Date.minute i)
-                    (Date.second i)
-                    (Date.millisecond i)
-                )
-                input
-            }
+          | inputField =
+            InputDateTime
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromParts
+                        val
+                        (Date.month i)
+                        (Date.day i)
+                        (Date.hour i)
+                        (Date.minute i)
+                        (Date.second i)
+                        (Date.millisecond i)
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectDateTimeMonth c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDateTime
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromParts
-                    (Date.year i)
-                    (Date.monthFromMonthNumber val)
-                    (Date.day i)
-                    (Date.hour i)
-                    (Date.minute i)
-                    (Date.second i)
-                    (Date.millisecond i)
-                )
-                input
-            }
+          | inputField =
+            InputDateTime
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromParts
+                        (Date.year i)
+                        (Date.monthFromMonthNumber val)
+                        (Date.day i)
+                        (Date.hour i)
+                        (Date.minute i)
+                        (Date.second i)
+                        (Date.millisecond i)
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectDateTimeDay c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDateTime
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromParts
-                    (Date.year i)
-                    (Date.month i)
-                    val
-                    (Date.hour i)
-                    (Date.minute i)
-                    (Date.second i)
-                    (Date.millisecond i)
-                )
-                input
-            }
+          | inputField =
+            InputDateTime
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromParts
+                        (Date.year i)
+                        (Date.month i)
+                        val
+                        (Date.hour i)
+                        (Date.minute i)
+                        (Date.second i)
+                        (Date.millisecond i)
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectDateTimeHour c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDateTime
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromParts
-                    (Date.year i)
-                    (Date.month i)
-                    (Date.day i)
-                    val
-                    (Date.minute i)
-                    (Date.second i)
-                    (Date.millisecond i)
-                )
-                input
-            }
+          | inputField =
+            InputDateTime
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromParts
+                        (Date.year i)
+                        (Date.month i)
+                        (Date.day i)
+                        val
+                        (Date.minute i)
+                        (Date.second i)
+                        (Date.millisecond i)
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectDateTimeMinute c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputDateTime
-            { c | input =
-              Maybe.map
-                (\i ->
-                  Date.fromParts
-                    (Date.year i)
-                    (Date.month i)
-                    (Date.day i)
-                    (Date.hour i)
-                    val
-                    (Date.second i)
-                    (Date.millisecond i)
-                )
-                input
-            }
+          | inputField =
+            InputDateTime
+              { c
+                | input =
+                  Maybe.map
+                    (\i ->
+                      Date.fromParts
+                        (Date.year i)
+                        (Date.month i)
+                        (Date.day i)
+                        (Date.hour i)
+                        val
+                        (Date.second i)
+                        (Date.millisecond i)
+                    )
+                    input
+              }
           }
         , Cmd.none
         )
 
     OnSelectList c val ->
       ( { model
-        | inputField = SelectList
-          { c | input = val }
+        | inputField =
+          SelectList
+            { c | input = val }
         }
       , Cmd.none
       )
 
     OnSelectPhoto c val ->
       ( { model
-        | inputField = SelectPhoto
-          { c | input = val }
+        | inputField =
+          SelectPhoto
+            { c | input = val }
         }
       , Cmd.none
       )
 
     OnCheckMultiSelect c val checked ->
       ( { model
-        | inputField = MultiSelect
-          { c
-          | inputs =
-            if checked
-            then
-              val :: c.inputs
-            else
-              List.filter ((/=) val) c.inputs
-          }
+        | inputField =
+          MultiSelect
+            { c
+              | inputs =
+                if checked then
+                  val :: c.inputs
+                else
+                  List.filter ((/=) val) c.inputs
+            }
         }
       , Cmd.none
       )
 
     OnInputTextArea c val ->
       ( { model
-        | inputField = TextArea
-          { c | input = val }
+        | inputField =
+          TextArea
+            { c | input = val }
         }
       , Cmd.none
       )
 
     OnInputLocation c val ->
       let
-        input = c.input
+        input =
+          c.input
       in
         ( { model
-          | inputField = InputLocation
-            { c | input =
-              { input
-              | address = val
+          | inputField =
+            InputLocation
+              { c
+                | input =
+                  { input
+                    | address = val
+                  }
               }
-            }
           }
         , Cmd.none
         )
 
     Geocode msg ->
       let
-        (model', cmd') = Geocode.update msg model.geocode
+        ( model_, cmd_ ) =
+          Geocode.update msg model.geocode
+
         newModel =
-          ( { model
-            | geocode = model'
-            }
+          ({ model
+            | geocode = model_
+           }
           )
-        newCmd = Cmd.map Geocode cmd'
+
+        newCmd =
+          Cmd.map Geocode cmd_
       in
         case msg of
           Geocode.OnGetGeocode address location ->
             ( newModel
             , Cmd.batch
-              [ cmdSucceed <| OnSubmit <|
-                InputLocation
-                  { input =
-                    { location = location
-                    , address = address
+              [ cmdSucceed <|
+                OnSubmit <|
+                  InputLocation
+                    { input =
+                      { location = location
+                      , address = address
+                      }
                     }
-                  }
               , newCmd
               ]
             )
@@ -579,18 +633,18 @@ renderInputStringHelper toMsg t c =
     [ class "submitArea"
     , onSubmit (OnSubmit (InputString c))
     ]
-    [ div [class "control-group inputString"]
+    [ div [ class "control-group inputString" ]
       [ input
-        [ type' t
+        [ type_ t
         , value c.input
         , onInput (toMsg c)
         ]
         []
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]
@@ -599,19 +653,23 @@ renderInputStringHelper toMsg t c =
 
 
 renderInputString : StringInput -> Html Msg
-renderInputString = renderInputStringHelper OnInputString "text"
+renderInputString =
+  renderInputStringHelper OnInputString "text"
 
 
 renderInputEmail : StringInput -> Html Msg
-renderInputEmail = renderInputStringHelper OnInputEmail "email"
+renderInputEmail =
+  renderInputStringHelper OnInputEmail "email"
 
 
 renderInputPhoneNumber : StringInput -> Html Msg
-renderInputPhoneNumber = renderInputStringHelper OnInputPhoneNumber "tel"
+renderInputPhoneNumber =
+  renderInputStringHelper OnInputPhoneNumber "tel"
 
 
 renderInputPostalCode : StringInput -> Html Msg
-renderInputPostalCode = renderInputStringHelper OnInputPostalCode "text"
+renderInputPostalCode =
+  renderInputStringHelper OnInputPostalCode "text"
 
 
 renderInputConfirm : InputConfirmConfig -> Html Msg
@@ -620,10 +678,10 @@ renderInputConfirm c =
     [ class "submitArea"
     , onSubmit (OnSubmit (InputConfirm c))
     ]
-    [ div [class "submit"]
+    [ div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text c.label ]
       ]
@@ -636,24 +694,24 @@ renderInputName c =
     [ class "submitArea"
     , onSubmit (OnSubmit (InputName c))
     ]
-    [ div [class "control-group inputName"]
+    [ div [ class "control-group inputName" ]
       [ input
-        [ type' "text"
+        [ type_ "text"
         , value c.input.family
         , onInput (OnInputFamilyName c)
         ]
         []
       , input
-        [ type' "text"
+        [ type_ "text"
         , value c.input.given
         , onInput (OnInputGivenName c)
         ]
         []
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]
@@ -667,7 +725,7 @@ renderInputDate c =
     [ class "submitArea"
     , onSubmit (OnSubmit (InputDate c))
     ]
-    [ div [class "control-group inputDate"]
+    [ div [ class "control-group inputDate" ]
       [ select
         [ onChangeInt 2000 (OnSelectDateYear c)
         , class "form-control"
@@ -682,9 +740,11 @@ renderInputDate c =
               ]
           )
           (List.unfoldr
-            (\b -> if b == 1900
-              then Nothing
-              else Just (b, b-1)
+            (\b ->
+              if b == 1900 then
+                Nothing
+              else
+                Just ( b, b - 1 )
             )
             2016
           )
@@ -702,7 +762,7 @@ renderInputDate c =
               [ text (toString m ++ "月")
               ]
           )
-          [1..12]
+          (List.range 1 12)
         )
       , select
         [ onChangeInt 1 (OnSelectDateDay c)
@@ -717,13 +777,13 @@ renderInputDate c =
               [ text (toString d ++ "日")
               ]
           )
-          [1..31]
+          (List.range 1 31)
         )
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]
@@ -737,7 +797,7 @@ renderInputDateTime c =
     [ class "submitArea"
     , onSubmit (OnSubmit (InputDateTime c))
     ]
-    [ div [class "control-group inputDateTime"]
+    [ div [ class "control-group inputDateTime" ]
       [ select
         [ onChangeInt 2000 (OnSelectDateTimeYear c)
         , class "inputDateTime_year"
@@ -752,9 +812,11 @@ renderInputDateTime c =
               ]
           )
           (List.unfoldr
-            (\b -> if b == 1900
-              then Nothing
-              else Just (b, b-1)
+            (\b ->
+              if b == 1900 then
+                Nothing
+              else
+                Just ( b, b - 1 )
             )
             2016
           )
@@ -772,7 +834,7 @@ renderInputDateTime c =
               [ text (toString m ++ "月")
               ]
           )
-          [1..12]
+          (List.range 1 12)
         )
       , select
         [ onChangeInt 1 (OnSelectDateTimeDay c)
@@ -787,7 +849,7 @@ renderInputDateTime c =
               [ text (toString d ++ "日")
               ]
           )
-          [1..31]
+          (List.range 1 31)
         )
       , select
         [ onChangeInt 1 (OnSelectDateTimeHour c)
@@ -802,7 +864,7 @@ renderInputDateTime c =
               [ text (toString d ++ "時")
               ]
           )
-          [1..24]
+          (List.range 1 24)
         )
       , select
         [ onChangeInt 1 (OnSelectDateTimeMinute c)
@@ -817,13 +879,13 @@ renderInputDateTime c =
               [ text (toString d ++ "分")
               ]
           )
-          [1..59]
+          (List.range 1 59)
         )
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]
@@ -836,8 +898,8 @@ renderInputRange c =
   Html.form
     [ class "submitArea"
     ]
-    [ div [class "control-group inputRange"]
-      [ div [class "inputRange-labelArea"]
+    [ div [ class "control-group inputRange" ]
+      [ div [ class "inputRange-labelArea" ]
         [ span
           [ style
             [ ( "opacity"
@@ -864,7 +926,7 @@ renderInputRange c =
           ]
         ]
       , input
-        [ type' "range"
+        [ type_ "range"
         , class "inputRange-range"
         , intValue c.input
         , onInputInt 50 (OnInputRange c)
@@ -881,47 +943,47 @@ renderInputPlace c =
     [ class "submitArea"
     , onSubmit (OnSubmit (InputPlace c))
     ]
-    [ div [class "control-group inputPlace"]
+    [ div [ class "control-group inputPlace" ]
       [ input
-        [ type' "text"
+        [ type_ "text"
         , class "inputPlace_region"
         , value c.input.region
         , onInput (OnInputPlaceRegion c)
         ]
         []
       , input
-        [ type' "text"
+        [ type_ "text"
         , class "inputPlace_locality"
         , value c.input.locality
         , onInput (OnInputPlaceLocality c)
         ]
         []
       , input
-        [ type' "text"
+        [ type_ "text"
         , class "inputPlace_streetAddress"
         , value c.input.streetAddress
         , onInput (OnInputPlaceStreetAddress c)
         ]
         []
       , input
-        [ type' "text"
+        [ type_ "text"
         , class "inputPlace_extendedAddress"
         , value c.input.extendedAddress
         , onInput (OnInputPlaceExtendedAddress c)
         ]
         []
       , input
-        [ type' "text"
+        [ type_ "text"
         , class "inputPlace_building"
         , value c.input.building
         , onInput (OnInputPlaceBuilding c)
         ]
         []
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]
@@ -931,8 +993,8 @@ renderInputPlace c =
 
 renderInputLocation : Model -> InputLocationConfig -> Html Msg
 renderInputLocation model c =
-  div [class "popupMap"]
-    [ App.map Geocode (Geocode.view model.geocode)
+  div [ class "popupMap" ]
+    [ Html.map Geocode (Geocode.view model.geocode)
     ]
 
 
@@ -942,18 +1004,17 @@ renderSelectList c =
     [ class "submitArea"
     , onSubmit (OnSubmit (SelectList c))
     ]
-    [ div [class "control-group selectList"]
+    [ div [ class "control-group selectList" ]
       [ select
         [ onChange (OnSelectList c)
         , class "form-control"
         ]
-        (
-          option
-            [ value ""
-            , disabled True
-            ]
-            [] ::
-          List.map
+        (option
+          [ value ""
+          , disabled True
+          ]
+          []
+          :: List.map
             (\opt ->
               option
                 [ value opt.value
@@ -964,10 +1025,10 @@ renderSelectList c =
             c.options
         )
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]
@@ -981,18 +1042,17 @@ renderSelectPhoto c =
     [ class "submitArea"
     , onSubmit (OnSubmit (SelectPhoto c))
     ]
-    [ div [class "control-group selectPhoto"]
+    [ div [ class "control-group selectPhoto" ]
       [ select
         [ onChange (OnSelectPhoto c)
         , class "form-control"
         ]
-        (
-          option
-            [ value ""
-            , disabled True
-            ]
-            [] ::
-          List.map
+        (option
+          [ value ""
+          , disabled True
+          ]
+          []
+          :: List.map
             (\opt ->
               option
                 [ value opt
@@ -1002,10 +1062,10 @@ renderSelectPhoto c =
             c.options
         )
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]
@@ -1016,26 +1076,28 @@ renderSelectPhoto c =
 renderMultiSelect : MultiSelectConfig -> Html Msg
 renderMultiSelect c =
   let
-    left = c.maximum - List.length c.inputs
+    left =
+      c.maximum - List.length c.inputs
   in
     Html.form
       [ class "submitArea"
       , onSubmit (OnSubmit (MultiSelect c))
       ]
-      [ div [class "control-group multiSelect"]
-        <| List.map
+      [ div [ class "control-group multiSelect" ] <|
+        List.map
           (\select ->
             let
-              tagId = "checkbox" ++ escapeSpace select.value
+              tagId =
+                "checkbox" ++ escapeSpace select.value
             in
-              div [class "checkboxWrapper"]
+              div [ class "checkboxWrapper" ]
                 [ input
-                  [ type' "checkbox"
-                  , id  tagId
+                  [ type_ "checkbox"
+                  , id tagId
                   , class "checkboxWrapper_checkbox"
                   , onCheck (OnCheckMultiSelect c select.value)
-                  , checked
-                    <| List.member select.value c.inputs
+                  , checked <|
+                    List.member select.value c.inputs
                   ]
                   []
                 , label
@@ -1046,21 +1108,21 @@ renderMultiSelect c =
                 ]
           )
           c.selection
-      , div [class "submit"]
-        [ div [class "annotation"]
+      , div [ class "submit" ]
+        [ div [ class "annotation" ]
           [ text "残り: "
           , span
-              [ classList
-                [ ("error", left < 0)
-                ]
+            [ classList
+              [ ( "error", left < 0 )
               ]
-              [ text <| toString left ]
+            ]
+            [ text <| toString left ]
           , text " 個"
           ]
         , button
           [ class "btn default"
           , disabled (left < 0)
-          , type' "submit"
+          , type_ "submit"
           ]
           [ text "送信する"
           ]
@@ -1074,17 +1136,17 @@ renderTextArea c =
     [ class "submitArea"
     , onSubmit (OnSubmit (TextArea c))
     ]
-    [ div [class "control-group textArea"]
+    [ div [ class "control-group textArea" ]
       [ textarea
         [ onInput (OnInputTextArea c)
         ]
         [ text c.input
         ]
       ]
-    , div [class "submit"]
+    , div [ class "submit" ]
       [ button
         [ class "btn default"
-        , type' "submit"
+        , type_ "submit"
         ]
         [ text "送信する"
         ]

@@ -5,12 +5,13 @@ port module Components.Geocode
       ( OnGetGeocode
       , OnErrorGetGeocode
       )
-    , Error (..)
+    , Error(..)
     , init
     , update
     , subscriptions
     , view
     )
+
 {-| Module to store user settings.
 -}
 
@@ -19,17 +20,22 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
 import String
-
 import Components.SubmitArea.Types exposing (..)
 import Util exposing (cmdSucceed)
 
 
-
 -- PORTS
 
+
 port askGetGeocode : String -> Cmd msg
+
+
 port onGetGeocode : (Location -> msg) -> Sub msg
+
+
 port onErrorGetGeocode : (String -> msg) -> Sub msg
+
+
 port onLoadGoogleMapApi : (String -> msg) -> Sub msg
 
 
@@ -57,7 +63,7 @@ type Error
   | UNKNOWN_ERROR
 
 
-init : (Model, Cmd Msg)
+init : ( Model, Cmd Msg )
 init =
   ( { address = ""
     , location = Nothing
@@ -77,7 +83,7 @@ init =
 
 type Msg
   = AskGetGeocode
-  | OnGetGeocode' Location
+  | OnGetGeocode_ Location
   | OnGetGeocode String Location
   | OnErrorGetGeocode String
   | OnLoadGoogleMapApi String
@@ -87,7 +93,7 @@ type Msg
   | OnHideModal
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     AskGetGeocode ->
@@ -97,7 +103,7 @@ update msg model =
       , askGetGeocode model.address
       )
 
-    OnGetGeocode' location ->
+    OnGetGeocode_ location ->
       ( { model
         | location = Just location
         , loading = False
@@ -170,21 +176,23 @@ view model =
     , onSubmit OnUpdateMap
     ]
     [ input
-      [ type' "text"
+      [ type_ "text"
       , defaultValue model.address
       , onInput OnInputAddress
       , class "getGeocodeArea-input"
       ]
       []
     , button
-      [ type' "button"
+      [ type_ "button"
       , class "getGeocodeArea-checkbutton"
       , onClick OnUpdateMap
       , disabled (String.isEmpty model.input || model.loading)
       ]
-      [ text <| if model.loading
-        then "処理中..."
-        else "地図で確認する"
+      [ text <|
+        if model.loading then
+          "処理中..."
+        else
+          "地図で確認する"
       ]
     , div
       [ class "mapModal"
@@ -198,32 +206,35 @@ view model =
           , attribute "allowfullscreen" ""
           , on "load" (Json.succeed OnLoadIframe)
           , src <|
-            "https://www.google.com/maps/embed/v1/place?key=" ++
-            Maybe.withDefault "" model.key ++
-            "&q=" ++
-            -- If you just put `model.address` here,
-            -- the user can not see modal after they canceled modal
-            -- and reopen without editing address.
-            if model.showModal
-               then model.address
-               else ""
+            "https://www.google.com/maps/embed/v1/place?key="
+              ++ Maybe.withDefault "" model.key
+              ++ "&q="
+              ++ -- If you just put `model.address` here,
+                 -- the user can not see modal after they canceled modal
+                 -- and reopen without editing address.
+                 if model.showModal then
+                model.address
+                 else
+                ""
           ]
           []
         , button
-          [ type' "button"
+          [ type_ "button"
           , class "mapModal-card-cancelButton"
           , onClick OnHideModal
           ]
           [ text "場所を入力し直す" ]
         , button
-          [ type' "button"
+          [ type_ "button"
           , class "mapModal-card-submitButton"
           , disabled model.loading
           , onClick AskGetGeocode
           ]
-          [ text <| if model.loading
-            then "処理中..."
-            else "決定"
+          [ text <|
+            if model.loading then
+              "処理中..."
+            else
+              "決定"
           ]
         ]
       ]
@@ -238,7 +249,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ onLoadGoogleMapApi OnLoadGoogleMapApi
-    , onGetGeocode OnGetGeocode'
+    , onGetGeocode OnGetGeocode_
     , onErrorGetGeocode OnErrorGetGeocode
     ]
 
@@ -252,15 +263,21 @@ parseError str =
   case str of
     "OK" ->
       Just OK
+
     "ZERO_RESULTS" ->
       Just ZERO_RESULTS
+
     "OVER_QUERY_LIMIT" ->
       Just OVER_QUERY_LIMIT
+
     "REQUEST_DENIED" ->
       Just REQUEST_DENIED
+
     "INVALID_REQUEST" ->
       Just INVALID_REQUEST
+
     "UNKNOWN_ERROR" ->
       Just UNKNOWN_ERROR
+
     _ ->
       Nothing

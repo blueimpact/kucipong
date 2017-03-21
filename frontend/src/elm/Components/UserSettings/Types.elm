@@ -1,4 +1,5 @@
 module Components.UserSettings.Types exposing (..)
+
 {-| Types for `Components.UserSettings`
 
 # Common

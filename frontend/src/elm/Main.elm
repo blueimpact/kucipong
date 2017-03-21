@@ -1,7 +1,7 @@
-import Html exposing (..)
-import Html.App as App
-import Html.Attributes exposing (..)
+module Main exposing (..)
 
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Components.Conversation as Conversation
 import Components.SubmitArea as SubmitArea
 import Components.SubmitArea.Types exposing (..)
@@ -10,13 +10,12 @@ import Components.UserSettings as UserSettings
 import Util exposing (cmdSucceed)
 
 
-
 -- APP
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
-  App.program
+  program
     { init = init
     , view = view
     , update = update
@@ -36,27 +35,37 @@ type alias Model =
   }
 
 
-init : (Model, Cmd Msg)
+init : ( Model, Cmd Msg )
 init =
   let
-    initialSubmitArea = SubmitArea.init
-    initialTalkArea = TalkArea.init
-    initialConversation = Conversation.init
-    initialUserSettings = UserSettings.init
+    initialSubmitArea =
+      SubmitArea.init
+
+    initialTalkArea =
+      TalkArea.init
+
+    initialConversation =
+      Conversation.init
+
+    initialUserSettings =
+      UserSettings.init
+
     model =
       { submitArea = modelOf initialSubmitArea
       , talkArea = modelOf initialTalkArea
       , conversation = modelOf initialConversation
       , userSettings = modelOf initialUserSettings
       }
-    cmd = Cmd.batch
-      [ Cmd.map TalkArea <| cmdOf initialTalkArea
-      , Cmd.map SubmitArea <| cmdOf initialSubmitArea
-      , Cmd.map UserSettings <| cmdOf initialUserSettings
-      , Cmd.map Conversation <| cmdOf initialConversation
-      ]
+
+    cmd =
+      Cmd.batch
+        [ Cmd.map TalkArea <| cmdOf initialTalkArea
+        , Cmd.map SubmitArea <| cmdOf initialSubmitArea
+        , Cmd.map UserSettings <| cmdOf initialUserSettings
+        , Cmd.map Conversation <| cmdOf initialConversation
+        ]
   in
-    (model, cmd)
+    ( model, cmd )
 
 
 
@@ -70,81 +79,91 @@ type Msg
   | Conversation Conversation.Msg
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
   case message of
     SubmitArea msg ->
       let
-        (model', cmd') = SubmitArea.update msg model.submitArea
-        newModel = { model | submitArea = model' }
+        ( model_, cmd_ ) =
+          SubmitArea.update msg model.submitArea
+
+        newModel =
+          { model | submitArea = model_ }
       in
         case msg of
           SubmitArea.OnSubmit input ->
             ( newModel
             , Cmd.batch
-              [ Cmd.map SubmitArea cmd'
+              [ Cmd.map SubmitArea cmd_
               , Cmd.map TalkArea
-                ( cmdSucceed <|
+                (cmdSucceed <|
                   TalkArea.PushNewUserString <|
-                  formatInputField input
+                    formatInputField input
                 )
               , Cmd.map UserSettings
-                ( cmdSucceed <|
+                (cmdSucceed <|
                   UserSettings.AskStoreUserSetting
                     model.conversation.getTalkKey
                     input
                 )
               , Cmd.map Conversation
-                ( cmdSucceed <|
+                (cmdSucceed <|
                   Conversation.LoadNextQuestion input
                 )
               ]
             )
-            -- TODO Store the answer
 
+          -- TODO Store the answer
           _ ->
             ( newModel
-            , Cmd.map SubmitArea cmd'
+            , Cmd.map SubmitArea cmd_
             )
 
     TalkArea msg ->
       let
-        (model', cmd') = TalkArea.update msg model.talkArea
+        ( model_, cmd_ ) =
+          TalkArea.update msg model.talkArea
       in
-        ( { model | talkArea = model' }
-        , Cmd.map TalkArea cmd'
+        ( { model | talkArea = model_ }
+        , Cmd.map TalkArea cmd_
         )
 
     UserSettings msg ->
       let
-        (model', cmd') = UserSettings.update msg model.userSettings
+        ( model_, cmd_ ) =
+          UserSettings.update msg model.userSettings
+
         newModel =
           { model
-          | userSettings = model'
+            | userSettings = model_
           }
-        newCmd = Cmd.map UserSettings cmd'
+
+        newCmd =
+          Cmd.map UserSettings cmd_
       in
         case msg of
           UserSettings.OnLoadUserSettings (Just settings) ->
             ( newModel
             , Cmd.batch
               [ Cmd.map Conversation
-                ( cmdSucceed <|
+                (cmdSucceed <|
                   Conversation.PutDefaultUserSettings settings
                 )
               , newCmd
               ]
             )
+
           UserSettings.OnLoadUserSettings Nothing ->
             ( newModel
             , Cmd.batch
               [ Cmd.map Conversation
-                ( cmdSucceed <|
+                (cmdSucceed <|
                   Conversation.LoadInitialQuestion
                 )
               , newCmd
               ]
             )
+
           _ ->
             ( newModel
             , newCmd
@@ -152,19 +171,22 @@ update message model =
 
     Conversation msg ->
       let
-        (model', cmd') = Conversation.update msg model.conversation
+        ( model_, cmd_ ) =
+          Conversation.update msg model.conversation
+
         newModel =
-          { model | conversation = model' }
+          { model | conversation = model_ }
       in
         case msg of
           Conversation.OnLoadNextQuestion q ->
             let
-              submitArea = newModel.submitArea
+              submitArea =
+                newModel.submitArea
             in
               ( { newModel
                 | submitArea =
                   { submitArea
-                  | inputField = q.submitType
+                    | inputField = q.submitType
                   }
                 }
               , Cmd.batch
@@ -175,7 +197,7 @@ update message model =
 
           _ ->
             ( newModel
-            , Cmd.map Conversation cmd'
+            , Cmd.map Conversation cmd_
             )
 
 
@@ -185,18 +207,18 @@ update message model =
 
 view : Model -> Html Msg
 view model =
-  div [class "container"] [
-    div [class "header"] [
-      div [class "header_title"]
-        [text "Kucipong"]
-    ],
-    div [class "body", id "js-body"] [
-      App.map TalkArea (TalkArea.view model.talkArea)
-    ],
-    div [class "footer"] [
-      App.map SubmitArea (SubmitArea.view model.submitArea)
+  div [ class "container" ]
+    [ div [ class "header" ]
+      [ div [ class "header_title" ]
+        [ text "Kucipong" ]
+      ]
+    , div [ class "body", id "js-body" ]
+      [ Html.map TalkArea (TalkArea.view model.talkArea)
+      ]
+    , div [ class "footer" ]
+      [ Html.map SubmitArea (SubmitArea.view model.submitArea)
+      ]
     ]
-  ]
 
 
 
@@ -217,9 +239,11 @@ subscriptions model =
 -- UTILS
 
 
-modelOf : (a, b) -> a
-modelOf = fst
+modelOf : ( a, b ) -> a
+modelOf =
+  Tuple.first
 
 
-cmdOf : (a, b) -> b
-cmdOf = snd
+cmdOf : ( a, b ) -> b
+cmdOf =
+  Tuple.second

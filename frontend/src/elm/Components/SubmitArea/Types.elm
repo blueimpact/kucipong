@@ -1,4 +1,5 @@
 module Components.SubmitArea.Types exposing (..)
+
 {-| Types for `Components.SubmitArea`
 
 # Common
@@ -33,7 +34,6 @@ module Components.SubmitArea.Types exposing (..)
 @docs TextAreaConfig
 -}
 
-
 import Date exposing (Date)
 import Date.Extra as Date
 import List.Extra as List
@@ -49,13 +49,11 @@ type alias Location =
 
 type InputField
   = InputNone
-
-  -- Variations for string input.
+    -- Variations for string input.
   | InputString StringInput
   | InputEmail StringInput
   | InputPhoneNumber StringInput
   | InputPostalCode StringInput
-
   | InputConfirm InputConfirmConfig
   | InputName InputNameConfig
   | InputDate InputDateConfig
@@ -66,7 +64,6 @@ type InputField
   | SelectList SelectListConfig
   | SelectPhoto SelectPhotoConfig
   | MultiSelect MultiSelectConfig
-
   | TextArea TextAreaConfig
 
 
@@ -75,42 +72,59 @@ calcNextKey a =
   case a of
     InputNone ->
       ""
+
     InputString c ->
       c.input
+
     InputEmail c ->
       c.input
+
     InputPhoneNumber c ->
       c.input
+
     InputPostalCode c ->
       c.input
+
     InputConfirm c ->
       c.input
+
     InputName c ->
       c.input.family ++ " " ++ c.input.given
+
     InputDate c ->
       case c.input of
         Nothing ->
           ""
+
         Just d ->
           Date.toFormattedString "MM/dd/yyyy" d
+
     InputDateTime c ->
       case c.input of
         Nothing ->
           ""
+
         Just d ->
           Date.toFormattedString "MM/dd/yyyy HH:mm" d
+
     InputRange c ->
       toString c.input
+
     InputPlace c ->
       toString c.input.region
+
     InputLocation c ->
       toString c.input.address
+
     SelectList c ->
       c.input
+
     SelectPhoto c ->
       c.input
+
     MultiSelect c ->
       Maybe.withDefault "" <| List.head c.inputs
+
     TextArea c ->
       c.input
 
@@ -120,56 +134,78 @@ formatInputField a =
   case a of
     InputNone ->
       ""
+
     InputString c ->
       c.input
+
     InputEmail c ->
       c.input
+
     InputPhoneNumber c ->
       c.input
+
     InputPostalCode c ->
       c.input
+
     InputConfirm c ->
       c.label
+
     InputName c ->
       c.input.family ++ " " ++ c.input.given
+
     InputDate c ->
       case c.input of
         Nothing ->
           ""
+
         Just d ->
           Date.toFormattedString "MM/dd/yyyy" d
+
     InputDateTime c ->
       case c.input of
         Nothing ->
           ""
+
         Just d ->
           Date.toFormattedString "MM/dd/yyyy HH:mm" d
+
     InputRange c ->
       toString c.input ++ "%"
+
     InputPlace c ->
-      c.input.region ++ " " ++
-      c.input.locality ++ " " ++
-      c.input.streetAddress ++ " " ++
-      c.input.extendedAddress ++ " " ++
-      c.input.building
+      c.input.region
+        ++ " "
+        ++ c.input.locality
+        ++ " "
+        ++ c.input.streetAddress
+        ++ " "
+        ++ c.input.extendedAddress
+        ++ " "
+        ++ c.input.building
+
     InputLocation c ->
       c.input.address
 
     SelectList c ->
       let
-        opts = c.options
+        opts =
+          c.options
       in
-         Maybe.mapDefault ""
-         (\o -> o.label)
-         <| List.find (\o -> o.value == c.input) opts
+        Maybe.unwrap ""
+          (\o -> o.label)
+        <|
+          List.find (\o -> o.value == c.input) opts
+
     SelectPhoto c ->
       c.input
+
     MultiSelect c ->
-      String.join ", "
-        <| List.map .label
-        <| List.filter
-          (\s -> List.member s.value c.inputs)
-          c.selection
+      String.join ", " <|
+        List.map .label <|
+          List.filter
+            (\s -> List.member s.value c.inputs)
+            c.selection
+
     TextArea c ->
       c.input
 
@@ -228,10 +264,12 @@ type alias InputLocationInput =
   }
 
 
-type alias FamilyName = String
+type alias FamilyName =
+  String
 
 
-type alias GivenName = String
+type alias GivenName =
+  String
 
 
 type alias SelectListConfig =

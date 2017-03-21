@@ -1,4 +1,5 @@
 module Components.TalkArea.Types exposing (..)
+
 {-| Types for `Components.TalkArea`
 
 # Talk structure itself
@@ -14,7 +15,6 @@ module Components.TalkArea.Types exposing (..)
 -}
 
 
-
 {-| A record representing a series of messages by same speaker.
 -}
 type alias TalkBlock =
@@ -26,7 +26,8 @@ type alias TalkBlock =
 
 {-| Representing a talk balloon
 -}
-type alias TalkBody = List TalkParagraph
+type alias TalkBody =
+  List TalkParagraph
 
 
 {-| Representing a paragraph on a talk balloon

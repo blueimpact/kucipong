@@ -11,6 +11,7 @@ port module Components.UserSettings
     , update
     , subscriptions
     )
+
 {-| Module to store user settings.
 -}
 
@@ -18,32 +19,36 @@ import List
 import List.Extra as List
 import Result
 import String
-
 import Components.Conversation.Types exposing (..)
 import Components.SubmitArea.Types exposing (..)
 import Components.UserSettings.Types exposing (..)
 import Util exposing (cmdSucceed)
 
 
-
 -- PORTS
 
+
 port askStoreUserSettings : { key : TalkKey, settings : Model } -> Cmd msg
+
+
 port onStoreUserSettings : (TalkKey -> msg) -> Sub msg
 
 
 port askLoadUserSettings : () -> Cmd msg
-port onLoadUserSettings : ((Maybe UserSettings) -> msg) -> Sub msg
+
+
+port onLoadUserSettings : (Maybe UserSettings -> msg) -> Sub msg
 
 
 
 -- MODEL
 
 
-type alias Model = UserSettings
+type alias Model =
+  UserSettings
 
 
-init : (Model, Cmd Msg)
+init : ( Model, Cmd Msg )
 init =
   ( { areas = []
     , tags = []
@@ -65,31 +70,33 @@ type Msg
   | OnStoreUserSetting TalkKey
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     AskLoadUserSettings ->
       ( model
       , askLoadUserSettings ()
       )
+
     OnLoadUserSettings Nothing ->
       ( model
       , Cmd.none
       )
 
-    OnLoadUserSettings (Just model') ->
-      ( model'
+    OnLoadUserSettings (Just model_) ->
+      ( model_
       , Cmd.none
       )
 
     AskStoreUserSetting key input ->
       let
-        model' = updateUserSettings key input model
+        model_ =
+          updateUserSettings key input model
       in
-        ( model'
+        ( model_
         , askStoreUserSettings
           { key = key
-          , settings = model'
+          , settings = model_
           }
         )
 
@@ -97,6 +104,7 @@ update msg model =
       ( model
       , Cmd.none
       )
+
 
 
 -- SUBSCRIPTIONS
@@ -119,29 +127,37 @@ updateUserSettings key input model =
   case key of
     "area0" ->
       let
-        location = takeLocation input
+        location =
+          takeLocation input
       in
         { model
-        | areas = Maybe.withDefault [location] <|
-          List.setAt 0 location model.areas
+          | areas =
+            Maybe.withDefault [ location ] <|
+              List.setAt 0 location model.areas
         }
+
     "area" ->
       { model
-      | areas =
-        model.areas ++
-        [ takeLocation input ]
+        | areas =
+          model.areas
+            ++ [ takeLocation input ]
       }
+
     "tags" ->
       { model
-      | tags = takeTags input
+        | tags = takeTags input
       }
-    _ -> model
+
+    _ ->
+      model
+
 
 takeLocation : InputField -> InputLocationInput
 takeLocation input =
   case input of
     InputLocation { input } ->
       input
+
     _ ->
       { location =
         { latitude = 0
@@ -150,6 +166,7 @@ takeLocation input =
       , address = ""
       }
 
+
 takeTags : InputField -> List Int
 takeTags input =
   case input of
@@ -157,4 +174,6 @@ takeTags input =
       List.filterMap
         (String.toInt >> Result.toMaybe)
         inputs
-    _ -> []
+
+    _ ->
+      []
