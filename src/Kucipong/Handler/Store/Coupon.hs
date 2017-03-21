@@ -90,6 +90,7 @@ couponGet couponKey = do
       <$> maybeStoreEntity
       <*> maybeCouponEntity
       <*> pure maybeImageUrl
+    aboutStore = renderRoute storeR
   $(renderTemplateFromEnv "storeUser_store_coupon_id.html")
 
 couponEditGet

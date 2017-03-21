@@ -57,7 +57,7 @@
         data-address!="\#{format StoreAddress coupon}"
       )
   .aboutStore
-    a.btn.outerBtn(href="\#{renderRoute storeR}")
+    a.btn.outerBtn(href="\#{aboutStore}")
       | \#{format StoreName coupon}
   .moreContents
     | %{ case format CouponType coupon }

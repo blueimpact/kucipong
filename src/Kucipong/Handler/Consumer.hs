@@ -14,7 +14,7 @@ import Web.Spock.Core (SpockCtxT, get)
 
 import Kucipong.Db (Coupon(..), CouponType(..), Key(..))
 import Kucipong.Handler.Consumer.Types (ConsumerError(..))
-import Kucipong.Handler.Route (consumerCouponVarR, storeR)
+import Kucipong.Handler.Route (consumerCouponVarR, consumerStoreVarR)
 import Kucipong.Handler.Store.Types
        (CouponView(..), CouponViewKey(..), CouponViewTypes(..),
         CouponViewConditions(..), CouponViewCouponType(..))
@@ -41,8 +41,10 @@ couponGet couponKey = do
       <$> maybeStoreEntity
       <*> maybeCouponEntity
       <*> pure maybeImageUrl
-  -- TODO
-  -- let storeR = undefined
+    aboutStore =
+      maybe mempty
+        (renderRoute consumerStoreVarR . entityKey)
+        maybeStoreEntity
   $(renderTemplateFromEnv "endUser_coupon_id.html")
   where
     handleErr :: Text -> ActionCtxT ctx m a

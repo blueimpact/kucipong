@@ -22,7 +22,7 @@ instance View CouponView CouponViewKey where
 
 instance View CouponView CouponViewTypes where
   type ViewO CouponViewTypes = Text
-  format StoreName = fromMaybe "(no title)" . storeName . store
+  format StoreName = fromMaybe "(no store name)" . storeName . store
   format StoreAddress = fromMaybe mempty . storeAddress . store
   format ImageUrl = fromMaybe mempty . couponImageUrl
   format Title = couponTitle . coupon
