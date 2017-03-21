@@ -8,19 +8,22 @@ import Control.FromSum (fromEitherMM, fromMaybeM)
 import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
-import Database.Persist.Sql (Entity(..), fromSqlKey)
+import Database.Persist.Sql (Entity(..))
 import Web.Spock (ActionCtxT, params, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
-       (Coupon(..), CouponType(..), Image(..), Key(..), Store(..),
+       (Coupon(..), CouponType(..), Image(..), Key(..),
         couponTypeToText, percentToText, priceToText)
 import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Route
        (storeCouponR, storeCouponCreateR, storeCouponVarR,
         storeCouponVarEditR, storeR)
-import Kucipong.Handler.Store.Types (StoreError(..))
+import Kucipong.Handler.Store.Types
+       (StoreError(..), CouponView(..), CouponViewKey(..),
+        CouponViewTypes(..), CouponViewConditions(..),
+        CouponViewCouponType(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.I18n (label)
@@ -35,6 +38,7 @@ import Kucipong.Session (Store, Session)
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreKey)
+import Kucipong.View (View(..))
 
 couponNewGet
   :: forall xs m.
@@ -81,6 +85,11 @@ couponGet couponKey = do
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
   let maybeImage = couponImage . entityVal =<< maybeCouponEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
+  let
+    mdata = CouponView
+      <$> maybeStoreEntity
+      <*> maybeCouponEntity
+      <*> pure maybeImageUrl
   $(renderTemplateFromEnv "storeUser_store_coupon_id.html")
 
 couponEditGet

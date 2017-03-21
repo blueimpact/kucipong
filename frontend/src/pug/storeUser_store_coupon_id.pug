@@ -2,8 +2,8 @@ include _layout
   body#main.wrapper
     include _storeHeader
       | クーポン情報
-    | %{ case maybeCouponEntity }
-    | %{ of Just (Entity couponKey coupon) }
+    | %{ case mdata }
+    | %{ of Just coupon }
     .store
       .store_editBtn
         a.btn.outerBtn(href="\#{renderRoute storeCouponVarEditR couponKey}")
