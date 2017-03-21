@@ -284,15 +284,15 @@ if (TARGET_ENV === 'production') {
 
     plugins: [
       new CopyWebpackPlugin([
-        {
-          from: 'src/favicon.ico'
-        },
+        // {
+        //   from: 'src/favicon.ico'
+        // },
       ]),
 
-      new webpack.optimize.OccurenceOrderPlugin(),
-
       // Extract CSS into a separate file
-      new ExtractTextPlugin( '/static/[name].css', { allChunks: true } ),
+      new ExtractTextPlugin({
+        filename: '/static/[name].css', disable: false, allChunks: true
+      }),
 
       // Minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({
