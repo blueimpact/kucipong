@@ -5,7 +5,7 @@ import Web.Routing.Combinators (PathState(Open))
 import Web.Spock (Path, (<//>), var)
 
 import Kucipong.LoginToken (LoginToken)
-import Kucipong.Db (Coupon, Key(..))
+import Kucipong.Db (Coupon, Key(..), Store)
 
 -----------------
 -- Path Pieces --
@@ -89,3 +89,6 @@ storeLoginVarR = storeR <//> loginR <//> var
 
 consumerCouponVarR :: Path '[Key Coupon] 'Open
 consumerCouponVarR = consumerR <//> couponR <//> var
+
+consumerStoreVarR :: Path '[Key Store] 'Open
+consumerStoreVarR = consumerR <//> storeR <//> var

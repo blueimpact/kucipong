@@ -3,86 +3,40 @@
   .card
     .card_header
       h2.card_header_text
-        | %{ case maybeStoreEntity }
-        | %{ of Just storeEntity }
-        | \#{fromMaybe "(no title)" (storeName (entityVal storeEntity))}
-        | %{ of Nothing }
-        | (no title)
-        | %{ endcase }
+        | \#{format StoreName coupon}
       .card_header_icon
         .icon.icon-fav.checkableIcon
-          input#js-fav-3.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{fromSqlKey couponKey}")
-          label.checkableIcon-icon(for="js-fav-3")
+          input#js-fav.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{format CouponId coupon}")
+          label.checkableIcon-icon(for="js-fav")
 
     .annotatedImageGroup
       img.annotatedImageGroup-image(
-        src="\#{fromMaybe mempty maybeImageUrl}"
-        alt="七輪焼き肉・安安"
+        src="\#{format ImageUrl coupon}"
+        alt="\#{format StoreName coupon}"
       )
       span.annotatedImageGroup-annotation 画像は一例です
     .card_body
       .card_body_title
-        | \#{couponTitle coupon}
+        | \#{format Title coupon}
 
       .card_body_summary.highlightedBlock
-        | %{ case couponCouponType coupon }
+        | %{ case format CouponType coupon }
         | %{ of CouponTypeDiscount }
-        |     %{ case couponDiscountPercent coupon }
-        |     %{ of Just discountPercent }
-        span.highlightedBlock-sub \#{discountPercent}% OFF
-        |     %{ of Nothing }
-        |     %{ endcase }
-
-        |     %{ case couponDiscountMinimumPrice coupon }
-        |     %{ of Just discountMinimumPrice }
-        span.highlightedBlock-main \#{discountMinimumPrice}円
-        |     %{ of Nothing }
-        |     %{ endcase }
+        span.highlightedBlock-sub \#{format DiscountPercent coupon}
+        span.highlightedBlock-main \#{format DiscountMinimumPrice coupon}
 
         | %{ of CouponTypeGift }
-        |     %{ case couponGiftContent coupon }
-        |     %{ of Just giftContent }
-        span.highlightedBlock-sub \#{giftContent}
-        |     %{ of Nothing }
-        |     %{ endcase }
-
-        |     %{ case couponGiftMinimumPrice coupon }
-        |     %{ of Just giftMinimumPrice }
-        span.highlightedBlock-main \#{giftMinimumPrice}円
-        |     %{ of Nothing }
-        |     %{ endcase }
-
-        |     %{ case couponGiftReferencePrice coupon }
-        |     %{ of Just giftReferencePrice }
-        span.highlightedBlock-main \#{giftReferencePrice}円
-        |     %{ of Nothing }
-        |     %{ endcase }
+        span.highlightedBlock-sub \#{format GiftContent coupon}
+        span.highlightedBlock-main \#{format GiftMinimumPrice coupon}
+        span.highlightedBlock-main \#{format GiftReferencePrice coupon}
 
         | %{ of CouponTypeSet }
-        |     %{ case couponSetContent coupon }
-        |     %{ of Just setContent }
-        span.highlightedBlock-sub \#{setContent}
-        |     %{ of Nothing }
-        |     %{ endcase }
-
-        |     %{ case couponSetPrice coupon }
-        |     %{ of Just setPrice }
-        span.highlightedBlock-main \#{setPrice}円
-        |     %{ of Nothing }
-        |     %{ endcase }
-
-        |     %{ case couponSetReferencePrice coupon }
-        |     %{ of Just setReferencePrice }
-        span.highlightedBlock-main \#{setReferencePrice}円
-        |     %{ of Nothing }
-        |     %{ endcase }
+        span.highlightedBlock-sub \#{format SetContent coupon}
+        span.highlightedBlock-main \#{format SetPrice coupon}
+        span.highlightedBlock-main \#{format SetReferencePrice coupon}
 
         | %{ of CouponTypeOther }
-        |     %{ case couponOtherContent coupon }
-        |     %{ of Just otherContent }
-        span.highlightedBlock-sub \#{otherContent}
-        |     %{ of Nothing }
-        |     %{ endcase }
+        span.highlightedBlock-sub \#{format OtherContent coupon}
 
         | %{ endcase }
 
@@ -91,73 +45,39 @@
         span.card_body_expiration-title
           | 有効期限
         span.card_body_expiration-body
-          | %{ case couponValidFrom coupon }
-          | %{ of Just validFrom }
-          | \#{tshow validFrom}から
-          | %{ of Nothing }
-          | %{ endcase }
-
-          | %{ case couponValidUntil coupon }
-          | %{ of Just validUntil }
-          | \#{tshow validUntil}まで
-          | %{ of Nothing }
-          | %{ endcase }
+          | \#{format ValidFrom coupon}
+          | \#{format ValidUntil coupon}
   .annotation ※ この画面を店舗でご提示ください
   .location
     .location_map
-      | %{ case (join . fmap (storeAddress . entityVal)) maybeStoreEntity }
-      | %{ of Just address }
-      iframe.location_map-frame(
+      iframe.location_map-frame.js-googleMap(
         frameborder="0"
         allowfullscreen
-        src='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q=\#{address}'
+        data-api-key=data.googleMapApiKey
+        data-address!="\#{format StoreAddress coupon}"
       )
-      | %{ of Nothing }
-      | No address is set
-      | %{ endcase }
   .aboutStore
-    a.btn.outerBtn(href="\#{renderRoute storeR}")
-      | %{ case maybeStoreEntity }
-      | %{ of Just storeEntity }
-      | \#{fromMaybe "(no title)" (storeName (entityVal storeEntity))}
-      | %{ of Nothing }
-      | (no title)
-      | %{ endcase }
+    a.btn.outerBtn(href="\#{aboutStore}")
+      | \#{format StoreName coupon}
   .moreContents
-    | %{ case couponCouponType coupon }
+    | %{ case format CouponType coupon }
     | %{ of CouponTypeDiscount }
-    |     %{ case couponDiscountOtherConditions coupon }
-    |     %{ of Just discountOtherConditions }
-    |         %{ forall condition <- lines discountOtherConditions }
+    |     %{ forall condition <- format DiscountOtherConditions coupon }
     p.moreContents_txt \#{condition}
-    |         %{ endforall }
-    |     %{ of Nothing }
-    |     %{ endcase }
+    |     %{ endforall }
 
     | %{ of CouponTypeGift }
-    |     %{ case couponGiftOtherConditions coupon }
-    |     %{ of Just giftOtherConditions }
-    |         %{ forall condition <- lines giftOtherConditions }
+    |     %{ forall condition <- format GiftOtherConditions coupon }
     p.moreContents_txt \#{condition}
-    |         %{ endforall }
-    |     %{ of Nothing }
-    |     %{ endcase }
+    |     %{ endforall }
 
     | %{ of CouponTypeSet }
-    |     %{ case couponSetOtherConditions coupon }
-    |     %{ of Just setOtherConditions }
-    |         %{ forall condition <- lines setOtherConditions }
+    |     %{ forall condition <- format SetOtherConditions coupon }
     p.moreContents_txt \#{condition}
-    |         %{ endforall }
-    |     %{ of Nothing }
-    |     %{ endcase }
+    |     %{ endforall }
 
     | %{ of CouponTypeOther }
-    |     %{ case couponOtherConditions coupon }
-    |     %{ of Just otherConditions }
-    |         %{ forall condition <- lines otherConditions }
+    |     %{ forall condition <- format OtherConditions coupon }
     p.moreContents_txt \#{condition}
-    |         %{ endforall }
-    |     %{ of Nothing }
-    |     %{ endcase }
+    |     %{ endforall }
     | %{ endcase }

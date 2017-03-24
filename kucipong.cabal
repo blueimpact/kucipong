@@ -74,6 +74,9 @@ library
                      , Kucipong.Spock
                      , Kucipong.Spock.ReqParam
                      , Kucipong.Util
+                     , Kucipong.View
+                     , Kucipong.View.Class
+                     , Kucipong.View.Instance
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , amazonka

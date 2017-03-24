@@ -8,18 +8,22 @@ import Kucipong.Prelude
 
 import Control.FromSum (fromMaybeM)
 import Data.Default (def)
-import Database.Persist.Sql (Entity(..), fromSqlKey)
+import Database.Persist.Sql (Entity(..))
 import Web.Spock (ActionCtxT, renderRoute)
 import Web.Spock.Core (SpockCtxT, get)
 
-import Kucipong.Db (Coupon(..), CouponType(..), Key(..), Store(..))
+import Kucipong.Db (Coupon(..), CouponType(..), Key(..))
 import Kucipong.Handler.Consumer.Types (ConsumerError(..))
-import Kucipong.Handler.Route (consumerCouponVarR, storeR)
+import Kucipong.Handler.Route (consumerCouponVarR, consumerStoreVarR)
+import Kucipong.Handler.Store.Types
+       (CouponView(..), CouponViewKey(..), CouponViewTypes(..),
+        CouponViewConditions(..), CouponViewCouponType(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (MonadKucipongAws(..), MonadKucipongDb(..), awsImageS3Url,
         dbFindStoreByStoreKey, dbFindPublicCouponById)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
+import Kucipong.View (View(..))
 
 couponGet
   :: forall ctx m.
@@ -32,8 +36,15 @@ couponGet couponKey = do
   maybeStoreEntity <- dbFindStoreByStoreKey $ couponStoreId coupon
   let maybeImage = couponImage . entityVal =<< maybeCouponEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
-  -- TODO
-  -- let storeR = undefined
+  let
+    mdata = CouponView
+      <$> maybeStoreEntity
+      <*> maybeCouponEntity
+      <*> pure maybeImageUrl
+    aboutStore =
+      maybe mempty
+        (renderRoute consumerStoreVarR . entityKey)
+        maybeStoreEntity
   $(renderTemplateFromEnv "endUser_coupon_id.html")
   where
     handleErr :: Text -> ActionCtxT ctx m a
