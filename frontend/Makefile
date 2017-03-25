@@ -6,6 +6,7 @@ build: yarn-install
 
 clean:
 	rm -rf dist
+	rm -rf elm-stuff
 
 yarn-install:
 	yarn install

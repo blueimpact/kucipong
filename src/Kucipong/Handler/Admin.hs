@@ -26,11 +26,13 @@ import Kucipong.Form
        (AdminLoginForm(AdminLoginForm),
         AdminStoreCreateForm(AdminStoreCreateForm),
         AdminStoreDeleteForm(AdminStoreDeleteForm),
-        AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm))
+        AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm),
+        AdminStoreLoginForm(AdminStoreLoginForm))
 import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
 import Kucipong.Handler.Route
        (adminR, adminLoginR, adminLoginVarR, adminStoreCreateR,
-        adminStoreDeleteR, adminStoreDeleteConfirmR, adminStoreLoginR)
+        adminStoreDeleteR, adminStoreDeleteConfirmR, adminStoreLoginR,
+        storeR)
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
@@ -42,7 +44,7 @@ import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Admin, Session(..))
 import Kucipong.Spock
        (ContainsAdminSession, getAdminCookie, getAdminEmail,
-        getReqParamErr, setAdminCookie)
+        getReqParamErr, setAdminCookie, setStoreCookie)
 
 -- | Handler for returning the admin login page.
 loginGet
@@ -105,6 +107,36 @@ doLoginGet loginToken = do
       setStatus forbidden403
       let errors = [label def AdminErrorTokenExpired]
       $(renderTemplateFromEnv "adminUser_login.html")
+
+-- | Return the store create page for an admin.
+loginAsStoreGet
+  :: forall xs m.
+     MonadIO m
+  => ActionCtxT (HVect xs) m ()
+loginAsStoreGet = $(renderTemplateFromEnv "adminUser_admin_store_login.html")
+
+loginAsStorePost
+  :: forall xs m.
+     ( MonadIO m
+     , MonadKucipongCookie m
+     , MonadKucipongDb m
+     , MonadLogger m
+     )
+  => ActionCtxT (HVect xs) m ()
+loginAsStorePost = do
+  (AdminStoreLoginForm storeEmailParam) <- getReqParamErr handleErr
+  maybeStoreEntity <- dbFindStoreByEmail storeEmailParam
+  (Entity storeKey _) <-
+    fromMaybeM (handleErr $ label def AdminErrorNoStoreEmail) maybeStoreEntity
+  setStoreCookie storeKey
+  redirect $ renderRoute storeR
+  where
+    handleErr :: Text -> ActionCtxT (HVect xs) m a
+    handleErr errMsg = do
+      $(logDebug) $
+        "got following error in admin loginAsStorePost handler: " <> errMsg
+      let errors = [errMsg]
+      $(renderTemplateFromEnv "adminUser_admin_store_login.html")
 
 -- | Return the store create page for an admin.
 storeCreateGet
@@ -233,3 +265,5 @@ adminComponent = do
     get adminStoreDeleteR storeDeleteGet
     post adminStoreDeleteR storeDeletePost
     post adminStoreDeleteConfirmR storeDeleteConfirmPost
+    get adminStoreLoginR loginAsStoreGet
+    post adminStoreLoginR loginAsStorePost
