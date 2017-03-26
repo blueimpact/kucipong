@@ -13,6 +13,9 @@ templateRoot = "admin"
 templateLogin :: FilePath
 templateLogin = templateRoot </> "login.html"
 
+templateStoreLogin :: FilePath
+templateStoreLogin = templateRoot </> "store_login.html"
+
 templateStoreCreate :: FilePath
 templateStoreCreate = templateRoot </> "store_create.html"
 

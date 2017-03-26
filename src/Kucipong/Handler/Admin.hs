@@ -114,7 +114,7 @@ loginAsStoreGet
   :: forall xs m.
      MonadIO m
   => ActionCtxT (HVect xs) m ()
-loginAsStoreGet = $(renderTemplateFromEnv "adminUser_admin_store_login.html")
+loginAsStoreGet = $(renderTemplateFromEnv templateStoreLogin)
 
 loginAsStorePost
   :: forall xs m.
@@ -137,7 +137,7 @@ loginAsStorePost = do
       $(logDebug) $
         "got following error in admin loginAsStorePost handler: " <> errMsg
       let errors = [errMsg]
-      $(renderTemplateFromEnv "adminUser_admin_store_login.html")
+      $(renderTemplateFromEnv templateStoreLogin)
 
 -- | Return the store create page for an admin.
 storeCreateGet

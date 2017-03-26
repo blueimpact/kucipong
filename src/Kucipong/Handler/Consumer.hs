@@ -37,7 +37,6 @@ couponGet couponKey = do
   maybeStoreEntity <- dbFindStoreByStoreKey $ couponStoreId coupon
   let maybeImage = couponImage . entityVal =<< maybeCouponEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
-<<<<<<< 9dafd65fe403382ba4900b6ad4a1f0b177a8adad
   let
     mdata = CouponView
       <$> maybeStoreEntity
@@ -47,12 +46,7 @@ couponGet couponKey = do
       maybe mempty
         (renderRoute consumerStoreVarR . entityKey)
         maybeStoreEntity
-  $(renderTemplateFromEnv "endUser_coupon_id.html")
-=======
-  -- TODO
-  -- let storeR = undefined
   $(renderTemplateFromEnv templateCouponId)
->>>>>>> Restructure template file hierarchy.
   where
     handleErr :: Text -> ActionCtxT ctx m a
     handleErr errMsg = do
