@@ -1,6 +1,6 @@
 "use strict";
 
-var imageSelector = function (config) {
+var imageSelector = function imageSelector(config) {
   var preview = document.getElementById(config.preview);
   var selector = document.getElementById(config.selector);
   var uploadBtn = document.getElementById(config.uploadBtn);
@@ -9,7 +9,7 @@ var imageSelector = function (config) {
   var defaultImage = document.getElementById(config.defaultImage);
 
   var defaultUrl = preview.src;
-  var clearSelector = function () {
+  var clearSelector = function clearSelector() {
     selector.value = '';
     selector.type = '';
     selector.type = 'file';
@@ -51,4 +51,15 @@ var imageSelector = function (config) {
   }, false);
 };
 
-module.exports = imageSelector;
+var parents = Array.prototype.slice.call(document.getElementsByClassName('js-imageSelector') || []);
+parents.forEach(function (p) {
+  var config = {
+    preview: (p.getElementsByClassName('js-imageSelectorPreview')[0] || {}).id,
+    selector: (p.getElementsByClassName('js-imageSelectorCore')[0] || {}).id,
+    uploadBtn: (p.getElementsByClassName('js-imageSelectorUploadBtn')[0] || {}).id,
+    resetBtn: (p.getElementsByClassName('js-imageSelectorResetBtn')[0] || {}).id,
+    defaultImage: (p.getElementsByClassName('js-imageSelectorDefaultImage')[0] || {}).id
+  };
+  console.log(config);
+  imageSelector(config);
+});

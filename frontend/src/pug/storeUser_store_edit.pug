@@ -136,11 +136,11 @@ include _layout
               .storeBody_info_body_row-header
                 | 店舗イメージ画像
               .storeBody_info_body_row-body
-                .uploaderWrapper
-                  input#storeImageSelector.uploaderCore(
+                .uploaderWrapper.js-imageSelector
+                  input#storeImageSelector.uploaderCore.js-imageSelectorCore(
                     name="image" type="file" accept="image/*"
                   )
-                  input#defaultImage(
+                  input#defaultImage.js-imageSelectorDefaultImage(
                     name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
                   )
                   | %{ case imageUrl }
@@ -152,8 +152,8 @@ include _layout
                     src="\#{iUrl}"
                   )
                   | %{ of Nothing }
-                  label#storeImageLabel.uploaderLabel(for="storeImageSelector")
-                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
+                  label#storeImageLabel.uploaderLabel.js-imageSelectorUploadBtn(for="storeImageSelector")
+                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image.js-imageSelectorPreview(
                   )
                   | %{ endcase }
             .storeSubmit
