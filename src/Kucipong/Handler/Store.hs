@@ -30,7 +30,9 @@ import Kucipong.Handler.Route
        (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.TemplatePath
-import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
+import Kucipong.Handler.Store.Types
+       (StoreError(..), StoreMsg(..), StoreView(..), StoreViewText(..),
+        StoreViewTexts(..), StoreViewImageUrl(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.I18n (label)
@@ -46,6 +48,7 @@ import Kucipong.Session (Store, Session)
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreCookie, getStoreKey, setStoreCookie)
+import Kucipong.View (View(..))
 
 -- | Handler for returning the store login page.
 loginGet
@@ -118,34 +121,14 @@ storeGet
   => ActionCtxT (HVect xs) m ()
 storeGet = do
   (StoreSession storeKey) <- getStoreKey
-  maybeStore <- fmap entityVal <$> dbFindStoreByStoreKey storeKey
-  Store { storeName
-        , storeSalesPoint
-        , storeBusinessCategory
-        , storeBusinessCategoryDetails
-        , storeAddress
-        , storePhoneNumber
-        , storeBusinessHours
-        , storeRegularHoliday
-        , storeUrl
-        , storeImage
-        } <- fromMaybeM handleNoStoreError maybeStore
+  maybeStoreEntity <- dbFindStoreByStoreKey storeKey
+  let maybeImage = storeImage . entityVal =<< maybeStoreEntity
+  maybeImageUrl <- traverse awsImageS3Url maybeImage
   let
-    name = storeName
-    businessCategory = storeBusinessCategory
-    businessCategoryDetails = storeBusinessCategoryDetails
-    salesPoint = storeSalesPoint
-    address = storeAddress
-    phoneNumber = storePhoneNumber
-    businessHourLines = maybe [] lines storeBusinessHours
-    regularHoliday = storeRegularHoliday
-    url = storeUrl
-  imageUrl <- traverse awsImageS3Url storeImage
+    mdata = StoreView
+      <$> maybeStoreEntity
+      <*> pure maybeImageUrl
   $(renderTemplateFromEnv templateStore)
-  where
-    handleNoStoreError :: ActionCtxT (HVect xs) m a
-    handleNoStoreError =
-      redirect $ renderRoute storeEditR
 
 storeEditGet
   :: forall xs n m.
