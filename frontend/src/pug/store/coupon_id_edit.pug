@@ -1,8 +1,8 @@
-include _layout
+include ../common/_layout
   body#main.wrapper
-    include _storeHeader
+    include _header
       | クーポン情報 編集
-    include _messageArea
+    include ../common/_messageArea
     form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}")
       .couponEditor_signbord
         .couponEditor_titleArea
@@ -21,24 +21,24 @@ include _layout
             label.labeledRow-header(for="image")
               | イメージ画像
             .labeledRow-body
-              .uploaderWrapper
-                input#couponImageSelector.uploaderCore(
+              .uploaderWrapper.js-imageSelector
+                input#couponImageSelector.uploaderCore.js-imageSelectorCore(
                   name="image" type="file" accept="image/*"
                 )
-                input#defaultImage(
+                input#defaultImage.js-imageSelectorDefaultImage(
                   name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
                 )
                 | %{ case maybeImageUrl }
                 | %{ of Just iUrl }
-                label#couponImageLabel.uploaderLabel
-                button.uploaderReset#resetImage(type="button")
+                label#couponImageLabel.uploaderLabel.js-imageSelectorUploadBtn
+                button.uploaderReset#resetImage.js-imageSelectorResetBtn(type="button")
                   | Restore initial image.
-                img#couponImage.uploaderImg.storeBody_info_body_row-body-image(
+                img#couponImage.uploaderImg.storeBody_info_body_row-body-image.js-imageSelectorPreview(
                   src="\#{iUrl}"
                 )
                 | %{ of Nothing }
-                label#couponImageLabel.uploaderLabel(for="couponImageSelector")
-                img#couponImage.uploaderImg.storeBody_info_body_row-body-image(
+                label#couponImageLabel.uploaderLabel.js-imageSelectorUploadBtn(for="couponImageSelector")
+                img#couponImage.uploaderImg.storeBody_info_body_row-body-image.js-imageSelectorPreview(
                 )
                 | %{ endcase }
 
@@ -67,6 +67,7 @@ include _layout
               select#couponType(
                 name="couponType"
                 value="\#{fromMaybe mempty couponType}"
+                data-select-child="type"
               )
                 option(
                   value="\#{key CouponTypeDiscount}"

@@ -31,12 +31,15 @@ library
                      , Kucipong.Form
                      , Kucipong.Handler
                      , Kucipong.Handler.Admin
+                     , Kucipong.Handler.Admin.TemplatePath
                      , Kucipong.Handler.Admin.Types
                      , Kucipong.Handler.Consumer
+                     , Kucipong.Handler.Consumer.TemplatePath
                      , Kucipong.Handler.Consumer.Types
                      , Kucipong.Handler.Route
                      , Kucipong.Handler.Store
                      , Kucipong.Handler.Store.Coupon
+                     , Kucipong.Handler.Store.TemplatePath
                      , Kucipong.Handler.Store.Types
                      , Kucipong.Handler.Store.Util
                      , Kucipong.Handler.Static

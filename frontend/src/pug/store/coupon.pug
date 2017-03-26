@@ -1,6 +1,6 @@
-include _layout
+include ../common/_layout
   body#main.wrapper
-    include _storeHeader
+    include _header
       | クーポン一覧
     .store
       .store_editBtn
@@ -11,6 +11,6 @@ include _layout
     |   No Coupons
     | %{ of entities }
     |   %{ forall (Entity couponKey coupon) <- entities }
-    include _couponSimple
+    include ../common/_couponSimple
     |   %{ endforall }
     | %{ endcase }

@@ -5,5 +5,4 @@
 require('./styles/endUser.scss');
 
 require('./js/_googleMap.js');
-
-Fav.view();
+require('./js/_fav.js').view();

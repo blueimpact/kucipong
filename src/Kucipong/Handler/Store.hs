@@ -29,6 +29,7 @@ import Kucipong.Form
 import Kucipong.Handler.Route
        (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
+import Kucipong.Handler.Store.TemplatePath
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
@@ -51,7 +52,7 @@ loginGet
   :: forall ctx m.
      (MonadIO m)
   => ActionCtxT ctx m ()
-loginGet = $(renderTemplateFromEnv "storeUser_login.html")
+loginGet = $(renderTemplateFromEnv templateLogin)
 
 -- | Handler for sending an email to the store owner that they can use to
 -- login.
@@ -70,13 +71,13 @@ loginPost = do
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail email (storeLoginTokenLoginToken storeLoginToken)
   let messages = [label def StoreMsgSentVerificationEmail]
-  $(renderTemplateFromEnv "storeUser_login.html")
+  $(renderTemplateFromEnv templateLogin)
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $ "got following error in store loginPost handler: " <> errMsg
       let errors = [errMsg]
-      $(renderTemplateFromEnv "storeUser_login.html")
+      $(renderTemplateFromEnv templateLogin)
 
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
@@ -140,7 +141,7 @@ storeGet = do
     regularHoliday = storeRegularHoliday
     url = storeUrl
   imageUrl <- traverse awsImageS3Url storeImage
-  $(renderTemplateFromEnv "storeUser_store.html")
+  $(renderTemplateFromEnv templateStore)
   where
     handleNoStoreError :: ActionCtxT (HVect xs) m a
     handleNoStoreError =
@@ -169,7 +170,7 @@ storeEditGet = do
     url = (maybeStore >>= storeUrl)
     defaultImage = unImage <$> (maybeStore >>= storeImage)
   imageUrl <- traverse awsImageS3Url $ maybeStore >>= storeImage
-  $(renderTemplateFromEnv "storeUser_store_edit.html")
+  $(renderTemplateFromEnv templateStoreEdit)
 
 storeEditPost
   :: forall xs n m.
@@ -193,7 +194,8 @@ storeEditPost = do
                 , url
                 , defaultImage
                 } <- getReqParamErr handleErr
-  checkBusinessCategoryDetails businessCategory businessCategoryDetails
+  let businessCategoryDetails' =
+        filterBusinessCategoryDetails businessCategory businessCategoryDetails
   s3ImageName <-
     fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
@@ -201,7 +203,7 @@ storeEditPost = do
       storeKey
       name
       businessCategory
-      (nub businessCategoryDetails)
+      (nub businessCategoryDetails')
       s3ImageName
       salesPoint
       address
@@ -211,23 +213,17 @@ storeEditPost = do
       url
   redirect $ renderRoute storeR
   where
-    checkBusinessCategoryDetails
+    filterBusinessCategoryDetails
       :: Maybe BusinessCategory
       -> [BusinessCategoryDetail]
-      -> ActionCtxT (HVect xs) m ()
-    checkBusinessCategoryDetails Nothing [] = pure ()
-    checkBusinessCategoryDetails Nothing _ =
-        handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect
-    checkBusinessCategoryDetails (Just busiCat) busiCatDets
-      | all (isValidBusinessCategoryDetailFor busiCat) busiCatDets = pure ()
-      | otherwise =
-        handleErr $ label def StoreErrorBusinessCategoryDetailIncorrect
-
-    handleFileUploadErr
-      :: UploadImgErr
-      -> ActionCtxT (HVect xs) m a
+      -> [BusinessCategoryDetail]
+    filterBusinessCategoryDetails Nothing _ = []
+    filterBusinessCategoryDetails (Just busiCat) busiCatDets =
+      filter (isValidBusinessCategoryDetailFor busiCat) busiCatDets
+    handleFileUploadErr :: UploadImgErr -> ActionCtxT (HVect xs) m a
     handleFileUploadErr (UploadImgErr uploadedFile (AwsError err)) = do
-      $(logDebug) $ "got following aws error in storeEditPost handler: " <> tshow err
+      $(logDebug) $
+        "got following aws error in storeEditPost handler: " <> tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorCouldNotUploadImage
     handleFileUploadErr (UploadImgErr uploadedFile FileContentTypeError) = do
@@ -235,11 +231,12 @@ storeEditPost = do
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorNotAnImage
     handleFileUploadErr (UploadImgErr uploadedFile (FileReadError err)) = do
-      $(logDebug) $ "got following error trying to read the uploaded file " <>
-        "in storeEditPost handler: " <> tshow err
+      $(logDebug) $
+        "got following error trying to read the uploaded file " <>
+        "in storeEditPost handler: " <>
+        tshow err
       $(logDebug) $ "uploaded file: " <> tshow uploadedFile
       handleErr $ label def StoreErrorCouldNotUploadImage
-
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       (StoreSession storeKey) <- getStoreKey
@@ -252,7 +249,7 @@ storeEditPost = do
             readBusinessCategory =<< lookup "businessCategory" p
           businessCategoryDetails = businessCategoryDetailsFromParams p
           businessHourLines = maybe [] lines $ lookup "businessHours" p
-      $(renderTemplate "storeUser_store_edit.html" $
+      $(renderTemplate templateStoreEdit $
         fromParams
           [|p|]
           [ "name"

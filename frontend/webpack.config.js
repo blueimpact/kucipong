@@ -2,13 +2,17 @@ const path              = require('path');
 const webpack           = require('webpack');
 const merge             = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 console.log('Start Webpack process...');
+const prod = 'production';
+const dev = 'development';
 
 // Determine build env by npm command options
-const TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
+const TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? prod : dev;
+const isDev = TARGET_ENV == dev;
+const isProd = TARGET_ENV == prod;
 const ENV = {
   'googleMapApiKey':
     process.env.GOOGLE_MAP_API_KEY ||
@@ -16,32 +20,32 @@ const ENV = {
       'AIzaSyA6yBv38YNHWzaAI5S7c27JfqkSFMFC-7g',
 };
 
+const outputPath = path.join(__dirname, 'dist');
+
 // Common webpack config
 const commonConfig = {
-
   output: {
-    path: path.resolve(__dirname, 'dist/'),
-    filename: '/static/[name].js',
+    path: outputPath,
+    filename: 'static/[name].js',
+    publicPath: "/",
   },
 
   entry: {
     chat: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/chat.js' )
     ],
     endUser: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/endUser.js' )
     ],
     storeUser: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/storeUser.js' )
     ],
     adminUser: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/adminUser.js' )
-    ],
-    "storeUser_store_edit": [
-      path.join( __dirname, 'src/js/storeUser_store_edit.js' )
-    ],
-    "storeUser_store_coupon_id_edit": [
-      path.join( __dirname, 'src/js/storeUser_store_coupon_id_edit.js' )
     ],
   },
 
@@ -54,6 +58,7 @@ const commonConfig = {
   },
 
   module: {
+    noParse: /\.elm$/,
     rules: [
       {
         test: /\.(eot|ttf|woff|woff2|svg)$/,
@@ -61,7 +66,7 @@ const commonConfig = {
           {
             loader: 'file-loader',
             options: {
-              name: "/static/[name]-[hash].[ext]",
+              name: "static/[name].[ext]",
             },
           },
         ]
@@ -78,144 +83,83 @@ const commonConfig = {
   },
 
   plugins: [
-    // Compile chat page
-    new HtmlWebpackPlugin({
-      chunks: ['chat'],
-      template: 'src/pug/chat.pug',
-      inject:   'body',
-      filename: 'static/chat.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['chat'],
-      template: 'src/style-guide/chat.html',
-      inject:   'body',
-      filename: 'style-guide_chat.html',
-    }),
-
-    // Compile end-user related pages
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_category.pug',
-      inject:   'body',
-      filename: 'endUser_category.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_coupon_id.pug',
-      inject:   'body',
-      filename: 'endUser_coupon_id.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_store_id.pug',
-      inject:   'body',
-      filename: 'endUser_store_id.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['endUser'],
-      template: 'src/pug/endUser_store_id_coupon.pug',
-      inject:   'body',
-      filename: 'endUser_store_id_coupon.html',
-      data: ENV,
-    }),
-
-    // Compile store-user related pages
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_login.pug',
-      inject:   'body',
-      filename: 'storeUser_login.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_store.pug',
-      inject:   'body',
-      filename: 'storeUser_store.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser', 'storeUser_store_edit'],
-      template: 'src/pug/storeUser_store_edit.pug',
-      inject:   'body',
-      filename: 'storeUser_store_edit.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_store_coupon.pug',
-      inject:   'body',
-      filename: 'storeUser_store_coupon.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser'],
-      template: 'src/pug/storeUser_store_coupon_id.pug',
-      inject:   'body',
-      filename: 'storeUser_store_coupon_id.html',
-      data: ENV,
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['storeUser', 'storeUser_store_coupon_id_edit'],
-      template: 'src/pug/storeUser_store_coupon_id_edit.pug',
-      inject:   'body',
-      filename: 'storeUser_store_coupon_id_edit.html',
-      data: ENV,
-    }),
-
-    // Compile admin-user related pages
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_login.pug',
-      inject:   'body',
-      filename: 'adminUser_login.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_create.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_create.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_delete.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_delete.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_delete_confirm.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_delete_confirm.html',
-    }),
-    new HtmlWebpackPlugin({
-      chunks: ['adminUser'],
-      template: 'src/pug/adminUser_admin_store_login.pug',
-      inject:   'body',
-      filename: 'adminUser_admin_store_login.html',
-    }),
-
-    // Inject variables to JS file.
-    new webpack.DefinePlugin({
-      'process.env':
-        Object.keys(ENV).reduce((o, k) =>
-          merge(o, {
-            [k]: JSON.stringify(ENV[k]),
-          }), {}
-        ),
-    }),
-  ],
+      // Chat page
+      {
+        chunks: ['chat'],
+        template: 'chat',
+      },
+    ].concat(
+      [
+        // Pages for end users.
+        'category',
+        'coupon_id',
+        'store_id',
+        'store_id_coupon',
+      ].map((template) => ({
+        chunks: ['endUser'],
+        template,
+      }))
+    ).concat(
+      // Pages for store users.
+      [
+        'login',
+        'store',
+        'store_edit',
+        'coupon',
+        'coupon_id',
+        'coupon_id_edit',
+      ].map((template) => ({
+        chunks: ['storeUser'],
+        template,
+        directory: 'src/pug/store',
+        outputDir: 'store',
+      }))
+    ).concat(
+      // Pages for admin users
+      [
+        'login',
+        'store_create',
+        'store_delete',
+        'store_delete_confirm',
+        'store_login',
+      ].map((template) => ({
+        chunks: ['adminUser'],
+        template,
+        directory: 'src/pug/admin',
+        outputDir: 'admin',
+      }))
+    ).map((o) =>
+      new HtmlWebpackPlugin({
+        chunks: o.chunks,
+        template: `${o.directory || 'src/pug'}/${o.template}.pug`,
+        inject:   'body',
+        filename: `templates/${o.outputDir || '.'}/${o.template}.html`,
+        data: ENV,
+        hash: true,
+      })
+    ).concat(
+      [
+        // Inject variables to JS file.
+        new webpack.DefinePlugin({
+          'process.env':
+            Object.keys(ENV).reduce((o, k) =>
+              merge(o, {
+                [k]: JSON.stringify(ENV[k]),
+              }), {}
+            ),
+        }),
+      ]
+    ),
 };
 
 // Settings for `npm start`
-if (TARGET_ENV === 'development') {
+if (isDev) {
   console.log('Serving locally...');
-
   module.exports = merge(commonConfig, {
 
     devtool: 'source-map',
     devServer: {
+      historyApiFallback: true,
       contentBase: 'src',
       inline: true,
       port: ENV.port,
@@ -235,6 +179,7 @@ if (TARGET_ENV === 'development') {
               options: {
                 verbose: true,
                 warn: true,
+                debug: true,
               },
             },
           ],
@@ -255,7 +200,7 @@ if (TARGET_ENV === 'development') {
 }
 
 // Settings for `npm run build`.
-if (TARGET_ENV === 'production') {
+if (isProd) {
   console.log('Building for prod...');
 
   module.exports = merge(commonConfig, {
@@ -265,7 +210,7 @@ if (TARGET_ENV === 'production') {
         {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
-          loader:  'elm-webpack-loader',
+          use:  'elm-webpack-loader',
         },
         {
           test: /\.(css|scss)$/,
@@ -291,7 +236,9 @@ if (TARGET_ENV === 'production') {
 
       // Extract CSS into a separate file
       new ExtractTextPlugin({
-        filename: '/static/[name].css', disable: false, allChunks: true
+        filename: 'static/[name].css',
+        disable: false,
+        allChunks: true,
       }),
 
       // Minify & mangle JS/CSS

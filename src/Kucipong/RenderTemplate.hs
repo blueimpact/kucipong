@@ -18,7 +18,7 @@ import Web.Spock (html)
 import Kucipong.I18n (label)
 
 templateDirectory :: FilePath
-templateDirectory = "frontend" </> "dist"
+templateDirectory = "frontend" </> "dist" </> "templates"
 
 -- | The `fromParams` construct a `ScopeM ()` from parameter lists.
 fromParams

@@ -1,9 +1,9 @@
 - var data = htmlWebpackPlugin.options.data;
-include _layout
+include ../common/_layout
   body#main.wrapper
-    include _storeHeader
+    include _header
       | 店舗情報 編集
-    include _messageArea
+    include ../common/_messageArea
     form.store(enctype="multipart/form-data" method="POST")
       .storeBody
         .storeBody_info
@@ -25,6 +25,7 @@ include _layout
               .storeBody_info_body_row-body
                 select#storeBusinessCategory(
                   name="businessCategory"
+                  data-select-child="subcateg"
                 )
                   option(value="" disabled)
                   | %{ forall category <- allBusinessCategories }
@@ -47,7 +48,9 @@ include _layout
                       | \#{label categoryDetail}
                   | %{ endforall }
                 | %{ forall category <- allBusinessCategories }
-                .checkboxGroup(data-subcategory-of="\#{key category}")
+                .checkboxGroup.showOnFocus(
+                  id="subcateg-\#{key category}"
+                )
                   | %{ forall categoryDetail <- (allBusinessCategoryDetails (Just category))  }
                   .checkboxWrapper
                     input.checkbox(
@@ -133,11 +136,11 @@ include _layout
               .storeBody_info_body_row-header
                 | 店舗イメージ画像
               .storeBody_info_body_row-body
-                .uploaderWrapper
-                  input#storeImageSelector.uploaderCore(
+                .uploaderWrapper.js-imageSelector
+                  input#storeImageSelector.uploaderCore.js-imageSelectorCore(
                     name="image" type="file" accept="image/*"
                   )
-                  input#defaultImage(
+                  input#defaultImage.js-imageSelectorDefaultImage(
                     name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
                   )
                   | %{ case imageUrl }
@@ -149,8 +152,8 @@ include _layout
                     src="\#{iUrl}"
                   )
                   | %{ of Nothing }
-                  label#storeImageLabel.uploaderLabel(for="storeImageSelector")
-                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
+                  label#storeImageLabel.uploaderLabel.js-imageSelectorUploadBtn(for="storeImageSelector")
+                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image.js-imageSelectorPreview(
                   )
                   | %{ endcase }
             .storeSubmit
