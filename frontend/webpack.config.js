@@ -6,9 +6,13 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 console.log('Start Webpack process...');
+const prod = 'production';
+const dev = 'development';
 
 // Determine build env by npm command options
-const TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
+const TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? prod : dev;
+const isDev = TARGET_ENV == dev;
+const isProd = TARGET_ENV == prod;
 const ENV = {
   'googleMapApiKey':
     process.env.GOOGLE_MAP_API_KEY ||
@@ -16,32 +20,31 @@ const ENV = {
       'AIzaSyA6yBv38YNHWzaAI5S7c27JfqkSFMFC-7g',
 };
 
+const outputPath = path.join(__dirname, 'dist');
+
 // Common webpack config
 const commonConfig = {
-
   output: {
-    path: path.resolve(__dirname, 'dist/'),
-    filename: '/static/[name].js',
+    path: outputPath,
+    filename: 'static/[name].js',
   },
 
   entry: {
     chat: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/chat.js' )
     ],
     endUser: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/endUser.js' )
     ],
     storeUser: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/storeUser.js' )
     ],
     adminUser: [
+      'webpack-dev-server/client?http://localhost:8080',
       path.join( __dirname, 'src/adminUser.js' )
-    ],
-    "storeUser_store_edit": [
-      path.join( __dirname, 'src/js/storeUser_store_edit.js' )
-    ],
-    "storeUser_store_coupon_id_edit": [
-      path.join( __dirname, 'src/js/storeUser_store_coupon_id_edit.js' )
     ],
   },
 
@@ -54,6 +57,7 @@ const commonConfig = {
   },
 
   module: {
+    noParse: /\.elm$/,
     rules: [
       {
         test: /\.(eot|ttf|woff|woff2|svg)$/,
@@ -61,7 +65,7 @@ const commonConfig = {
           {
             loader: 'file-loader',
             options: {
-              name: "/static/[name]-[hash].[ext]",
+              name: "static/[name]-[hash].[ext]",
             },
           },
         ]
@@ -145,13 +149,13 @@ const commonConfig = {
 };
 
 // Settings for `npm start`
-if (TARGET_ENV === 'development') {
+if (isDev) {
   console.log('Serving locally...');
-
   module.exports = merge(commonConfig, {
 
     devtool: 'source-map',
     devServer: {
+      historyApiFallback: true,
       contentBase: 'src',
       inline: true,
       port: ENV.port,
@@ -171,6 +175,7 @@ if (TARGET_ENV === 'development') {
               options: {
                 verbose: true,
                 warn: true,
+                debug: true,
               },
             },
           ],
@@ -191,7 +196,7 @@ if (TARGET_ENV === 'development') {
 }
 
 // Settings for `npm run build`.
-if (TARGET_ENV === 'production') {
+if (isProd) {
   console.log('Building for prod...');
 
   module.exports = merge(commonConfig, {
@@ -201,7 +206,7 @@ if (TARGET_ENV === 'production') {
         {
           test:    /\.elm$/,
           exclude: [/elm-stuff/, /node_modules/],
-          loader:  'elm-webpack-loader',
+          use:  'elm-webpack-loader',
         },
         {
           test: /\.(css|scss)$/,
@@ -227,7 +232,7 @@ if (TARGET_ENV === 'production') {
 
       // Extract CSS into a separate file
       new ExtractTextPlugin({
-        filename: '/static/[name].css', disable: false, allChunks: true
+        filename: 'static/[name].css', disable: false, allChunks: true
       }),
 
       // Minify & mangle JS/CSS
