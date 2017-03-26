@@ -67,6 +67,7 @@ include _layout
               select#couponType(
                 name="couponType"
                 value="\#{fromMaybe mempty couponType}"
+                data-select-child="type"
               )
                 option(
                   value="\#{key CouponTypeDiscount}"

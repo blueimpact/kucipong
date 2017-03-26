@@ -25,6 +25,7 @@ include _layout
               .storeBody_info_body_row-body
                 select#storeBusinessCategory(
                   name="businessCategory"
+                  data-select-child="subcateg"
                 )
                   option(value="" disabled)
                   | %{ forall category <- allBusinessCategories }
@@ -47,7 +48,9 @@ include _layout
                       | \#{label categoryDetail}
                   | %{ endforall }
                 | %{ forall category <- allBusinessCategories }
-                .checkboxGroup(data-subcategory-of="\#{key category}")
+                .checkboxGroup.showOnFocus(
+                  id="subcateg-\#{key category}"
+                )
                   | %{ forall categoryDetail <- (allBusinessCategoryDetails (Just category))  }
                   .checkboxWrapper
                     input.checkbox(
