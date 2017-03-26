@@ -29,6 +29,7 @@ import Kucipong.Form
 import Kucipong.Handler.Route
        (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
+import Kucipong.Handler.Store.TemplatePath
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
@@ -51,7 +52,7 @@ loginGet
   :: forall ctx m.
      (MonadIO m)
   => ActionCtxT ctx m ()
-loginGet = $(renderTemplateFromEnv "storeUser_login.html")
+loginGet = $(renderTemplateFromEnv templateLogin)
 
 -- | Handler for sending an email to the store owner that they can use to
 -- login.
@@ -70,13 +71,13 @@ loginPost = do
   maybe (pure ()) handleSendEmailFail =<<
     sendStoreLoginEmail email (storeLoginTokenLoginToken storeLoginToken)
   let messages = [label def StoreMsgSentVerificationEmail]
-  $(renderTemplateFromEnv "storeUser_login.html")
+  $(renderTemplateFromEnv templateLogin)
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       $(logDebug) $ "got following error in store loginPost handler: " <> errMsg
       let errors = [errMsg]
-      $(renderTemplateFromEnv "storeUser_login.html")
+      $(renderTemplateFromEnv templateLogin)
 
     handleSendEmailFail :: EmailError -> ActionCtxT (HVect xs) m a
     handleSendEmailFail emailError = do
@@ -140,7 +141,7 @@ storeGet = do
     regularHoliday = storeRegularHoliday
     url = storeUrl
   imageUrl <- traverse awsImageS3Url storeImage
-  $(renderTemplateFromEnv "storeUser_store.html")
+  $(renderTemplateFromEnv templateStore)
   where
     handleNoStoreError :: ActionCtxT (HVect xs) m a
     handleNoStoreError =
@@ -252,7 +253,7 @@ storeEditPost = do
             readBusinessCategory =<< lookup "businessCategory" p
           businessCategoryDetails = businessCategoryDetailsFromParams p
           businessHourLines = maybe [] lines $ lookup "businessHours" p
-      $(renderTemplate "storeUser_store_edit.html" $
+      $(renderTemplate templateStoreEdit $
         fromParams
           [|p|]
           [ "name"

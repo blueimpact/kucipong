@@ -20,11 +20,15 @@ import Kucipong.Form
 import Kucipong.Handler.Route
        (storeCouponR, storeCouponCreateR, storeCouponVarR,
         storeCouponVarEditR, storeR)
-import Kucipong.Handler.Store.TemplatePath
+<<<<<<< 9dafd65fe403382ba4900b6ad4a1f0b177a8adad
 import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewKey(..),
         CouponViewTypes(..), CouponViewConditions(..),
         CouponViewCouponType(..))
+=======
+import Kucipong.Handler.Store.TemplatePath
+import Kucipong.Handler.Store.Types (StoreError(..))
+>>>>>>> Restructure template file hierarchy.
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.I18n (label)

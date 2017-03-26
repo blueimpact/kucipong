@@ -1,6 +1,6 @@
-include _layout
+include ../common/_layout
   body#main.wrapper
-    include _storeHeader
+    include _header
       | クーポン情報
     | %{ case mdata }
     | %{ of Just coupon }
@@ -8,7 +8,7 @@ include _layout
       .store_editBtn
         a.btn.outerBtn(href="\#{renderRoute storeCouponVarEditR couponKey}")
           | クーポン情報編集
-    include _coupon_id
+    include ../common/_coupon_id
     | %{ of Nothing }
     | No coupon info.
     | %{ endcase }

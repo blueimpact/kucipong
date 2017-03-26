@@ -26,9 +26,13 @@ import Kucipong.Form
        (AdminLoginForm(AdminLoginForm),
         AdminStoreCreateForm(AdminStoreCreateForm),
         AdminStoreDeleteForm(AdminStoreDeleteForm),
+<<<<<<< 9dafd65fe403382ba4900b6ad4a1f0b177a8adad
         AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm),
         AdminStoreLoginForm(AdminStoreLoginForm))
+=======
+        AdminStoreDeleteConfirmForm(AdminStoreDeleteConfirmForm))
 import Kucipong.Handler.Admin.TemplatePath
+>>>>>>> Restructure template file hierarchy.
 import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
 import Kucipong.Handler.Route
        (adminR, adminLoginR, adminLoginVarR, adminStoreCreateR,

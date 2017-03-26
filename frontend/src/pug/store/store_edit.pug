@@ -1,9 +1,9 @@
 - var data = htmlWebpackPlugin.options.data;
-include _layout
+include ../common/_layout
   body#main.wrapper
-    include _storeHeader
+    include _header
       | 店舗情報 編集
-    include _messageArea
+    include ../common/_messageArea
     form.store(enctype="multipart/form-data" method="POST")
       .storeBody
         .storeBody_info

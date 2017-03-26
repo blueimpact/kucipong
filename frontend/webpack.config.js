@@ -2,8 +2,8 @@ const path              = require('path');
 const webpack           = require('webpack');
 const merge             = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 console.log('Start Webpack process...');
 const prod = 'production';
@@ -27,6 +27,7 @@ const commonConfig = {
   output: {
     path: outputPath,
     filename: 'static/[name].js',
+    publicPath: "/",
   },
 
   entry: {
@@ -65,7 +66,7 @@ const commonConfig = {
           {
             loader: 'file-loader',
             options: {
-              name: "static/[name]-[hash].[ext]",
+              name: "static/[name].[ext]",
             },
           },
         ]
@@ -86,50 +87,53 @@ const commonConfig = {
       {
         chunks: ['chat'],
         template: 'chat',
-        outputDir: 'static',
       },
     ].concat(
       [
         // Pages for end users.
-        'endUser_category',
-        'endUser_coupon_id',
-        'endUser_store_id',
-        'endUser_store_id_coupon',
+        'category',
+        'coupon_id',
+        'store_id',
+        'store_id_coupon',
       ].map((template) => ({
         chunks: ['endUser'],
-        template
+        template,
       }))
     ).concat(
       // Pages for store users.
       [
-        'storeUser_login',
-        'storeUser_store',
-        'storeUser_store_edit',
-        'storeUser_store_coupon',
-        'storeUser_store_coupon_id',
-        'storeUser_store_coupon_id_edit',
+        'login',
+        'store',
+        'store_edit',
+        'coupon',
+        'coupon_id',
+        'coupon_id_edit',
       ].map((template) => ({
         chunks: ['storeUser'],
-        template
+        template,
+        directory: 'src/pug/store',
+        outputDir: 'store',
       }))
     ).concat(
       // Pages for admin users
       [
-        'adminUser_login',
-        'adminUser_admin_store_create',
-        'adminUser_admin_store_delete',
-        'adminUser_admin_store_delete_confirm',
-        'adminUser_admin_store_login',
+        'login',
+        'store_create',
+        'store_delete',
+        'store_delete_confirm',
+        'store_login',
       ].map((template) => ({
         chunks: ['adminUser'],
-        template
+        template,
+        directory: 'src/pug/admin',
+        outputDir: 'admin',
       }))
     ).map((o) =>
       new HtmlWebpackPlugin({
         chunks: o.chunks,
         template: `${o.directory || 'src/pug'}/${o.template}.pug`,
         inject:   'body',
-        filename: `${o.outputDir || '.'}/${o.template}.html`,
+        filename: `templates/${o.outputDir || '.'}/${o.template}.html`,
         data: ENV,
         hash: true,
       })
@@ -232,7 +236,9 @@ if (isProd) {
 
       // Extract CSS into a separate file
       new ExtractTextPlugin({
-        filename: 'static/[name].css', disable: false, allChunks: true
+        filename: 'static/[name].css',
+        disable: false,
+        allChunks: true,
       }),
 
       // Minify & mangle JS/CSS

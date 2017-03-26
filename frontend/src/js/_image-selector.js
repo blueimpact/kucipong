@@ -60,6 +60,5 @@ parents.forEach(function (p) {
     resetBtn: (p.getElementsByClassName('js-imageSelectorResetBtn')[0] || {}).id,
     defaultImage: (p.getElementsByClassName('js-imageSelectorDefaultImage')[0] || {}).id
   };
-  console.log(config);
   imageSelector(config);
 });

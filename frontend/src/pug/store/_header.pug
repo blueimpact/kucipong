@@ -2,7 +2,7 @@ header.header
   .home.showMenu
     input#storeHeaderShowMenu.showMenu_checkbox(type="checkbox")
     label.showMenu_label(for="storeHeaderShowMenu")
-      img.showMenu_label-image(src=require("../img/hamburger.svg"))
+      img.showMenu_label-image(src=require("../../img/hamburger.svg"))
     .sideMenu
       .sideMenu_hide
         label.sideMenu_hide-text(for="storeHeaderShowMenu")
@@ -13,4 +13,4 @@ header.header
     yield
   .icons
     a.icon.icon-me(href="\#{renderRoute storeR}")
-      img(src=require("../img/me.svg"))
+      img(src=require("../../img/me.svg"))

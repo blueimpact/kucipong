@@ -1,8 +1,8 @@
-include _layout
+include ../common/_layout
   body#main.wrapper
-    include _storeHeader
+    include _header
       | 店舗ユーザログイン
-    include _messageArea
+    include ../common/_messageArea
     .store
       form#js-request-verification.loginSignboard(
         action="\#{renderRoute storeLoginR}"
