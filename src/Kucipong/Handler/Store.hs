@@ -17,8 +17,8 @@ import Web.Spock
 import Web.Spock.Core (SpockCtxT, get, post)
 
 import Kucipong.Db
-       (BusinessCategory(..), BusinessCategoryDetail(..), Image(..),
-        Key(..), LoginTokenExpirationTime(..), Store(..),
+       (BusinessCategory(..), BusinessCategoryDetail(..), Key(..),
+        LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken),
         isValidBusinessCategoryDetailFor, readBusinessCategory,
@@ -32,7 +32,9 @@ import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.TemplatePath
 import Kucipong.Handler.Store.Types
        (StoreError(..), StoreMsg(..), StoreView(..), StoreViewText(..),
-        StoreViewTexts(..), StoreViewImageUrl(..))
+        StoreViewTexts(..), StoreViewBusinessCategory(..),
+        StoreViewBusinessCategoryDetails(..), StoreViewImageUrl(..),
+        StoreViewDefaultImage(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.I18n (label)
@@ -43,7 +45,7 @@ import Kucipong.Monad
         dbFindStoreByEmail, dbFindStoreByStoreKey, dbFindStoreLoginToken,
         dbUpdateStore)
 import Kucipong.RenderTemplate
-       (fromParams, renderTemplate, renderTemplateFromEnv)
+       (renderTemplateFromEnv)
 import Kucipong.Session (Store, Session)
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
@@ -128,6 +130,7 @@ storeGet = do
     mdata = StoreView
       <$> maybeStoreEntity
       <*> pure maybeImageUrl
+      <*> pure Nothing
   $(renderTemplateFromEnv templateStore)
 
 storeEditGet
@@ -140,19 +143,14 @@ storeEditGet
   => ActionCtxT (HVect xs) m ()
 storeEditGet = do
   (StoreSession storeKey) <- getStoreKey
-  maybeStore <- fmap entityVal <$> dbFindStoreByStoreKey storeKey
+  maybeStoreEntity <- dbFindStoreByStoreKey storeKey
+  let maybeImage = storeImage . entityVal =<< maybeStoreEntity
+  maybeImageUrl <- traverse awsImageS3Url maybeImage
   let
-    name = (maybeStore >>= storeName)
-    businessCategory = (maybeStore >>= storeBusinessCategory)
-    businessCategoryDetails = concat (storeBusinessCategoryDetails <$> maybeStore)
-    salesPoint = (maybeStore >>= storeSalesPoint)
-    address = (maybeStore >>= storeAddress)
-    phoneNumber = (maybeStore >>= storePhoneNumber)
-    businessHourLines = maybe [] lines (maybeStore >>= storeBusinessHours)
-    regularHoliday = (maybeStore >>= storeRegularHoliday)
-    url = (maybeStore >>= storeUrl)
-    defaultImage = unImage <$> (maybeStore >>= storeImage)
-  imageUrl <- traverse awsImageS3Url $ maybeStore >>= storeImage
+    mdata = StoreView
+      <$> maybeStoreEntity
+      <*> pure maybeImageUrl
+      <*> pure Nothing
   $(renderTemplateFromEnv templateStoreEdit)
 
 storeEditPost
@@ -223,26 +221,34 @@ storeEditPost = do
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       (StoreSession storeKey) <- getStoreKey
-      maybeStore <- fmap entityVal <$> dbFindStoreByStoreKey storeKey
-      imageUrl <- traverse awsImageS3Url $ maybeStore >>= storeImage
+      maybeStoreEntity <- dbFindStoreByStoreKey storeKey
+      let maybeImage = storeImage . entityVal =<< maybeStoreEntity
+      maybeImageUrl <- traverse awsImageS3Url maybeImage
       p <- params
+      let
+        maybeStore = do
+          (Entity k v) <- maybeStoreEntity
+          pure . Entity k $ v
+            { storeName = lookup "name" p
+            , storeSalesPoint = lookup "salesPoint" p
+            , storeAddress = lookup "address" p
+            , storePhoneNumber = lookup "phoneNumber" p
+            , storeRegularHoliday = lookup "regularHoliday" p
+            , storeUrl = lookup "url" p
+            , storeBusinessHours = lookup "businessHours" p
+            , storeBusinessCategory =
+                readBusinessCategory =<< lookup "businessCategory" p
+            , storeBusinessCategoryDetails =
+                 businessCategoryDetailsFromParams p
+            }
+
+        mdata = StoreView
+          <$> maybeStore
+          <*> pure maybeImageUrl
+          <*> pure (lookup "defaultImage" p)
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
       let errors = [errMsg]
-          businessCategory =
-            readBusinessCategory =<< lookup "businessCategory" p
-          businessCategoryDetails = businessCategoryDetailsFromParams p
-          businessHourLines = maybe [] lines $ lookup "businessHours" p
-      $(renderTemplate templateStoreEdit $
-        fromParams
-          [|p|]
-          [ "name"
-          , "salesPoint"
-          , "address"
-          , "phoneNumber"
-          , "regularHoliday"
-          , "url"
-          , "defaultImage"
-          ])
+      $(renderTemplateFromEnv templateStoreEdit)
 
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)

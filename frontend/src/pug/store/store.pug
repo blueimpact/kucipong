@@ -34,14 +34,14 @@ include ../common/_layout
               .storeBody_info_body_row-header
                 | カテゴリ
               .storeBody_info_body_row-body
-                | \#{ format StoreBusinessCategory store}
+                | \#{ label (format StoreBusinessCategory store)}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の特徴
               .storeBody_info_body_row-body.simpleTagWrapper
                 | %{ forall businessCategoryDetail <- format StoreBusinessCategoryDetails store }
                 .simpleTag
-                  | \#{ businessCategoryDetail }
+                  | \#{ label businessCategoryDetail }
                 | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header

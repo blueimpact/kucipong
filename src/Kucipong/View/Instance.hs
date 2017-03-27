@@ -4,20 +4,20 @@ module Kucipong.View.Instance where
 
 import Kucipong.Prelude
 
-import Data.Default (def)
 import Database.Persist (Entity(..))
 import Database.Persist.Sql (fromSqlKey)
 
 import Kucipong.Db
-       (Coupon(..), CouponType(..), Percent, Price, Store(..),
-        percentToText, priceToText)
+       (BusinessCategory, BusinessCategoryDetail, Coupon(..),
+        CouponType(..), Percent, Price, Store(..), percentToText,
+        priceToText)
 import Kucipong.Handler.Store.Types
        (CouponView(..), CouponViewKey(..), CouponViewTypes(..),
         CouponViewConditions(..), CouponViewCouponType(..),
-        CouponViewImageUrl(..), StoreView(..),
-        StoreViewImageUrl(..),
-        StoreViewText(..), StoreViewTexts(..))
-import Kucipong.I18n (label)
+        CouponViewImageUrl(..), StoreView(..), StoreViewDefaultImage(..),
+        StoreViewImageUrl(..), StoreViewBusinessCategory(..),
+        StoreViewBusinessCategoryDetails(..), StoreViewText(..),
+        StoreViewTexts(..))
 import Kucipong.View.Class (View(..))
 
 
@@ -96,17 +96,35 @@ instance View Store StoreViewText where
   format StorePhoneNumber = fromMaybe mempty . storePhoneNumber
   format StoreRegularHoliday = fromMaybe mempty . storeRegularHoliday
   format StoreUrl = fromMaybe mempty . storeUrl
-  format StoreBusinessCategory = label def . fromMaybe minBound . storeBusinessCategory
 
 instance View Store StoreViewTexts where
   type ViewO StoreViewTexts = [Text]
   format StoreBusinessHour =
     concatMap lines . storeBusinessHours
-  format StoreBusinessCategoryDetails = map (label def) . storeBusinessCategoryDetails
+
+instance View Store StoreViewBusinessCategory where
+  type ViewO StoreViewBusinessCategory = BusinessCategory
+  format StoreBusinessCategory = fromMaybe minBound . storeBusinessCategory
+
+instance View Store StoreViewBusinessCategoryDetails where
+  type ViewO StoreViewBusinessCategoryDetails = [BusinessCategoryDetail]
+  format StoreBusinessCategoryDetails = storeBusinessCategoryDetails
 
 instance View StoreView StoreViewImageUrl where
   type ViewO StoreViewImageUrl = Text
   format StoreImageUrl = fromMaybe mempty . storeImageUrl
+
+instance View StoreView StoreViewDefaultImage where
+  type ViewO StoreViewDefaultImage = Text
+  format StoreDefaultImage = fromMaybe mempty . storeDefaultImage
+
+instance View StoreView StoreViewBusinessCategory where
+  type ViewO StoreViewBusinessCategory = BusinessCategory
+  format a = format a . entityVal . storeEntity
+
+instance View StoreView StoreViewBusinessCategoryDetails where
+  type ViewO StoreViewBusinessCategoryDetails = [BusinessCategoryDetail]
+  format a = format a . entityVal . storeEntity
 
 instance View StoreView StoreViewText where
   type ViewO StoreViewText = Text
