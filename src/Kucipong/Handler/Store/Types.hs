@@ -19,6 +19,7 @@ data StoreError
   = StoreErrorBusinessCategoryDetailIncorrect
   | StoreErrorCouldNotSendEmail
   | StoreErrorCouldNotUploadImage
+  | StoreErrorCouponNotFound
   | StoreErrorNoImage
   | StoreErrorNoStoreEmail EmailAddress
   | StoreErrorNotAnImage

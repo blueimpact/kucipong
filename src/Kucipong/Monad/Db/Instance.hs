@@ -23,7 +23,8 @@ import Kucipong.Db
         UpdatedTime(..), emailToAdminKey, runDb, runDbCurrTime)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class
-       (MonadKucipongDb(..), StoreDeleteResult(..))
+       (CouponDeleteResult(..), MonadKucipongDb(..),
+        StoreDeleteResult(..))
 import Kucipong.Monad.Db.Trans (KucipongDbT(..))
 import Kucipong.Persist (repsertEntity)
 import Kucipong.Util (addOneDay)
@@ -37,9 +38,9 @@ instance ( MonadBaseControl IO m
          ) =>
          MonadKucipongDb (KucipongDbT m) where
 
-    -- ===========
-    --  For Admin
-    -- ===========
+    -- =======
+    --  Admin
+    -- =======
   dbCreateAdmin :: EmailAddress -> Text -> KucipongDbT m (Entity Admin)
   dbCreateAdmin email name = lift go
     where
@@ -103,9 +104,9 @@ instance ( MonadBaseControl IO m
               newAdminKey <- insert newAdminVal
               pure $ Entity newAdminKey newAdminVal
 
-  -- ===========
-  --  For Store
-  -- ===========
+  -- =======
+  --  Store
+  -- =======
   dbCreateStoreMagicLoginToken :: Key Store
                                -> KucipongDbT m (Entity StoreLoginToken)
   dbCreateStoreMagicLoginToken storeEmailKey = lift go
@@ -221,9 +222,31 @@ instance ( MonadBaseControl IO m
           ]
         pure StoreDeleteSuccess
 
-  -- ======= --
-  -- Generic --
-  -- ======= --
+  -- ========
+  --  Coupon
+  -- ========
+
+  dbDeleteCoupon :: Key Store -> Key Coupon -> KucipongDbT m CouponDeleteResult
+  dbDeleteCoupon storeKey couponKey = lift go
+    where
+      go :: m CouponDeleteResult
+      go =
+        runDbCurrTime $ \currTime -> do
+          maybeCouponEntity <-
+            selectFirst [CouponId ==. couponKey, CouponStoreId ==. storeKey] []
+          case maybeCouponEntity of
+            Nothing -> pure $ CouponDeleteErrDoesNotExist
+            Just _ -> do
+              update
+                couponKey
+                [ CouponDeleted =. Just (DeletedTime currTime)
+                , CouponUpdated =. UpdatedTime currTime
+                ]
+              pure $ CouponDeleteSuccess
+
+  -- =========
+  --  Generic
+  -- =========
 
   dbFindByKey
     :: forall record.
@@ -525,7 +548,7 @@ dbFindCouponsByStoreKey
   :: MonadKucipongDb m
   => Key Store -> m [Entity Coupon]
 dbFindCouponsByStoreKey storeKey =
-  dbSelectList [CouponStoreId ==. storeKey] []
+  dbSelectListNotDeleted [CouponStoreId ==. storeKey] []
 
 dbUpdateCoupon
   :: MonadKucipongDb m

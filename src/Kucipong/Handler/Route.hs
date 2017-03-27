@@ -72,6 +72,12 @@ storeCouponR = storeR <//> couponR
 storeCouponCreateR :: Path '[] 'Open
 storeCouponCreateR = storeR <//> couponR <//> createR
 
+storeCouponDeleteR :: Path '[] 'Open
+storeCouponDeleteR = storeR <//> couponR <//> deleteR
+
+storeCouponDeleteVarR :: Path '[Key Coupon] 'Open
+storeCouponDeleteVarR = storeR <//> couponR <//> deleteR <//> var
+
 storeCouponVarR :: Path '[Key Coupon] 'Open
 storeCouponVarR = storeR <//> couponR <//> var
 

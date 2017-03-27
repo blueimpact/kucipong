@@ -91,6 +91,7 @@ const commonConfig = {
     ].concat(
       [
         // Pages for end users.
+        '404',
         'category',
         'coupon_id',
         'store_id',
@@ -106,6 +107,7 @@ const commonConfig = {
         'store',
         'store_edit',
         'coupon',
+        'coupon_delete',
         'coupon_id',
         'coupon_id_edit',
       ].map((template) => ({

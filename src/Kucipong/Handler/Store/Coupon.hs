@@ -8,7 +8,7 @@ import Control.FromSum (fromEitherMM, fromMaybeM)
 import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
-import Database.Persist.Sql (Entity(..))
+import Database.Persist.Sql (Entity(..), fromSqlKey)
 import Web.Spock (ActionCtxT, params, redirect, renderRoute)
 import Web.Spock.Core (SpockCtxT, get, post)
 
@@ -17,22 +17,27 @@ import Kucipong.Db
         couponTypeToText, percentToText, priceToText)
 import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
+import Kucipong.Handler.Error (resp404)
 import Kucipong.Handler.Route
-       (storeCouponR, storeCouponCreateR, storeCouponVarR,
-        storeCouponVarEditR, storeR)
+       (storeCouponR, storeCouponCreateR, storeCouponDeleteVarR,
+        storeCouponVarR, storeCouponVarEditR, storeR)
 import Kucipong.Handler.Store.TemplatePath
+       (templateCoupon, templateCouponDelete, templateCouponId,
+        templateCouponIdEdit)
 import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewKey(..),
         CouponViewTypes(..), CouponViewConditions(..),
         CouponViewCouponType(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
+import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
-       (FileUploadError(..), MonadKucipongAws(..), MonadKucipongDb(..),
-        awsGetBucketName, awsImageS3Url, awsUrlFromImageAndBucket,
-        dbFindCouponByStoreKeyAndCouponKey, dbFindCouponsByStoreKey,
-        dbFindStoreByStoreKey, dbInsertCoupon, dbUpdateCoupon)
+       (CouponDeleteResult(..), FileUploadError(..), MonadKucipongAws(..),
+        MonadKucipongDb(..), awsGetBucketName, awsImageS3Url,
+        awsUrlFromImageAndBucket, dbFindCouponByStoreKeyAndCouponKey,
+        dbFindCouponsByStoreKey, dbFindStoreByStoreKey, dbInsertCoupon,
+        dbUpdateCoupon)
 import Kucipong.RenderTemplate
        (fromParams, renderTemplate, renderTemplateFromEnv)
 import Kucipong.Session (Store, Session)
@@ -92,6 +97,7 @@ couponGet couponKey = do
       <*> maybeCouponEntity
       <*> pure maybeImageUrl
     aboutStore = renderRoute storeR
+    pageViewer = PageViewerStore
   $(renderTemplateFromEnv templateCouponId)
 
 couponEditGet
@@ -366,6 +372,31 @@ couponPost = do
           , "defaultImage"
           ])
 
+-- | Return the store create page for an admin.
+couponDeleteGet
+  :: forall xs n m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+  => Key Coupon -> ActionCtxT (HVect xs) m ()
+couponDeleteGet couponKey = do
+  (StoreSession storeKey) <- getStoreKey
+  maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
+  case maybeCouponEntity of
+    Nothing -> resp404 [label def StoreErrorCouponNotFound]
+    Just (Entity _ Coupon{couponTitle}) ->
+      $(renderTemplateFromEnv templateCouponDelete)
+
+couponDeletePost
+  :: forall n xs m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+  => Key Coupon -> ActionCtxT (HVect xs) m ()
+couponDeletePost couponKey = do
+  (StoreSession storeKey) <- getStoreKey
+  deleteCouponResult <- dbDeleteCoupon storeKey couponKey
+  case deleteCouponResult of
+    CouponDeleteErrDoesNotExist ->
+      resp404 [label def StoreErrorCouponNotFound]
+    CouponDeleteSuccess -> redirect $ renderRoute storeCouponR
+
 storeCouponComponent
   :: forall m xs.
      ( MonadIO m
@@ -378,6 +409,8 @@ storeCouponComponent = do
   get storeCouponR couponListGet
   post storeCouponCreateR couponPost
   get storeCouponCreateR couponNewGet
+  get storeCouponDeleteVarR couponDeleteGet
+  post storeCouponDeleteVarR couponDeletePost
   get storeCouponVarR couponGet
   get storeCouponVarEditR couponEditGet
   post storeCouponVarEditR couponEditPost

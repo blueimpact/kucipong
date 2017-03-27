@@ -15,10 +15,12 @@ import Web.Spock.Core (SpockCtxT, get)
 import Kucipong.Db (Coupon(..), CouponType(..), Key(..))
 import Kucipong.Handler.Consumer.TemplatePath
 import Kucipong.Handler.Consumer.Types (ConsumerError(..))
-import Kucipong.Handler.Route (consumerCouponVarR, consumerStoreVarR)
+import Kucipong.Handler.Route
+       (consumerCouponVarR, consumerStoreVarR, storeCouponDeleteVarR)
 import Kucipong.Handler.Store.Types
        (CouponView(..), CouponViewKey(..), CouponViewTypes(..),
         CouponViewConditions(..), CouponViewCouponType(..))
+import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (MonadKucipongAws(..), MonadKucipongDb(..), awsImageS3Url,
@@ -46,6 +48,7 @@ couponGet couponKey = do
       maybe mempty
         (renderRoute consumerStoreVarR . entityKey)
         maybeStoreEntity
+    pageViewer = PageViewerEndUser
   $(renderTemplateFromEnv templateCouponId)
   where
     handleErr :: Text -> ActionCtxT ctx m a

@@ -16,7 +16,8 @@ import Kucipong.Db.Models.Base
 import Kucipong.Handler.Admin.Types (AdminError(..), AdminMsg(..))
 import Kucipong.Handler.Consumer.Types (ConsumerError(..))
 import Kucipong.Handler.Store.Types (StoreError(..), StoreMsg(..))
-import Kucipong.Monad.Db.Class (StoreDeleteResult(..))
+import Kucipong.Monad.Db.Class
+       (CouponDeleteResult(..), StoreDeleteResult(..))
 
 import Text.EmailAddress (toText)
 
@@ -57,6 +58,10 @@ instance I18n StoreDeleteResult where
   label EnUS (StoreDeleteErrDoesNotExist email) =
     "Store with email address of \"" <> toText email <> "\" does not exist."
 
+instance I18n CouponDeleteResult where
+  label EnUS CouponDeleteSuccess = "Successfully deleted coupon."
+  label EnUS CouponDeleteErrDoesNotExist = "Coupon with that ID does not exist."
+
 instance I18n StoreError where
   label EnUS StoreErrorBusinessCategoryDetailIncorrect =
     "Business category details do not belong to the selected business category."
@@ -64,6 +69,8 @@ instance I18n StoreError where
     "Could not send email. Please try again."
   label EnUS StoreErrorCouldNotUploadImage =
     "Could not upload image. Please try again."
+  label EnUS StoreErrorCouponNotFound =
+    "Could not find the specified coupon."
   label EnUS StoreErrorNoImage =
     "Failed to upload image. Please try again."
   label EnUS (StoreErrorNoStoreEmail email) =
