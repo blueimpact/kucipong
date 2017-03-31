@@ -372,7 +372,7 @@ couponPost = do
           , "defaultImage"
           ])
 
--- | Return the store create page for an admin.
+-- | Return the coupon delete page for a store.
 couponDeleteGet
   :: forall xs n m.
      (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
