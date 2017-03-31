@@ -17,8 +17,8 @@ import Web.FormUrlEncoded (FromForm)
 import Web.HttpApiData (FromHttpApiData(..))
 
 import Kucipong.Db
-       (BusinessCategory(..), BusinessCategoryDetail(..), CouponType(..),
-        Image(..), Percent(..), Price(..))
+       (BusinessCategory(..), BusinessCategoryDetail(..),
+        CouponType(..), Image(..), Percent(..), Price(..))
 
 newtype MaybeEmpty a = MaybeEmpty
   { unMaybeEmpty :: Maybe a

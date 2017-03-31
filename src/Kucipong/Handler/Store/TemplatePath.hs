@@ -22,6 +22,9 @@ templateStoreEdit = templateRoot </> "store_edit.html"
 templateCoupon :: FilePath
 templateCoupon = templateRoot </> "coupon.html"
 
+templateCouponDelete :: FilePath
+templateCouponDelete = templateRoot </> "coupon_delete.html"
+
 templateCouponId :: FilePath
 templateCouponId = templateRoot </> "coupon_id.html"
 

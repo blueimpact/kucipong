@@ -12,10 +12,19 @@ import Database.Persist.Sql
 import Web.Spock (ActionCtxT)
 
 import Kucipong.Db
-       (Admin, AdminLoginToken, Key, Store, StoreLoginToken)
+       (Admin, AdminLoginToken, Coupon, Key, Store, StoreLoginToken)
 import Kucipong.Monad.Aws.Trans ( KucipongAwsT )
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
+
+-- | Result to return from a call to 'dbDeleteCoupon'.
+data CouponDeleteResult
+  = CouponDeleteSuccess
+  -- ^ Successfully deleted the coupon.
+  | CouponDeleteErrDoesNotExist
+  -- ^ There is no 'Coupon' in the database for the 'Key' 'Coupon' and 'Key'
+  -- 'Store' that was passed in.
+  deriving (Eq, Generic, Show, Typeable)
 
 -- | Result to return from a call to 'dbDeleteStoreIfNameMatches'.
 data StoreDeleteResult
@@ -34,9 +43,9 @@ data StoreDeleteResult
 -- transformers that implement 'MonadTrans'.
 class Monad m => MonadKucipongDb m where
 
-  -- ===========
-  --  For Admin
-  -- ===========
+  -- =======
+  --  Admin
+  -- =======
 
   dbCreateAdmin
       :: EmailAddress
@@ -73,9 +82,9 @@ class Monad m => MonadKucipongDb m where
       => EmailAddress -> Text -> t n (Entity Admin)
   dbUpsertAdmin = (lift .) . dbUpsertAdmin
 
-  -- ===========
-  --  For Store
-  -- ===========
+  -- =======
+  --  Store
+  -- =======
 
   dbCreateStoreMagicLoginToken :: Key Store -> m (Entity StoreLoginToken)
   default dbCreateStoreMagicLoginToken
@@ -110,9 +119,22 @@ class Monad m => MonadKucipongDb m where
   dbDeleteStoreIfNameMatches storeKey name =
     lift $ dbDeleteStoreIfNameMatches storeKey name
 
-  -- ======= --
-  -- Generic --
-  -- ======= --
+  -- ========
+  --  Coupon
+  -- ========
+
+  dbDeleteCoupon :: Key Store -> Key Coupon -> m CouponDeleteResult
+  default dbDeleteCoupon
+    :: ( MonadKucipongDb n
+       , MonadTrans t
+       , m ~ t n
+       )
+    => Key Store -> Key Coupon -> t n CouponDeleteResult
+  dbDeleteCoupon storeKey = lift . dbDeleteCoupon storeKey
+
+  -- =========
+  --  Generic
+  -- =========
 
   dbFindByKey
     :: (PersistRecordBackend record SqlBackend)

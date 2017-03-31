@@ -36,6 +36,8 @@ library
                      , Kucipong.Handler.Consumer
                      , Kucipong.Handler.Consumer.TemplatePath
                      , Kucipong.Handler.Consumer.Types
+                     , Kucipong.Handler.Error
+                     , Kucipong.Handler.Error.TemplatePath
                      , Kucipong.Handler.Route
                      , Kucipong.Handler.Store
                      , Kucipong.Handler.Store.Coupon
@@ -44,6 +46,7 @@ library
                      , Kucipong.Handler.Store.Util
                      , Kucipong.Handler.Static
                      , Kucipong.Handler.Static.TH
+                     , Kucipong.Handler.Types
                      , Kucipong.Host
                      , Kucipong.I18n
                      , Kucipong.I18n.Class

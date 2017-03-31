@@ -1,0 +1,25 @@
+include ../common/_layout
+  body#main.wrapper
+    include _header
+      | クーポン削除
+    include ../common/_messageArea
+    .admin
+      .adminBody
+        .signboard_titleArea
+          .signboard_titleArea-title
+            | クーポンの削除
+        form.signboard_body(
+          method="POST"
+          action="\#{renderRoute storeCouponDeleteVarR couponKey}"
+        )
+          input#couponId(
+            type="hidden" value="\#{fromSqlKey couponKey}"
+          )
+          .row
+            | 「\#{couponTitle}」を削除しますか？
+          .submitRow
+            button.btn.outerBtn(type="submit")
+              | このクーポンを削除
+            a.btn.outerBtn(href="\#{renderRoute storeCouponVarR couponKey}")
+              | 戻る
+
