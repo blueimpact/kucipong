@@ -5,6 +5,8 @@ include ../common/_layout
       | 店舗情報 編集
     include ../common/_messageArea
     form.store(enctype="multipart/form-data" method="POST")
+      | %{ case mdata }
+      | %{ of Just store }
       .storeBody
         .storeBody_info
           .storeBody_info_titleArea
@@ -17,7 +19,7 @@ include ../common/_layout
               .storeBody_info_body_row-body
                 input#storeName(
                   name="name" type="text"
-                  value="\#{ fromMaybe mempty name }"
+                  value="\#{format StoreName store}"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -29,7 +31,11 @@ include ../common/_layout
                 )
                   option(value="" disabled)
                   | %{ forall category <- allBusinessCategories }
-                  option(value="\#{key category}" #{isSelected businessCategory category}) \#{label category}
+                  option(
+                    value="\#{key category}"
+                    \#{isSelected (Just (format StoreBusinessCategory store)) category}
+                  )
+                    | \#{label category}
                   | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -42,7 +48,7 @@ include ../common/_layout
                       id="storeTagsCommon-\#{key categoryDetail}"
                       type="checkbox" name="businessCategoryDetails"
                       value="\#{key categoryDetail}"
-                      #{isChecked businessCategoryDetails categoryDetail}
+                      #{isChecked (format StoreBusinessCategoryDetails store) categoryDetail}
                     )
                     label.checkboxLabel(for="storeTagsCommon-\#{key categoryDetail}")
                       | \#{label categoryDetail}
@@ -57,7 +63,7 @@ include ../common/_layout
                       id="storeTags\#{key category}-\#{key categoryDetail}"
                       type="checkbox" name="businessCategoryDetails"
                       value="\#{key categoryDetail}"
-                      #{isChecked businessCategoryDetails categoryDetail}
+                      #{isChecked (format StoreBusinessCategoryDetails store) categoryDetail}
                     )
                     label.checkboxLabel(for="storeTags\#{key category}-\#{key categoryDetail}")
                       | \#{label categoryDetail}
@@ -71,7 +77,7 @@ include ../common/_layout
                   name="salesPoint"
                   type="text"
                 )
-                  | \#{ fromMaybe mempty salesPoint }
+                  | \#{format StoreSalesPoint store}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 住所
@@ -79,32 +85,22 @@ include ../common/_layout
                 .storeBody_info_body_row-body-address
                   input#storeAddress(
                     name="address" type="text"
-                    value="\#{ fromMaybe mempty address }"
+                    value="\#{format StoreAddress store}"
                   )
                 .storeBody_info_body_row-body-map#js-map-frame-wrapper
-                  | %{ case address }
-                  | %{ of Just address }
-                  iframe#js-map-frame.location_map-frame(
+                  iframe.location_map-frame.js-googleMap(
                     frameborder="0"
                     allowfullscreen
-                    data-map-base-api='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q='
-                    src='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q=\#{address}'
+                    data-api-key=data.googleMapApiKey
+                    data-address!="\#{format StoreAddress store}"
                   )
-                  | %{ of Nothing }
-                  iframe#js-map-frame.location_map-frame(
-                    frameborder="0"
-                    allowfullscreen
-                    data-map-base-api='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q='
-                    aria-hidden="true"
-                  )
-                  | %{ endcase }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 電話番号
               .storeBody_info_body_row-body
                 input#storePhoneNumber(
                   name="phoneNumber" type="text"
-                  value="\#{ fromMaybe mempty phoneNumber }"
+                  value="\#{format StorePhoneNumber store}"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -113,8 +109,8 @@ include ../common/_layout
                 textarea#storeBusinessHours(
                   name="businessHours" type="text"
                 )
-                  | %{ forall businessHourLine <- businessHourLines }
-                  | \#{ businessHourLine }
+                  | %{ forall hour <- format StoreBusinessHour store }
+                  | \#{hour}
                   | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -123,14 +119,14 @@ include ../common/_layout
                 textarea#storeRegularHoliday(
                   name="regularHoliday" type="text"
                 )
-                  | \#{ fromMaybe mempty regularHoliday }
+                  | \#{format StoreRegularHoliday store}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | オフィシャルサイト
               .storeBody_info_body_row-body
                 input#storeUrl(
                   name="url" type="url"
-                  value="\#{ fromMaybe mempty url }"
+                  value="\#{format StoreUrl store}"
                 )
             .storeBody_info_body_row
               .storeBody_info_body_row-header
@@ -141,21 +137,17 @@ include ../common/_layout
                     name="image" type="file" accept="image/*"
                   )
                   input#defaultImage.js-imageSelectorDefaultImage(
-                    name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
+                    name="defaultImage" type="hidden" value="\#{format StoreDefaultImage store}"
                   )
-                  | %{ case imageUrl }
-                  | %{ of Just iUrl }
                   label#storeImageLabel.uploaderLabel
                   button.uploaderReset#resetImage(type="button")
                     | Restore initial image.
                   img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
-                    src="\#{iUrl}"
+                    src="\#{format StoreImageUrl store}"
                   )
-                  | %{ of Nothing }
-                  label#storeImageLabel.uploaderLabel.js-imageSelectorUploadBtn(for="storeImageSelector")
-                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image.js-imageSelectorPreview(
-                  )
-                  | %{ endcase }
             .storeSubmit
               button.btn.outerBtn(type="submit")
                 | この内容で店舗情報を更新する
+      | %{ of Nothing }
+      | No store info.
+      | %{ endcase }

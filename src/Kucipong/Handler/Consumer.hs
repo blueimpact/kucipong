@@ -19,7 +19,8 @@ import Kucipong.Handler.Route
        (consumerCouponVarR, consumerStoreVarR, storeCouponDeleteVarR)
 import Kucipong.Handler.Store.Types
        (CouponView(..), CouponViewKey(..), CouponViewTypes(..),
-        CouponViewConditions(..), CouponViewCouponType(..))
+        CouponViewImageUrl(..), CouponViewConditions(..),
+        CouponViewCouponType(..), StoreViewText(..))
 import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad

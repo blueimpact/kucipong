@@ -6,6 +6,14 @@ module Kucipong.Handler.Store.Types
   , CouponViewTypes(..)
   , CouponViewConditions(..)
   , CouponViewCouponType(..)
+  , CouponViewImageUrl(..)
+  , StoreView(..)
+  , StoreViewImageUrl(..)
+  , StoreViewDefaultImage(..)
+  , StoreViewBusinessCategory(..)
+  , StoreViewBusinessCategoryDetails(..)
+  , StoreViewText(..)
+  , StoreViewTexts(..)
   ) where
 
 import Kucipong.Prelude
@@ -40,11 +48,11 @@ data CouponViewKey
   = StoreId
   | CouponId
 
+data CouponViewImageUrl
+  = CouponImageUrl
+
 data CouponViewTypes
-  = StoreName
-  | StoreAddress
-  | ImageUrl
-  | Title
+  = Title
   | ValidFrom
   | ValidUntil
   | DiscountPercent
@@ -65,3 +73,33 @@ data CouponViewConditions
 
 data CouponViewCouponType =
   CouponType
+
+data StoreView = StoreView
+  { storeEntity :: Entity Store
+  , storeImageUrl :: Maybe Text
+  , storeDefaultImage :: Maybe Text
+  } deriving (Show, Eq)
+
+data StoreViewText
+  = StoreName
+  | StoreSalesPoint
+  | StoreAddress
+  | StorePhoneNumber
+  | StoreRegularHoliday
+  | StoreUrl
+
+data StoreViewImageUrl
+  = StoreImageUrl
+
+data StoreViewDefaultImage
+  = StoreDefaultImage
+
+data StoreViewBusinessCategory
+  = StoreBusinessCategory
+
+data StoreViewBusinessCategoryDetails
+  = StoreBusinessCategoryDetails
+
+data StoreViewTexts
+  = StoreBusinessHour
+

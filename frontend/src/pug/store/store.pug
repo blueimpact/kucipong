@@ -4,22 +4,25 @@ include ../common/_layout
     include _header
       | 店舗情報
     include ../common/_messageArea
+    | %{ case mdata }
+    | %{ of Just store }
+
     .store
       .store_editBtn
         a.btn.outerBtn(href="\#{renderRoute storeEditR}") 店舗情報編集
       header.storeHeader
         .annotatedImageGroup
           img.annotatedImageGroup-image(
-            src="\#{fromMaybe mempty imageUrl}"
-            alt!='\#{fromMaybe "(no name)" name}'
+            src="\#{format StoreImageUrl store}"
+            alt!='\#{format StoreName store}'
           )
           span.annotatedImageGroup-annotation 画像は一例です
         .highlightedBlock
           h2.highlightedBlock.storeHeader-title
-            | \#{fromMaybe "(no name)" name}
+            | \#{format StoreName store}
       .storeBody
         .storeBody_description
-          p \#{ fromMaybe mempty salesPoint }
+          p \#{format StoreSalesPoint store}
         .storeBody_couponBtn
           a.btn.defaultBtn(href="\#{renderRoute storeCouponR}") クーポン一覧
         .storeBody_info
@@ -31,12 +34,12 @@ include ../common/_layout
               .storeBody_info_body_row-header
                 | カテゴリ
               .storeBody_info_body_row-body
-                | \#{ label (fromMaybe minBound businessCategory) }
+                | \#{ label (format StoreBusinessCategory store)}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 店舗の特徴
               .storeBody_info_body_row-body.simpleTagWrapper
-                | %{ forall businessCategoryDetail <- businessCategoryDetails }
+                | %{ forall businessCategoryDetail <- format StoreBusinessCategoryDetails store }
                 .simpleTag
                   | \#{ label businessCategoryDetail }
                 | %{ endforall }
@@ -45,34 +48,38 @@ include ../common/_layout
                 | 住所
               .storeBody_info_body_row-body
                 .storeBody_info_body_row-body-address
-                  | \#{ fromMaybe mempty address }
+                  | \#{format StoreAddress store}
                 .storeBody_info_body_row-body-map
-                  | %{ case address }
-                  | %{ of Just address }
-                  iframe.location_map-frame(
+                  iframe.location_map-frame.js-googleMap(
                     frameborder="0"
                     allowfullscreen
-                    src='https://www.google.com/maps/embed/v1/place?key=' + data.googleMapApiKey + '&q=\#{address}'
+                    data-api-key=data.googleMapApiKey
+                    data-address!="\#{format StoreAddress store}"
                   )
-                  | %{ of Nothing }
-                  | %{ endcase }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 電話番号
               .storeBody_info_body_row-body
-                | \#{ fromMaybe mempty phoneNumber }
+                | \#{format StorePhoneNumber store}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 営業時間
               .storeBody_info_body_row-body
-                | %{ forall businessHourLine <- businessHourLines }
+                | %{ forall businessHour <- format StoreBusinessHour store }
                 p
-                  | \#{ businessHourLine }
+                  | \#{businessHour}
                 | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 定休日
               .storeBody_info_body_row-body
-                | \#{ fromMaybe mempty regularHoliday }
+                | \#{format StoreRegularHoliday store}
             .storeBody_info_body_btnRow
-              a.btn.outerBtn(href="\#{ fromMaybe mempty url }") オフィシャルサイト
+              a.btn.outerBtn(href="\#{format StoreUrl store}") オフィシャルサイト
+
+    | %{ of Nothing }
+    | No store info.
+    | %{ endcase }
+
+
+

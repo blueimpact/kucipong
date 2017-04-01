@@ -29,7 +29,8 @@ import Kucipong.Handler.Store.TemplatePath
 import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewKey(..),
         CouponViewTypes(..), CouponViewConditions(..),
-        CouponViewCouponType(..))
+        CouponViewCouponType(..), CouponViewImageUrl(..),
+        StoreViewText(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.Handler.Types (PageViewer(..))
