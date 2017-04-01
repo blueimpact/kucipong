@@ -1,4 +1,4 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
 
 module Kucipong.Monad.Db.Class where
@@ -6,6 +6,7 @@ module Kucipong.Monad.Db.Class where
 import Kucipong.Prelude
 
 import Control.Monad.Trans (MonadTrans)
+import Data.Aeson.TH (defaultOptions, deriveJSON)
 import Database.Persist.Sql
        (Entity, Filter, PersistRecordBackend, SelectOpt, SqlBackend,
         Update)
@@ -25,6 +26,8 @@ data CouponDeleteResult
   -- ^ There is no 'Coupon' in the database for the 'Key' 'Coupon' and 'Key'
   -- 'Store' that was passed in.
   deriving (Eq, Generic, Show, Typeable)
+
+$(deriveJSON defaultOptions ''CouponDeleteResult)
 
 -- | Result to return from a call to 'dbDeleteStoreIfNameMatches'.
 data StoreDeleteResult
