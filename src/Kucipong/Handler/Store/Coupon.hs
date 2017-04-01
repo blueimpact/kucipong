@@ -10,7 +10,9 @@ import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist.Sql (Entity(..), fromSqlKey)
 import Web.Spock (ActionCtxT, params, redirect, renderRoute)
-import Web.Spock.Core (SpockCtxT, get, post)
+import Web.Spock.Core
+       (ClientPreferredFormat(PrefJSON), SpockCtxT, get, json,
+        preferredFormat, post)
 
 import Kucipong.Db
        (Coupon(..), CouponType(..), Image(..), Key(..),
@@ -373,6 +375,8 @@ couponPost = do
           ])
 
 -- | Return the coupon delete page for a store.
+-- TODO: This can be deleted when
+-- https://github.com/blueimpact/kucipong/issues/157 is implemented
 couponDeleteGet
   :: forall xs n m.
      (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
@@ -385,17 +389,32 @@ couponDeleteGet couponKey = do
     Just (Entity _ Coupon{couponTitle}) ->
       $(renderTemplateFromEnv templateCouponDelete)
 
+-- TODO: This can be deleted when
+-- https://github.com/blueimpact/kucipong/issues/157 is implemented
 couponDeletePost
   :: forall n xs m.
      (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponDeletePost couponKey = do
+  prefFormat <- preferredFormat
+  case prefFormat of
+    PrefJSON -> couponDeletePostJson couponKey
+    _ -> do
+      (StoreSession storeKey) <- getStoreKey
+      deleteCouponResult <- dbDeleteCoupon storeKey couponKey
+      case deleteCouponResult of
+        CouponDeleteErrDoesNotExist ->
+          resp404 [label def StoreErrorCouponNotFound]
+        CouponDeleteSuccess -> redirect $ renderRoute storeCouponR
+
+couponDeletePostJson
+  :: forall n xs m.
+     (ContainsStoreSession n xs, MonadIO m, MonadKucipongDb m)
+  => Key Coupon -> ActionCtxT (HVect xs) m ()
+couponDeletePostJson couponKey = do
   (StoreSession storeKey) <- getStoreKey
   deleteCouponResult <- dbDeleteCoupon storeKey couponKey
-  case deleteCouponResult of
-    CouponDeleteErrDoesNotExist ->
-      resp404 [label def StoreErrorCouponNotFound]
-    CouponDeleteSuccess -> redirect $ renderRoute storeCouponR
+  json deleteCouponResult
 
 storeCouponComponent
   :: forall m xs.
