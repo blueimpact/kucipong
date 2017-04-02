@@ -16,7 +16,7 @@ import Text.Heterocephalus
 import Web.Spock (html)
 
 import Kucipong.I18n (label)
-import Kucipong.View (format)
+import Kucipong.View (format, toName)
 
 templateDirectory :: FilePath
 templateDirectory = "frontend" </> "dist" </> "templates"
@@ -51,6 +51,7 @@ renderTemplate filename extraScope = renderer `appE` body
         overwrite "key" [|key|]
         overwrite "label" [|label def|]
         overwrite "format" [|format|]
+        overwrite "toName" [|toName|]
         extraScope
     renderer :: Q Exp
     renderer = [|html . toStrict . renderMarkup|]
