@@ -85,9 +85,9 @@
   | %{ case pageViewer }
   | %{ of PageViewerStore }
   .deleteCoupon
-    a.btn.outerBtn(
-      href="\#{renderRoute storeCouponDeleteVarR (entityKey (couponCoupon coupon))}"
-    )
-      | クーポンの削除
+    // a.btn.outerBtn(
+    //   href="\#{renderRoute storeCouponDeleteVarR (entityKey (couponCoupon coupon))}"
+    // )
+    //   | クーポンの削除
   | %{ of _ }
   | %{ endcase}
