@@ -16,13 +16,30 @@ import Kucipong.Handler.Store.Types
         CouponViewTypes(..), CouponViewConditions(..),
         CouponViewCouponType(..), StoreView(..),
         StoreViewBusinessCategory(..),
-        StoreViewBusinessCategoryDetails(..), StoreViewDefaultImage(..),
-        StoreViewImageUrl(..), StoreViewText(..), StoreViewTexts(..))
+        StoreViewBusinessCategoryDetails(..), StoreViewImageUrl(..),
+        StoreViewText(..), StoreViewTexts(..))
 import Kucipong.View.Class (ToName(..), View(..), ViewO)
 
 -- --------
 --  ToName
 -- --------
+
+instance ToName StoreViewText where
+  toName StoreName = "name"
+  toName StoreSalesPoint = "salesPoint"
+  toName StoreAddress = "address"
+  toName StorePhoneNumber = "phoneNumber"
+  toName StoreRegularHoliday = "regularHoliday"
+  toName StoreUrl = "url"
+
+instance ToName StoreViewTexts where
+  toName StoreBusinessHour = "businessHours"
+
+instance ToName StoreViewBusinessCategory where
+  toName StoreBusinessCategory = "businessCategory"
+
+instance ToName StoreViewBusinessCategoryDetails where
+  toName StoreBusinessCategoryDetails = "businessCategoryDetails"
 
 instance ToName CouponViewTypes where
   toName Title = "title"
@@ -58,7 +75,6 @@ type instance ViewO CouponViewKey = Int64
 type instance ViewO CouponViewTypes = Text
 type instance ViewO StoreViewBusinessCategory = BusinessCategory
 type instance ViewO StoreViewBusinessCategoryDetails = [BusinessCategoryDetail]
-type instance ViewO StoreViewDefaultImage = Text
 type instance ViewO StoreViewImageUrl = Text
 type instance ViewO StoreViewText = Text
 type instance ViewO StoreViewTexts = [Text]
@@ -149,9 +165,6 @@ instance View Store StoreViewTexts where
 
 instance View StoreView StoreViewImageUrl where
   format StoreImageUrl = fromMaybe mempty . storeImageUrl
-
-instance View StoreView StoreViewDefaultImage where
-  format StoreDefaultImage = fromMaybe mempty . storeDefaultImage
 
 instance View Store StoreViewBusinessCategory where
   format StoreBusinessCategory = fromMaybe minBound . storeBusinessCategory

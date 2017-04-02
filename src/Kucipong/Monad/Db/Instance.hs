@@ -18,7 +18,7 @@ import Kucipong.Db
        (Admin(..), AdminLoginToken(..), BusinessCategory(..),
         BusinessCategoryDetail(..), Coupon(..), CouponType(..),
         CreatedTime(..), DeletedTime(..), EntityField(..),
-        EntityDateFields(..), Image, Key(..), LoginTokenExpirationTime(..),
+        EntityDateFields(..), Key(..), LoginTokenExpirationTime(..),
         Percent(..), Price(..), Store(..), StoreLoginToken(..),
         UpdatedTime(..), emailToAdminKey, runDb, runDbCurrTime)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
@@ -461,7 +461,6 @@ dbUpdateStore
   -> Maybe Text
   -> Maybe BusinessCategory
   -> [BusinessCategoryDetail]
-  -> Maybe Image
   -> Maybe Text
   -> Maybe Text
   -> Maybe Text
@@ -469,13 +468,12 @@ dbUpdateStore
   -> Maybe Text
   -> Maybe Text
   -> m ()
-dbUpdateStore storeKey name businessCategory businessCategoryDetails image salesPoint address phoneNumber businessHours regularHoliday url =
+dbUpdateStore storeKey name businessCategory businessCategoryDetails salesPoint address phoneNumber businessHours regularHoliday url =
   dbUpdateWithTime
     [StoreId ==. storeKey]
     [ StoreName =. name
     , StoreBusinessCategory =. businessCategory
     , StoreBusinessCategoryDetails =. businessCategoryDetails
-    , StoreImage =. image
     , StoreSalesPoint =. salesPoint
     , StoreAddress =. address
     , StorePhoneNumber =. phoneNumber
