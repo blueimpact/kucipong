@@ -30,3 +30,6 @@ templateCouponId = templateRoot </> "coupon_id.html"
 
 templateCouponIdEdit :: FilePath
 templateCouponIdEdit = templateRoot </> "coupon_id_edit.html"
+
+templateCouponCreate :: FilePath
+templateCouponCreate = templateRoot </> "coupon_create.html"

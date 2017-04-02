@@ -107,6 +107,7 @@ const commonConfig = {
         'store',
         'store_edit',
         'coupon',
+        'coupon_create',
         'coupon_delete',
         'coupon_id',
         'coupon_id_edit',

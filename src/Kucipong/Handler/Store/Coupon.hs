@@ -24,7 +24,7 @@ import Kucipong.Handler.Route
        (storeCouponR, storeCouponCreateR, storeCouponDeleteVarR,
         storeCouponVarR, storeCouponVarEditR, storeR)
 import Kucipong.Handler.Store.TemplatePath
-       (templateCoupon, templateCouponDelete, templateCouponId,
+       (templateCoupon, templateCouponCreate, templateCouponDelete, templateCouponId,
         templateCouponIdEdit)
 import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewKey(..),
@@ -54,31 +54,9 @@ couponNewGet
      (MonadIO m)
   => ActionCtxT (HVect xs) m ()
 couponNewGet = do
-  let p = [] :: [(Text, Text)]
-      action = renderRoute storeCouponCreateR
-  $(renderTemplate templateCouponIdEdit $
-    fromParams
-      [|p|]
-      [ "title"
-      , "couponType"
-      , "validFrom"
-      , "validUntil"
-      , "maybeImageUrl"
-      , "discountPercent"
-      , "discountMinimumPrice"
-      , "discountOtherConditions"
-      , "giftContent"
-      , "giftReferencePrice"
-      , "giftMinimumPrice"
-      , "giftOtherConditions"
-      , "setContent"
-      , "setPrice"
-      , "setReferencePrice"
-      , "setOtherConditions"
-      , "otherContent"
-      , "otherConditions"
-      , "defaultImage"
-      ])
+  let
+    action = renderRoute storeCouponCreateR
+  $(renderTemplateFromEnv templateCouponCreate)
 
 couponGet
   :: forall xs n m.
