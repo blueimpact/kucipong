@@ -50,7 +50,6 @@ import Kucipong.Session (Store, Session)
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreCookie, getStoreKey, setStoreCookie)
-import Kucipong.View (View(..))
 
 -- | Handler for returning the store login page.
 loginGet

@@ -495,7 +495,6 @@ dbInsertCoupon
   -> CouponType
   -> Maybe Day
   -> Maybe Day
-  -> Maybe Image
   -> Maybe Percent
   -> Maybe Price
   -> Maybe Text
@@ -510,7 +509,7 @@ dbInsertCoupon
   -> Maybe Text
   -> Maybe Text
   -> m (Entity Coupon)
-dbInsertCoupon storeKey title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbInsertCoupon storeKey title couponType validFrom validUntil discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbInsertWithTime $ \createdTime updatedTime deletedTime ->
     Coupon
       storeKey
@@ -521,7 +520,7 @@ dbInsertCoupon storeKey title couponType validFrom validUntil image discountPerc
       couponType
       validFrom
       validUntil
-      image
+      Nothing
       discountPercent
       discountMinimumPrice
       discountOtherConditions

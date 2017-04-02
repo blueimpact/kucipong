@@ -4,7 +4,6 @@ module Kucipong.Handler.Store.Coupon where
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromEitherMM)
 import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
@@ -29,12 +28,10 @@ import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewImageUrl(..),
         CouponViewKey(..), CouponViewTypes(..), CouponViewConditions(..),
         CouponViewCouponType(..), StoreViewText(..))
-import Kucipong.Handler.Store.Util
-       (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
-       (CouponDeleteResult(..), FileUploadError(..), MonadKucipongAws(..),
+       (CouponDeleteResult(..), MonadKucipongAws(..),
         MonadKucipongDb(..), awsGetBucketName, awsImageS3Url,
         awsUrlFromImageAndBucket, dbFindCouponByStoreKeyAndCouponKey,
         dbFindCouponsByStoreKey, dbFindStoreByStoreKey, dbInsertCoupon,
@@ -44,7 +41,6 @@ import Kucipong.Session (Store, Session)
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreKey)
-import Kucipong.View (View(..))
 
 couponNewGet
   :: forall xs m.
@@ -159,7 +155,6 @@ couponPost
   :: forall xs n m.
      ( ContainsStoreSession n xs
      , MonadIO m
-     , MonadKucipongAws m
      , MonadKucipongDb m
      , MonadLogger m
      )
@@ -168,8 +163,6 @@ couponPost = do
   (StoreSession storeKey) <- getStoreKey
   storeNewCouponForm <- getReqParamErr handleErr
   let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
-  s3ImageName <-
-    fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
     dbInsertCoupon
       storeKey
@@ -177,7 +170,6 @@ couponPost = do
       couponType
       (view _Wrapped validFrom)
       (view _Wrapped validUntil)
-      s3ImageName
       (view _Wrapped discountPercent)
       (view _Wrapped discountMinimumPrice)
       (view _Wrapped discountOtherConditions)
@@ -193,23 +185,6 @@ couponPost = do
       (view _Wrapped otherConditions)
   redirect $ renderRoute storeCouponR
   where
-    handleFileUploadErr
-      :: UploadImgErr
-      -> ActionCtxT (HVect xs) m a
-    handleFileUploadErr (UploadImgErr uploadedFile (AwsError err)) = do
-      $(logDebug) $ "got following aws error in couponPost handler: " <> tshow err
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorCouldNotUploadImage
-    handleFileUploadErr (UploadImgErr uploadedFile FileContentTypeError) = do
-      $(logDebug) "got a content type error in couponPost handler."
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorNotAnImage
-    handleFileUploadErr (UploadImgErr uploadedFile (FileReadError err)) = do
-      $(logDebug) $ "got following error trying to read the uploaded file " <>
-        "in couponPost handler: " <> tshow err
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorCouldNotUploadImage
-
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       p <- params

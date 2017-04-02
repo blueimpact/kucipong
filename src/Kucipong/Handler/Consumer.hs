@@ -27,7 +27,6 @@ import Kucipong.Monad
        (MonadKucipongAws(..), MonadKucipongDb(..), awsImageS3Url,
         dbFindStoreByStoreKey, dbFindPublicCouponById)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
-import Kucipong.View (View(..))
 
 couponGet
   :: forall ctx m.
