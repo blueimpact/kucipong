@@ -6,6 +6,7 @@ import Kucipong.Prelude
 
 import Database.Persist (Entity(..))
 import Database.Persist.Sql (fromSqlKey)
+import Web.HttpApiData (parseQueryParamMaybe)
 
 import Kucipong.Db
        (BusinessCategory, BusinessCategoryDetail, Coupon(..),
@@ -104,7 +105,7 @@ instance View CouponView CouponViewCouponType where
   format a = format a . entityVal . couponCoupon
 
 instance View [(Text, Text)] CouponViewCouponType where
-  format a = fromMaybe minBound . (readMay =<<) . lookup (toName a)
+  format a = fromMaybe minBound . (parseQueryParamMaybe =<<) . lookup (toName a)
 
 instance View CouponView CouponViewImageUrl where
   format CouponImageUrl = fromMaybe mempty . couponImageUrl
@@ -159,9 +160,22 @@ instance View Store StoreViewText where
   format StoreRegularHoliday = fromMaybe mempty . storeRegularHoliday
   format StoreUrl = fromMaybe mempty . storeUrl
 
+instance View StoreView StoreViewText where
+  format a = format a . entityVal . storeEntity
+
+instance View [(Text, Text)] StoreViewText where
+  format a = fromMaybe mempty . lookup (toName a)
+
 instance View Store StoreViewTexts where
   format StoreBusinessHour =
     concatMap lines . storeBusinessHours
+
+instance View StoreView StoreViewTexts where
+  format a = format a . entityVal . storeEntity
+
+instance View [(Text, Text)] StoreViewTexts where
+  format a =
+    fromMaybe mempty . (lines <$>) . lookup (toName a)
 
 instance View StoreView StoreViewImageUrl where
   format StoreImageUrl = fromMaybe mempty . storeImageUrl
@@ -169,20 +183,22 @@ instance View StoreView StoreViewImageUrl where
 instance View Store StoreViewBusinessCategory where
   format StoreBusinessCategory = fromMaybe minBound . storeBusinessCategory
 
-instance View Store StoreViewBusinessCategoryDetails where
-  format StoreBusinessCategoryDetails = storeBusinessCategoryDetails
-
 instance View StoreView StoreViewBusinessCategory where
   format a = format a . entityVal . storeEntity
+
+instance View [(Text, Text)] StoreViewBusinessCategory where
+  format a =
+    fromMaybe minBound . (parseQueryParamMaybe =<<) . lookup (toName a)
+
+instance View Store StoreViewBusinessCategoryDetails where
+  format StoreBusinessCategoryDetails = storeBusinessCategoryDetails
 
 instance View StoreView StoreViewBusinessCategoryDetails where
   format a = format a . entityVal . storeEntity
 
-instance View StoreView StoreViewText where
-  format a = format a . entityVal . storeEntity
-
-instance View StoreView StoreViewTexts where
-  format a = format a . entityVal . storeEntity
+instance View [(Text, Text)] StoreViewBusinessCategoryDetails where
+  format a =
+    mapMaybe (parseQueryParamMaybe . snd) . filter ((== toName a) . fst)
 
 -- Helper functions
 formatValidFrom :: Day -> Text
