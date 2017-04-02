@@ -21,7 +21,7 @@ import Kucipong.Db
         LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken),
-        isValidBusinessCategoryDetailFor, readBusinessCategory,
+        isValidBusinessCategoryDetailFor,
         unfoldAllBusinessCategoryDetailAlt)
 import Kucipong.Email (EmailError)
 import Kucipong.Form
@@ -187,27 +187,9 @@ storeEditPost = do
       filter (isValidBusinessCategoryDetailFor busiCat) busiCatDets
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      (StoreSession storeKey) <- getStoreKey
-      maybeStoreEntity <- dbFindStoreByStoreKey storeKey
       p <- params
       let
-        maybeStore = do
-          (Entity k v) <- maybeStoreEntity
-          pure . Entity k $ v
-            { storeName = lookup "name" p
-            , storeSalesPoint = lookup "salesPoint" p
-            , storeAddress = lookup "address" p
-            , storePhoneNumber = lookup "phoneNumber" p
-            , storeRegularHoliday = lookup "regularHoliday" p
-            , storeUrl = lookup "url" p
-            , storeBusinessHours = lookup "businessHours" p
-            , storeBusinessCategory =
-                readBusinessCategory =<< lookup "businessCategory" p
-            , storeBusinessCategoryDetails =
-                 businessCategoryDetailsFromParams p
-            }
-
-        mdata = maybeStore
+        mdata = pure p
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv templateStoreEdit)
