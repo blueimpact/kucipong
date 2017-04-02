@@ -9,7 +9,6 @@ module Kucipong.Handler.Store.Types
   , CouponViewImageUrl(..)
   , StoreView(..)
   , StoreViewImageUrl(..)
-  , StoreViewDefaultImage(..)
   , StoreViewBusinessCategory(..)
   , StoreViewBusinessCategoryDetails(..)
   , StoreViewText(..)
@@ -77,7 +76,6 @@ data CouponViewCouponType =
 data StoreView = StoreView
   { storeEntity :: Entity Store
   , storeImageUrl :: Maybe Text
-  , storeDefaultImage :: Maybe Text
   } deriving (Show, Eq)
 
 data StoreViewText
@@ -90,9 +88,6 @@ data StoreViewText
 
 data StoreViewImageUrl
   = StoreImageUrl
-
-data StoreViewDefaultImage
-  = StoreDefaultImage
 
 data StoreViewBusinessCategory
   = StoreBusinessCategory

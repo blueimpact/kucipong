@@ -18,7 +18,7 @@ include ../common/_layout
                 | 店舗名
               .storeBody_info_body_row-body
                 input#storeName(
-                  name="name" type="text"
+                  name="\#{toName StoreName}" type="text"
                   value="\#{format StoreName store}"
                 )
             .storeBody_info_body_row
@@ -26,7 +26,7 @@ include ../common/_layout
                 | カテゴリ
               .storeBody_info_body_row-body
                 select#storeBusinessCategory(
-                  name="businessCategory"
+                  name="\#{toName StoreBusinessCategory}"
                   data-select-child="subcateg"
                 )
                   option(value="" disabled)
@@ -46,7 +46,7 @@ include ../common/_layout
                   .checkboxWrapper
                     input.checkbox(
                       id="storeTagsCommon-\#{key categoryDetail}"
-                      type="checkbox" name="businessCategoryDetails"
+                      type="checkbox" name="\#{toName StoreBusinessCategoryDetails}"
                       value="\#{key categoryDetail}"
                       #{isChecked (format StoreBusinessCategoryDetails store) categoryDetail}
                     )
@@ -61,7 +61,7 @@ include ../common/_layout
                   .checkboxWrapper
                     input.checkbox(
                       id="storeTags\#{key category}-\#{key categoryDetail}"
-                      type="checkbox" name="businessCategoryDetails"
+                      type="checkbox" name="\#{toName StoreBusinessCategoryDetails}"
                       value="\#{key categoryDetail}"
                       #{isChecked (format StoreBusinessCategoryDetails store) categoryDetail}
                     )
@@ -74,7 +74,7 @@ include ../common/_layout
                 | 店舗の説明
               .storeBody_info_body_row-body
                 textarea#storeSalesPoint(
-                  name="salesPoint"
+                  name="\#{toName StoreSalesPoint}"
                   type="text"
                 )
                   | \#{format StoreSalesPoint store}
@@ -84,7 +84,7 @@ include ../common/_layout
               .storeBody_info_body_row-body
                 .storeBody_info_body_row-body-address
                   input#storeAddress(
-                    name="address" type="text"
+                    name="\#{toName StoreAddress}" type="text"
                     value="\#{format StoreAddress store}"
                   )
                 .storeBody_info_body_row-body-map#js-map-frame-wrapper
@@ -99,7 +99,7 @@ include ../common/_layout
                 | 電話番号
               .storeBody_info_body_row-body
                 input#storePhoneNumber(
-                  name="phoneNumber" type="text"
+                  name="\#{toName StorePhoneNumber}" type="text"
                   value="\#{format StorePhoneNumber store}"
                 )
             .storeBody_info_body_row
@@ -107,7 +107,7 @@ include ../common/_layout
                 | 営業時間
               .storeBody_info_body_row-body
                 textarea#storeBusinessHours(
-                  name="businessHours" type="text"
+                  name="\#{toName StoreBusinessHour}" type="text"
                 )
                   | %{ forall hour <- format StoreBusinessHour store }
                   | \#{hour}
@@ -117,7 +117,7 @@ include ../common/_layout
                 | 定休日
               .storeBody_info_body_row-body
                 textarea#storeRegularHoliday(
-                  name="regularHoliday" type="text"
+                  name="\#{toName StoreRegularHoliday}" type="text"
                 )
                   | \#{format StoreRegularHoliday store}
             .storeBody_info_body_row
@@ -125,26 +125,9 @@ include ../common/_layout
                 | オフィシャルサイト
               .storeBody_info_body_row-body
                 input#storeUrl(
-                  name="url" type="url"
+                  name="\#{toName StoreUrl}" type="url"
                   value="\#{format StoreUrl store}"
                 )
-            .storeBody_info_body_row
-              .storeBody_info_body_row-header
-                | 店舗イメージ画像
-              .storeBody_info_body_row-body
-                .uploaderWrapper.js-imageSelector
-                  input#storeImageSelector.uploaderCore.js-imageSelectorCore(
-                    name="image" type="file" accept="image/*"
-                  )
-                  input#defaultImage.js-imageSelectorDefaultImage(
-                    name="defaultImage" type="hidden" value="\#{format StoreDefaultImage store}"
-                  )
-                  label#storeImageLabel.uploaderLabel
-                  button.uploaderReset#resetImage(type="button")
-                    | Restore initial image.
-                  img#storeImage.uploaderImg.storeBody_info_body_row-body-image(
-                    src="\#{format StoreImageUrl store}"
-                  )
             .storeSubmit
               button.btn.outerBtn(type="submit")
                 | この内容で店舗情報を更新する

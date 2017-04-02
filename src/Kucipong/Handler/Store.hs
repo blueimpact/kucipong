@@ -33,8 +33,7 @@ import Kucipong.Handler.Store.TemplatePath
 import Kucipong.Handler.Store.Types
        (StoreError(..), StoreMsg(..), StoreView(..), StoreViewText(..),
         StoreViewTexts(..), StoreViewBusinessCategory(..),
-        StoreViewBusinessCategoryDetails(..), StoreViewImageUrl(..),
-        StoreViewDefaultImage(..))
+        StoreViewBusinessCategoryDetails(..), StoreViewImageUrl(..))
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
@@ -127,34 +126,26 @@ storeGet = do
     mdata = StoreView
       <$> maybeStoreEntity
       <*> pure maybeImageUrl
-      <*> pure Nothing
   $(renderTemplateFromEnv templateStore)
 
 storeEditGet
   :: forall xs n m.
      ( ContainsStoreSession n xs
      , MonadIO m
-     , MonadKucipongAws m
      , MonadKucipongDb m
      )
   => ActionCtxT (HVect xs) m ()
 storeEditGet = do
   (StoreSession storeKey) <- getStoreKey
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
-  let maybeImage = storeImage . entityVal =<< maybeStoreEntity
-  maybeImageUrl <- traverse awsImageS3Url maybeImage
   let
-    mdata = StoreView
-      <$> maybeStoreEntity
-      <*> pure maybeImageUrl
-      <*> pure Nothing
+    mdata = maybeStoreEntity
   $(renderTemplateFromEnv templateStoreEdit)
 
 storeEditPost
   :: forall xs n m.
      ( ContainsStoreSession n xs
      , MonadIO m
-     , MonadKucipongAws m
      , MonadKucipongDb m
      , MonadLogger m
      )
@@ -179,7 +170,6 @@ storeEditPost = do
       name
       businessCategory
       (nub businessCategoryDetails')
-      Nothing
       salesPoint
       address
       phoneNumber
@@ -199,8 +189,6 @@ storeEditPost = do
     handleErr errMsg = do
       (StoreSession storeKey) <- getStoreKey
       maybeStoreEntity <- dbFindStoreByStoreKey storeKey
-      let maybeImage = storeImage . entityVal =<< maybeStoreEntity
-      maybeImageUrl <- traverse awsImageS3Url maybeImage
       p <- params
       let
         maybeStore = do
@@ -219,10 +207,7 @@ storeEditPost = do
                  businessCategoryDetailsFromParams p
             }
 
-        mdata = StoreView
-          <$> maybeStore
-          <*> pure maybeImageUrl
-          <*> pure (lookup "defaultImage" p)
+        mdata = maybeStore
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv templateStoreEdit)
