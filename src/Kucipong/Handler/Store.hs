@@ -6,7 +6,7 @@ module Kucipong.Handler.Store
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromEitherMM, fromMaybeM)
+import Control.FromSum (fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
 import Data.Default (def)
 import Data.List (nub)
@@ -35,12 +35,10 @@ import Kucipong.Handler.Store.Types
         StoreViewTexts(..), StoreViewBusinessCategory(..),
         StoreViewBusinessCategoryDetails(..), StoreViewImageUrl(..),
         StoreViewDefaultImage(..))
-import Kucipong.Handler.Store.Util
-       (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
-       (FileUploadError(..), MonadKucipongAws(..), MonadKucipongCookie,
+       (MonadKucipongAws(..), MonadKucipongCookie,
         MonadKucipongDb(..), MonadKucipongSendEmail(..), awsImageS3Url,
         dbFindStoreByEmail, dbFindStoreByStoreKey, dbFindStoreLoginToken,
         dbUpdateStore)
@@ -50,7 +48,6 @@ import Kucipong.Session (Store, Session)
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreCookie, getStoreKey, setStoreCookie)
-import Kucipong.View (View(..))
 
 -- | Handler for returning the store login page.
 loginGet
@@ -173,19 +170,16 @@ storeEditPost = do
                 , businessHours
                 , regularHoliday
                 , url
-                , defaultImage
                 } <- getReqParamErr handleErr
   let businessCategoryDetails' =
         filterBusinessCategoryDetails businessCategory businessCategoryDetails
-  s3ImageName <-
-    fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
     dbUpdateStore
       storeKey
       name
       businessCategory
       (nub businessCategoryDetails')
-      s3ImageName
+      Nothing
       salesPoint
       address
       phoneNumber
@@ -201,23 +195,6 @@ storeEditPost = do
     filterBusinessCategoryDetails Nothing _ = []
     filterBusinessCategoryDetails (Just busiCat) busiCatDets =
       filter (isValidBusinessCategoryDetailFor busiCat) busiCatDets
-    handleFileUploadErr :: UploadImgErr -> ActionCtxT (HVect xs) m a
-    handleFileUploadErr (UploadImgErr uploadedFile (AwsError err)) = do
-      $(logDebug) $
-        "got following aws error in storeEditPost handler: " <> tshow err
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorCouldNotUploadImage
-    handleFileUploadErr (UploadImgErr uploadedFile FileContentTypeError) = do
-      $(logDebug) "got a content type error in storeEditPost handler."
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorNotAnImage
-    handleFileUploadErr (UploadImgErr uploadedFile (FileReadError err)) = do
-      $(logDebug) $
-        "got following error trying to read the uploaded file " <>
-        "in storeEditPost handler: " <>
-        tshow err
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorCouldNotUploadImage
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       (StoreSession storeKey) <- getStoreKey

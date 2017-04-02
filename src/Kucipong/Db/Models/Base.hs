@@ -28,7 +28,7 @@ data CouponType
   | CouponTypeGift
   | CouponTypeSet
   | CouponTypeOther
-  deriving (Data, Eq, Generic, Read, Show, Typeable)
+  deriving (Bounded, Data, Enum, Eq, Generic, Read, Show, Typeable)
 
 couponTypeToText :: CouponType -> Text
 couponTypeToText = tshow
