@@ -90,7 +90,7 @@ couponEditGet couponKey = do
   maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
   let
     action = renderRoute storeCouponVarEditR couponKey
-    mdata = entityVal <$> maybeCouponEntity
+    mdata = maybeCouponEntity
   $(renderTemplateFromEnv templateCouponIdEdit)
 
 couponEditPost

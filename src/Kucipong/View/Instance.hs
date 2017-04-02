@@ -32,6 +32,10 @@ type instance ViewO StoreViewImageUrl = Text
 type instance ViewO StoreViewText = Text
 type instance ViewO StoreViewTexts = [Text]
 
+instance (View v a) => View (Entity v) a where
+  format :: a -> Entity v -> ViewO a
+  format a (Entity _ v) = format a v
+
 instance View CouponView CouponViewKey where
   format StoreId = fromSqlKey . entityKey . couponStore
   format CouponId = fromSqlKey . entityKey . couponCoupon
