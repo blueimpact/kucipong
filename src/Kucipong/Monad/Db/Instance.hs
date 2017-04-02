@@ -558,7 +558,6 @@ dbUpdateCoupon
   -> CouponType
   -> Maybe Day
   -> Maybe Day
-  -> Maybe Image
   -> Maybe Percent
   -> Maybe Price
   -> Maybe Text
@@ -573,7 +572,11 @@ dbUpdateCoupon
   -> Maybe Text
   -> Maybe Text
   -> m ()
-dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil image discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions = do
+  maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
+  let image = do
+        Entity _ v <- maybeCouponEntity
+        couponImage v
   dbUpdateWithTime
     [CouponId ==. couponKey, CouponStoreId ==. storeKey]
     [ CouponTitle =. title

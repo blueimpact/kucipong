@@ -163,7 +163,6 @@ couponEditPost
   :: forall xs n m.
      ( ContainsStoreSession n xs
      , MonadIO m
-     , MonadKucipongAws m
      , MonadKucipongDb m
      , MonadLogger m
      )
@@ -172,8 +171,6 @@ couponEditPost couponKey = do
   (StoreSession storeKey) <- getStoreKey
   storeNewCouponForm <- getReqParamErr handleErr
   let StoreNewCouponForm {..} = removeNonUsedCouponInfo storeNewCouponForm
-  s3ImageName <-
-    fromEitherMM handleFileUploadErr $ uploadImgToS3WithDef defaultImage
   void $
     dbUpdateCoupon
       couponKey
@@ -182,7 +179,6 @@ couponEditPost couponKey = do
       couponType
       (view _Wrapped validFrom)
       (view _Wrapped validUntil)
-      s3ImageName
       (view _Wrapped discountPercent)
       (view _Wrapped discountMinimumPrice)
       (view _Wrapped discountOtherConditions)
@@ -198,22 +194,6 @@ couponEditPost couponKey = do
       (view _Wrapped otherConditions)
   redirect $ renderRoute storeCouponVarR couponKey
   where
-    handleFileUploadErr
-      :: UploadImgErr
-      -> ActionCtxT (HVect xs) m a
-    handleFileUploadErr (UploadImgErr uploadedFile (AwsError err)) = do
-      $(logDebug) $ "got following aws error in couponEditPost handler: " <> tshow err
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorCouldNotUploadImage
-    handleFileUploadErr (UploadImgErr uploadedFile FileContentTypeError) = do
-      $(logDebug) "got a content type error in couponEditPost handler."
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorNotAnImage
-    handleFileUploadErr (UploadImgErr uploadedFile (FileReadError err)) = do
-      $(logDebug) $ "got following error trying to read the uploaded file " <>
-        "in couponEditPost handler: " <> tshow err
-      $(logDebug) $ "uploaded file: " <> tshow uploadedFile
-      handleErr $ label def StoreErrorCouldNotUploadImage
 
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
