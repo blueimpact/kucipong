@@ -18,7 +18,38 @@ import Kucipong.Handler.Store.Types
         StoreViewBusinessCategory(..),
         StoreViewBusinessCategoryDetails(..), StoreViewDefaultImage(..),
         StoreViewImageUrl(..), StoreViewText(..), StoreViewTexts(..))
-import Kucipong.View.Class (View(..), ViewO)
+import Kucipong.View.Class (ToName(..), View(..), ViewO)
+
+-- --------
+--  ToName
+-- --------
+
+instance ToName CouponViewTypes where
+  toName Title = "title"
+  toName ValidFrom = "validFrom"
+  toName ValidUntil = "validUntil"
+  toName DiscountPercent = "discountPercent"
+  toName DiscountMinimumPrice = "discountMinimumPrice"
+  toName GiftContent = "giftContent"
+  toName GiftMinimumPrice = "giftMinimumPrice"
+  toName GiftReferencePrice = "giftReferencePrice"
+  toName SetContent = "setContent"
+  toName SetPrice = "setPrice"
+  toName SetReferencePrice = "setReferencePrice"
+  toName OtherContent = "otherContent"
+
+instance ToName CouponViewConditions where
+  toName DiscountOtherConditions = "discountOtherConditions"
+  toName GiftOtherConditions = "giftOtherConditions"
+  toName SetOtherConditions = "setOtherConditions"
+  toName OtherConditions = "otherConditions"
+
+instance ToName CouponViewCouponType where
+  toName CouponType = "couponType"
+
+-- ------
+--  View
+-- ------
 
 type instance ViewO CouponViewConditions = [Text]
 type instance ViewO CouponViewCouponType = CouponType
@@ -44,37 +75,20 @@ instance View CouponView CouponViewTypes where
   format a = format a . entityVal . couponCoupon
 
 instance View [(Text, Text)] CouponViewTypes where
-  format Title = fromMaybe mempty . lookup "title"
-  format ValidFrom = fromMaybe mempty . lookup "validFrom"
-  format ValidUntil = fromMaybe mempty . lookup "validUntil"
-  format DiscountPercent = fromMaybe mempty . lookup "discountPercent"
-  format DiscountMinimumPrice = fromMaybe mempty . lookup "discountMinimumPrice"
-  format GiftContent = fromMaybe mempty . lookup "giftContent"
-  format GiftMinimumPrice = fromMaybe mempty . lookup "giftMinimumPrice"
-  format GiftReferencePrice = fromMaybe mempty . lookup "giftReferencePrice"
-  format SetContent = fromMaybe mempty . lookup "setContent"
-  format SetPrice = fromMaybe mempty . lookup "setPrice"
-  format SetReferencePrice = fromMaybe mempty . lookup "setReferencePrice"
-  format OtherContent = fromMaybe mempty . lookup "otherContent"
+  format a = fromMaybe mempty . lookup (toName a)
 
 instance View CouponView CouponViewConditions where
   format a = format a . entityVal . couponCoupon
 
 instance View [(Text, Text)] CouponViewConditions where
-  format DiscountOtherConditions =
-    fromMaybe mempty . (lines <$>) . lookup "discountOtherConditions"
-  format GiftOtherConditions =
-    fromMaybe mempty . (lines <$>) . lookup "giftOtherConditions"
-  format SetOtherConditions =
-    fromMaybe mempty . (lines <$>) . lookup "setOtherConditions"
-  format OtherConditions =
-    fromMaybe mempty . (lines <$>) . lookup "otherConditions"
+  format a =
+    fromMaybe mempty . (lines <$>) . lookup (toName a)
 
 instance View CouponView CouponViewCouponType where
   format a = format a . entityVal . couponCoupon
 
 instance View [(Text, Text)] CouponViewCouponType where
-  format CouponType = fromMaybe minBound . (readMay =<<) . lookup "couponType"
+  format a = fromMaybe minBound . (readMay =<<) . lookup (toName a)
 
 instance View CouponView CouponViewImageUrl where
   format CouponImageUrl = fromMaybe mempty . couponImageUrl
