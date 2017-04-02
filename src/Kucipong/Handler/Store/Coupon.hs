@@ -4,7 +4,7 @@ module Kucipong.Handler.Store.Coupon where
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromEitherMM, fromMaybeM)
+import Control.FromSum (fromEitherMM)
 import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
@@ -15,8 +15,7 @@ import Web.Spock.Core
         preferredFormat, post)
 
 import Kucipong.Db
-       (Coupon(..), CouponType(..), Image(..), Key(..),
-        couponTypeToText, percentToText, priceToText)
+       (Coupon(..), CouponType(..), Key(..))
 import Kucipong.Form
        (StoreNewCouponForm(..), removeNonUsedCouponInfo)
 import Kucipong.Handler.Error (resp404)
@@ -27,10 +26,9 @@ import Kucipong.Handler.Store.TemplatePath
        (templateCoupon, templateCouponCreate, templateCouponDelete, templateCouponId,
         templateCouponIdEdit)
 import Kucipong.Handler.Store.Types
-       (StoreError(..), CouponView(..), CouponViewKey(..),
-        CouponViewTypes(..), CouponViewConditions(..),
-        CouponViewCouponType(..), CouponViewImageUrl(..),
-        StoreViewText(..))
+       (StoreError(..), CouponView(..), CouponViewImageUrl(..),
+        CouponViewKey(..), CouponViewTypes(..), CouponViewConditions(..),
+        CouponViewCouponType(..), StoreViewText(..))
 import Kucipong.Handler.Store.Util
        (UploadImgErr(..), uploadImgToS3WithDef)
 import Kucipong.Handler.Types (PageViewer(..))
@@ -41,8 +39,7 @@ import Kucipong.Monad
         awsUrlFromImageAndBucket, dbFindCouponByStoreKeyAndCouponKey,
         dbFindCouponsByStoreKey, dbFindStoreByStoreKey, dbInsertCoupon,
         dbUpdateCoupon)
-import Kucipong.RenderTemplate
-       (fromParams, renderTemplate, renderTemplateFromEnv)
+import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Store, Session)
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
@@ -54,8 +51,8 @@ couponNewGet
      (MonadIO m)
   => ActionCtxT (HVect xs) m ()
 couponNewGet = do
-  let
-    action = renderRoute storeCouponCreateR
+  -- let
+  --   action = renderRoute storeCouponCreateR
   $(renderTemplateFromEnv templateCouponCreate)
 
 couponGet
@@ -85,79 +82,16 @@ couponEditGet
   :: forall xs n m.
      ( ContainsStoreSession n xs
      , MonadIO m
-     , MonadKucipongAws m
      , MonadKucipongDb m
-     , MonadLogger m
      )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponEditGet couponKey = do
   (StoreSession storeKey) <- getStoreKey
   maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
-  Entity
-    _
-    (Coupon
-      _
-      _
-      _
-      _
-      (Just -> title)
-      (Just . couponTypeToText -> couponType)
-      (fmap tshow -> validFrom)
-      (fmap tshow -> validUntil)
-      maybeImage
-      (fmap percentToText  -> discountPercent)
-      (fmap priceToText -> discountMinimumPrice)
-      discountOtherConditions
-      giftContent
-      (fmap priceToText -> giftReferencePrice)
-      (fmap priceToText -> giftMinimumPrice)
-      giftOtherConditions
-      setContent
-      (fmap priceToText -> setPrice)
-      (fmap priceToText -> setReferencePrice)
-      setOtherConditions
-      otherContent
-      otherConditions) <-
-        fromMaybeM (handleErr "couldn't find coupon") maybeCouponEntity
-  maybeImageUrl <- traverse awsImageS3Url maybeImage
   let
     action = renderRoute storeCouponVarEditR couponKey
-    defaultImage = unImage <$> maybeImage
+    mdata = entityVal <$> maybeCouponEntity
   $(renderTemplateFromEnv templateCouponIdEdit)
-  where
-    handleErr :: Text -> ActionCtxT (HVect xs) m a
-    handleErr errMsg = do
-      (StoreSession storeKey) <- getStoreKey
-      maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
-      let maybeImage = maybeCouponEntity >>= couponImage . entityVal
-      maybeImageUrl <- traverse awsImageS3Url maybeImage
-      p <- params
-      $(logDebug) $ "params: " <> tshow p
-      $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
-      let errors = [errMsg]
-          action = renderRoute storeCouponVarEditR couponKey
-      $(renderTemplate templateCouponIdEdit $
-        fromParams
-          [|p|]
-          [ "title"
-          , "couponType"
-          , "validFrom"
-          , "validUntil"
-          , "discountPercent"
-          , "discountMinimumPrice"
-          , "discountOtherConditions"
-          , "giftContent"
-          , "giftReferencePrice"
-          , "giftMinimumPrice"
-          , "giftOtherConditions"
-          , "setContent"
-          , "setPrice"
-          , "setReferencePrice"
-          , "setOtherConditions"
-          , "otherContent"
-          , "otherConditions"
-          , "defaultImage"
-          ])
 
 couponEditPost
   :: forall xs n m.
@@ -194,41 +128,16 @@ couponEditPost couponKey = do
       (view _Wrapped otherConditions)
   redirect $ renderRoute storeCouponVarR couponKey
   where
-
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      (StoreSession storeKey) <- getStoreKey
-      maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
-      let maybeImage = maybeCouponEntity >>= couponImage . entityVal
-      maybeImageUrl <- traverse awsImageS3Url maybeImage
       p <- params
       $(logDebug) $ "params: " <> tshow p
       $(logDebug) $
         "got following error in store couponEditPost handler: " <> errMsg
       let errors = [errMsg]
-      let action = renderRoute storeCouponVarEditR couponKey
-      $(renderTemplate templateCouponIdEdit $
-        fromParams
-          [|p|]
-          [ "title"
-          , "couponType"
-          , "validFrom"
-          , "validUntil"
-          , "discountPercent"
-          , "discountMinimumPrice"
-          , "discountOtherConditions"
-          , "giftContent"
-          , "giftReferencePrice"
-          , "giftMinimumPrice"
-          , "giftOtherConditions"
-          , "setContent"
-          , "setPrice"
-          , "setReferencePrice"
-          , "setOtherConditions"
-          , "otherContent"
-          , "otherConditions"
-          , "defaultImage"
-          ])
+          action = renderRoute storeCouponVarEditR couponKey
+          mdata = return p
+      $(renderTemplateFromEnv templateCouponIdEdit)
 
 couponListGet
   :: forall xs n m.
@@ -307,31 +216,8 @@ couponPost = do
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
       let errors = [errMsg]
           action = renderRoute storeCouponCreateR
-      $(renderTemplate templateCouponIdEdit $
-        fromParams
-          [|p|]
-          [ "title"
-          , "couponType"
-          , "validFrom"
-          , "validUntil"
-          -- TODO: We should make sure the image url is filled in like normal
-          -- for the user when they resubmit the page.
-          , "maybeImageUrl"
-          , "discountPercent"
-          , "discountMinimumPrice"
-          , "discountOtherConditions"
-          , "giftContent"
-          , "giftReferencePrice"
-          , "giftMinimumPrice"
-          , "giftOtherConditions"
-          , "setContent"
-          , "setPrice"
-          , "setReferencePrice"
-          , "setOtherConditions"
-          , "otherContent"
-          , "otherConditions"
-          , "defaultImage"
-          ])
+          mdata = return p
+      $(renderTemplateFromEnv templateCouponIdEdit)
 
 -- | Return the coupon delete page for a store.
 -- TODO: This can be deleted when
@@ -374,6 +260,9 @@ couponDeletePostJson couponKey = do
   (StoreSession storeKey) <- getStoreKey
   deleteCouponResult <- dbDeleteCoupon storeKey couponKey
   json deleteCouponResult
+
+allCouponTypes :: [CouponType]
+allCouponTypes = [minBound .. maxBound]
 
 storeCouponComponent
   :: forall m xs.

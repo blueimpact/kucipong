@@ -3,6 +3,8 @@ include ../common/_layout
     include _header
       | クーポン情報 編集
     include ../common/_messageArea
+    | %{ case mdata }
+    | %{ of Just coupon }
     form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}")
       .couponEditor_signbord
         .couponEditor_titleArea
@@ -15,32 +17,8 @@ include ../common/_layout
             .labeledRow-body
               input#couponTitle(
                 name="title" type="text"
-                value="\#{fromMaybe mempty title}"
+                value="\#{format Title coupon}"
               )
-          .labeledRow
-            label.labeledRow-header(for="image")
-              | イメージ画像
-            .labeledRow-body
-              .uploaderWrapper.js-imageSelector
-                input#couponImageSelector.uploaderCore.js-imageSelectorCore(
-                  name="image" type="file" accept="image/*"
-                )
-                input#defaultImage.js-imageSelectorDefaultImage(
-                  name="defaultImage" type="hidden" value="\#{fromMaybe mempty defaultImage}"
-                )
-                | %{ case maybeImageUrl }
-                | %{ of Just iUrl }
-                label#couponImageLabel.uploaderLabel.js-imageSelectorUploadBtn
-                button.uploaderReset#resetImage.js-imageSelectorResetBtn(type="button")
-                  | Restore initial image.
-                img#couponImage.uploaderImg.storeBody_info_body_row-body-image.js-imageSelectorPreview(
-                  src="\#{iUrl}"
-                )
-                | %{ of Nothing }
-                label#couponImageLabel.uploaderLabel.js-imageSelectorUploadBtn(for="couponImageSelector")
-                img#couponImage.uploaderImg.storeBody_info_body_row-body-image.js-imageSelectorPreview(
-                )
-                | %{ endcase }
 
           .labeledRow
             label.labeledRow-header(for="validFrom")
@@ -48,7 +26,7 @@ include ../common/_layout
             .labeledRow-body
               input#couponValidFrom(
                 name="validFrom" type="date"
-                value="\#{fromMaybe mempty validFrom}"
+                value="\#{format ValidFrom coupon}"
               )
 
           .labeledRow
@@ -57,7 +35,7 @@ include ../common/_layout
             .labeledRow-body
               input#couponExpire(
                 name="validUntil" type="date"
-                value="\#{fromMaybe mempty validUntil}"
+                value="\#{format ValidUntil coupon}"
               )
 
           .labeledRow
@@ -66,30 +44,16 @@ include ../common/_layout
             .labeledRow-body
               select#couponType(
                 name="couponType"
-                value="\#{fromMaybe mempty couponType}"
+                value="\#{key (format CouponType coupon)}"
                 data-select-child="type"
               )
+                | %{ forall ctype <- allCouponTypes }
                 option(
-                  value="\#{key CouponTypeDiscount}"
-                  #{isSelected couponType (key CouponTypeDiscount)}
+                  value="\#{key ctype}"
+                  #{isSelected (Just (format CouponType coupon)) ctype}
                 )
-                  | \#{label CouponTypeDiscount}
-                option(
-                  value="\#{key CouponTypeGift}"
-                  #{isSelected couponType (key CouponTypeGift)}
-                )
-                  | \#{label CouponTypeGift}
-                option(
-                  value="\#{key CouponTypeSet}"
-                  #{isSelected couponType (key CouponTypeSet)}
-                )
-                  | \#{label CouponTypeSet}
-                option(
-                  value="\#{key CouponTypeOther}"
-                  #{isSelected couponType (key CouponTypeOther)}
-                )
-                  | \#{label CouponTypeOther}
-
+                  | \#{label ctype}
+                | %{ endforall }
 
           .showOnFocus(id="type-\#{key CouponTypeDiscount}")
             .labeledRow
@@ -99,7 +63,7 @@ include ../common/_layout
                 input#discountRate(
                   name="discountPercent" type="number"
                   min="0" max="100"
-                  value="\#{fromMaybe mempty discountPercent}"
+                  value="\#{format DiscountPercent coupon}"
                 )
             .labeledRow
               label.labeledRow-header(for="discountMinimumPrice")
@@ -108,7 +72,7 @@ include ../common/_layout
                 input#discountMinimumFee(
                   name="discountMinimumPrice" type="number"
                   min="0"
-                  value="\#{fromMaybe mempty discountMinimumPrice}"
+                  value="\#{format DiscountMinimumPrice coupon}"
                 )
             .labeledRow
               label.labeledRow-header(for="discountOtherConditions")
@@ -117,7 +81,9 @@ include ../common/_layout
                 textarea#discountOtherConditions(
                    name="discountOtherConditions"
                 )
-                  | \#{fromMaybe mempty discountOtherConditions}
+                  | %{forall condition <- format DiscountOtherConditions coupon}
+                  p \#{condition}
+                  | %{endforall}
 
           .showOnFocus(id="type-\#{key CouponTypeGift}")
             .labeledRow
@@ -126,7 +92,7 @@ include ../common/_layout
               .labeledRow-body
                 input#giftContent(
                   name="giftContent" type="text"
-                  value="\#{fromMaybe mempty giftContent}"
+                  value="\#{format GiftContent coupon}"
                 )
             .labeledRow
               label.labeledRow-header(for="giftReferencePrice")
@@ -135,7 +101,7 @@ include ../common/_layout
                 input#giftReferencePrice(
                   name="giftReferencePrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe mempty giftReferencePrice}'
+                  value!='\#{format GiftReferencePrice coupon}'
                 )
             .labeledRow
               label.labeledRow-header(for="giftMinimumPrice")
@@ -144,7 +110,7 @@ include ../common/_layout
                 input#giftMinimumFee(
                   name="giftMinimumPrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe mempty giftMinimumPrice}'
+                  value!='\#{format GiftMinimumPrice coupon}'
                 )
             .labeledRow
               label.labeledRow-header(for="giftOtherConditions")
@@ -153,7 +119,9 @@ include ../common/_layout
                 textarea#giftOtherConditions(
                    name="giftOtherConditions"
                 )
-                  | \#{fromMaybe mempty giftOtherConditions}
+                  | %{forall condition <- format GiftOtherConditions coupon}
+                  p \#{condition}
+                  | %{endforall}
 
           .showOnFocus(id="type-\#{key CouponTypeSet}")
             .labeledRow
@@ -163,7 +131,7 @@ include ../common/_layout
                 textarea#setContent(
                   name="setContent"
                 )
-                  | \#{fromMaybe mempty setContent}
+                  | \#{format SetContent coupon}
             .labeledRow
               label.labeledRow-header(for="setPrice")
                 | セット価格
@@ -171,7 +139,7 @@ include ../common/_layout
                 input#setPrice(
                   name="setPrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe mempty setPrice}'
+                  value!='\#{format SetPrice coupon}'
                 )
             .labeledRow
               label.labeledRow-header(for="setReferencePrice")
@@ -180,7 +148,7 @@ include ../common/_layout
                 input#setReferencePrice(
                   name="setReferencePrice" type="number"
                   min="0"
-                  value!='\#{fromMaybe mempty setReferencePrice}'
+                  value!='\#{format SetReferencePrice coupon}'
                 )
             .labeledRow
               label.labeledRow-header(for="setOtherConditions")
@@ -189,7 +157,9 @@ include ../common/_layout
                 textarea#setOtherConditions(
                    name="setOtherConditions"
                 )
-                  | \#{fromMaybe mempty setOtherConditions}
+                  | %{forall condition <- format SetOtherConditions coupon}
+                  p \#{condition}
+                  | %{endforall}
 
           .showOnFocus(id="type-\#{key CouponTypeOther}")
             .labeledRow
@@ -199,7 +169,7 @@ include ../common/_layout
                 textarea#otherContent(
                   name="otherContent"
                 )
-                  | \#{fromMaybe mempty otherContent}
+                  | \#{format OtherContent coupon}
             .labeledRow
               label.labeledRow-header(for="otherConditions")
                 | クーポン適用条件
@@ -207,7 +177,12 @@ include ../common/_layout
                 textarea#otherConditions(
                    name="otherConditions"
                 )
-                  | \#{fromMaybe mempty otherConditions}
+                  | %{forall condition <- format OtherConditions coupon}
+                  | \#{condition}
+                  | %{endforall}
           .couponSubmit
             button.btn.outerBtn(type="submit")
               | この内容で店舗情報を更新する
+    | %{ of Nothing }
+    | No coupon found.
+    | %{ endcase }
