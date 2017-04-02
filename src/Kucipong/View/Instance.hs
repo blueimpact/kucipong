@@ -18,19 +18,28 @@ import Kucipong.Handler.Store.Types
         StoreViewBusinessCategory(..),
         StoreViewBusinessCategoryDetails(..), StoreViewDefaultImage(..),
         StoreViewImageUrl(..), StoreViewText(..), StoreViewTexts(..))
-import Kucipong.View.Class (View(..))
+import Kucipong.View.Class (View(..), ViewO)
+
+type instance ViewO CouponViewConditions = [Text]
+type instance ViewO CouponViewCouponType = CouponType
+type instance ViewO CouponViewImageUrl = Text
+type instance ViewO CouponViewKey = Int64
+type instance ViewO CouponViewTypes = Text
+type instance ViewO StoreViewBusinessCategory = BusinessCategory
+type instance ViewO StoreViewBusinessCategoryDetails = [BusinessCategoryDetail]
+type instance ViewO StoreViewDefaultImage = Text
+type instance ViewO StoreViewImageUrl = Text
+type instance ViewO StoreViewText = Text
+type instance ViewO StoreViewTexts = [Text]
 
 instance View CouponView CouponViewKey where
-  type ViewO CouponViewKey = Int64
   format StoreId = fromSqlKey . entityKey . couponStore
   format CouponId = fromSqlKey . entityKey . couponCoupon
 
 instance View CouponView CouponViewTypes where
-  type ViewO CouponViewTypes = Text
   format a = format a . entityVal . couponCoupon
 
 instance View [(Text, Text)] CouponViewTypes where
-  type ViewO CouponViewTypes = Text
   format Title = fromMaybe mempty . lookup "title"
   format ValidFrom = fromMaybe mempty . lookup "validFrom"
   format ValidUntil = fromMaybe mempty . lookup "validUntil"
@@ -45,11 +54,9 @@ instance View [(Text, Text)] CouponViewTypes where
   format OtherContent = fromMaybe mempty . lookup "otherContent"
 
 instance View CouponView CouponViewConditions where
-  type ViewO CouponViewConditions = [Text]
   format a = format a . entityVal . couponCoupon
 
 instance View [(Text, Text)] CouponViewConditions where
-  type ViewO CouponViewConditions = [Text]
   format DiscountOtherConditions =
     fromMaybe mempty . (lines <$>) . lookup "discountOtherConditions"
   format GiftOtherConditions =
@@ -60,19 +67,15 @@ instance View [(Text, Text)] CouponViewConditions where
     fromMaybe mempty . (lines <$>) . lookup "otherConditions"
 
 instance View CouponView CouponViewCouponType where
-  type ViewO CouponViewCouponType = CouponType
   format a = format a . entityVal . couponCoupon
 
 instance View [(Text, Text)] CouponViewCouponType where
-  type ViewO CouponViewCouponType = CouponType
   format CouponType = fromMaybe minBound . (readMay =<<) . lookup "couponType"
 
 instance View CouponView CouponViewImageUrl where
-  type ViewO CouponViewImageUrl = Text
   format CouponImageUrl = fromMaybe mempty . couponImageUrl
 
 instance View CouponView StoreViewText where
-  type ViewO StoreViewText = Text
   format a = format a . entityVal . couponStore
 
 -- ---------------
@@ -80,7 +83,6 @@ instance View CouponView StoreViewText where
 -- ---------------
 
 instance View Coupon CouponViewTypes where
-  type ViewO CouponViewTypes = Text
   format Title = couponTitle
   format ValidFrom = maybe mempty formatValidFrom . couponValidFrom
   format ValidUntil = maybe mempty formatValidUntil . couponValidFrom
@@ -100,7 +102,6 @@ instance View Coupon CouponViewTypes where
   format OtherContent = maybe mempty tshow . couponOtherContent
 
 instance View Coupon CouponViewConditions where
-  type ViewO CouponViewConditions = [Text]
   format DiscountOtherConditions =
     concatMap lines . couponDiscountOtherConditions
   format GiftOtherConditions =
@@ -110,7 +111,6 @@ instance View Coupon CouponViewConditions where
   format OtherConditions = concatMap lines . couponOtherConditions
 
 instance View Coupon CouponViewCouponType where
-  type ViewO CouponViewCouponType = CouponType
   format CouponType = couponCouponType
 
 -- -------
@@ -118,7 +118,6 @@ instance View Coupon CouponViewCouponType where
 -- -------
 
 instance View Store StoreViewText where
-  type ViewO StoreViewText = Text
   format StoreName = fromMaybe "(no store name)" . storeName
   format StoreSalesPoint = fromMaybe mempty . storeSalesPoint
   format StoreAddress = fromMaybe mempty . storeAddress
@@ -127,40 +126,31 @@ instance View Store StoreViewText where
   format StoreUrl = fromMaybe mempty . storeUrl
 
 instance View Store StoreViewTexts where
-  type ViewO StoreViewTexts = [Text]
   format StoreBusinessHour =
     concatMap lines . storeBusinessHours
 
 instance View StoreView StoreViewImageUrl where
-  type ViewO StoreViewImageUrl = Text
   format StoreImageUrl = fromMaybe mempty . storeImageUrl
 
 instance View StoreView StoreViewDefaultImage where
-  type ViewO StoreViewDefaultImage = Text
   format StoreDefaultImage = fromMaybe mempty . storeDefaultImage
 
 instance View Store StoreViewBusinessCategory where
-  type ViewO StoreViewBusinessCategory = BusinessCategory
   format StoreBusinessCategory = fromMaybe minBound . storeBusinessCategory
 
 instance View Store StoreViewBusinessCategoryDetails where
-  type ViewO StoreViewBusinessCategoryDetails = [BusinessCategoryDetail]
   format StoreBusinessCategoryDetails = storeBusinessCategoryDetails
 
 instance View StoreView StoreViewBusinessCategory where
-  type ViewO StoreViewBusinessCategory = BusinessCategory
   format a = format a . entityVal . storeEntity
 
 instance View StoreView StoreViewBusinessCategoryDetails where
-  type ViewO StoreViewBusinessCategoryDetails = [BusinessCategoryDetail]
   format a = format a . entityVal . storeEntity
 
 instance View StoreView StoreViewText where
-  type ViewO StoreViewText = Text
   format a = format a . entityVal . storeEntity
 
 instance View StoreView StoreViewTexts where
-  type ViewO StoreViewTexts = [Text]
   format a = format a . entityVal . storeEntity
 
 -- Helper functions
