@@ -51,8 +51,9 @@ couponNewGet
      (MonadIO m)
   => ActionCtxT (HVect xs) m ()
 couponNewGet = do
-  -- let
-  --   action = renderRoute storeCouponCreateR
+  let
+    action = renderRoute storeCouponCreateR
+    mdata = pure mempty :: Maybe [(Text, Text)]
   $(renderTemplateFromEnv templateCouponCreate)
 
 couponGet

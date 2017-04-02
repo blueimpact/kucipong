@@ -3,4 +3,9 @@ include ../common/_layout
     include _header
       | クーポン 新規作成
     include ../common/_messageArea
-
+    | %{ case mdata }
+    | %{ of Just coupon }
+    include _coupon_edit
+    | %{ of Nothing }
+    | No coupon found.
+    | %{ endcase }
