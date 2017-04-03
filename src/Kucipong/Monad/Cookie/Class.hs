@@ -10,7 +10,8 @@ import Web.Spock (ActionCtxT, CookieSettings)
 import Kucipong.Monad.Aws.Trans (KucipongAwsT)
 import Kucipong.Monad.Db.Trans (KucipongDbT)
 import Kucipong.Monad.SendEmail.Trans (KucipongSendEmailT)
-import Kucipong.Session (Admin, Session, Store)
+import Kucipong.Session
+       (Session, SessionType(SessionTypeAdmin, SessionTypeStore))
 
 -- |
 -- Default implementations are used to easily derive instances for monads
@@ -37,23 +38,23 @@ class Monad m => MonadKucipongCookie m where
   encryptSessionCookie = lift . encryptSessionCookie
 
   decryptAdminSessionCookie
-    :: Text -> m (Maybe (Session Admin))
+    :: Text -> m (Maybe (Session 'SessionTypeAdmin))
   default decryptAdminSessionCookie
     :: ( MonadKucipongCookie n
        , MonadTrans t
        , m ~ t n
        )
-    => Text -> t n (Maybe (Session Admin))
+    => Text -> t n (Maybe (Session 'SessionTypeAdmin))
   decryptAdminSessionCookie  = lift . decryptAdminSessionCookie
 
   decryptStoreSessionCookie
-    :: Text -> m (Maybe (Session Store))
+    :: Text -> m (Maybe (Session 'SessionTypeStore))
   default decryptStoreSessionCookie
     :: ( MonadKucipongCookie n
        , MonadTrans t
        , m ~ t n
        )
-    => Text -> t n (Maybe (Session Store))
+    => Text -> t n (Maybe (Session 'SessionTypeStore))
   decryptStoreSessionCookie  = lift . decryptStoreSessionCookie
 
 instance MonadKucipongCookie m => MonadKucipongCookie (ActionCtxT ctx m)

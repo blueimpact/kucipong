@@ -37,7 +37,7 @@ import Kucipong.Monad
         dbFindCouponsByStoreKey, dbFindStoreByStoreKey, dbInsertCoupon,
         dbUpdateCoupon)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
-import Kucipong.Session (Store, Session)
+import Kucipong.Session (Session, SessionType(SessionTypeStore))
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreKey)
@@ -247,7 +247,7 @@ storeCouponComponent
      , MonadKucipongDb m
      , MonadLogger m
      )
-  => SpockCtxT (HVect (Session Kucipong.Session.Store : xs)) m ()
+  => SpockCtxT (HVect (Session 'SessionTypeStore : xs)) m ()
 storeCouponComponent = do
   get storeCouponR couponListGet
   post storeCouponCreateR couponPost

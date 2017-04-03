@@ -13,8 +13,9 @@ import Kucipong.Environment
 import Kucipong.Monad.Cookie.Class (MonadKucipongCookie(..))
 import Kucipong.Monad.Cookie.Trans (KucipongCookieT(..))
 import Kucipong.Session
-       (Admin, HasSessionKey, Session, Store, decryptAdminSession,
-        decryptStoreSession, encryptSession)
+       (HasSessionKey, Session,
+        SessionType(SessionTypeAdmin, SessionTypeStore),
+        decryptAdminSession, decryptStoreSession, encryptSession)
 import Kucipong.Util (oneYear)
 
 instance
@@ -44,9 +45,9 @@ instance
   encryptSessionCookie = lift . encryptSession
 
   decryptAdminSessionCookie
-    :: Text -> KucipongCookieT m (Maybe (Session Admin))
+    :: Text -> KucipongCookieT m (Maybe (Session 'SessionTypeAdmin))
   decryptAdminSessionCookie = decryptAdminSession
 
   decryptStoreSessionCookie
-    :: Text -> KucipongCookieT m (Maybe (Session Store))
+    :: Text -> KucipongCookieT m (Maybe (Session 'SessionTypeStore))
   decryptStoreSessionCookie = decryptStoreSession

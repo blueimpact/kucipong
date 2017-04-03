@@ -3,8 +3,7 @@ module Kucipong.Session
   ( -- * Session type
     Session(..)
     -- * Markers for either AdminSession or StoreSession
-  , Admin
-  , Store
+  , SessionType(..)
     -- * Helper functions for encrypting / decrypting a 'Session'
   , decryptAdminSession
   , decryptStoreSession
@@ -44,15 +43,12 @@ instance HasSessionKey Key where
   getSessionKey :: Key -> Key
   getSessionKey = id
 
--- | Tag for 'AdminSession'
-data Admin
+-- | Tag for 'Session' types.
+data SessionType = SessionTypeAdmin | SessionTypeStore
 
--- | Tag for 'StoreSession'.
-data Store
-
-data Session :: * -> * where
-  AdminSession :: EmailAddress -> Session Admin
-  StoreSessionRaw :: Int64 -> Session Store
+data Session :: SessionType -> * where
+  AdminSession :: EmailAddress -> Session 'SessionTypeAdmin
+  StoreSessionRaw :: Int64 -> Session 'SessionTypeStore
 
 deriving instance Show (Session a)
 
@@ -97,7 +93,7 @@ decryptAdminSession
   :: ( HasSessionKey r
      , MonadReader r m
      )
-  => Text -> m (Maybe (Session Admin))
+  => Text -> m (Maybe (Session 'SessionTypeAdmin))
 decryptAdminSession =
   decryptSessionGeneric $ Just . AdminSession <=< emailAddressFromText
 
@@ -111,7 +107,7 @@ decryptStoreSession
   :: ( HasSessionKey r
      , MonadReader r m
      )
-  => Text -> m (Maybe (Session Store))
+  => Text -> m (Maybe (Session 'SessionTypeStore))
 decryptStoreSession = decryptSessionGeneric $ Just . StoreSessionRaw <=< readMay
 
 decryptSessionGeneric
