@@ -4,6 +4,7 @@ module Kucipong.Handler.Store.Coupon where
 
 import Kucipong.Prelude
 
+import Control.FromSum (fromMaybeM)
 import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
@@ -22,8 +23,8 @@ import Kucipong.Handler.Route
        (storeCouponR, storeCouponCreateR, storeCouponDeleteVarR,
         storeCouponVarR, storeCouponVarEditR, storeR)
 import Kucipong.Handler.Store.TemplatePath
-       (templateCoupon, templateCouponCreate, templateCouponDelete, templateCouponId,
-        templateCouponIdEdit)
+       (templateCoupon, templateCouponCreate, templateCouponDelete,
+        templateCouponId, templateCouponIdEdit)
 import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewImageUrl(..),
         CouponViewKey(..), CouponViewTypes(..), CouponViewConditions(..),
@@ -47,9 +48,8 @@ couponNewGet
      (MonadIO m)
   => ActionCtxT (HVect xs) m ()
 couponNewGet = do
-  let
-    action = renderRoute storeCouponCreateR
-    mdata = pure mempty :: Maybe [(Text, Text)]
+  let action = renderRoute storeCouponCreateR
+      coupon = mempty :: [(Text, Text)]
   $(renderTemplateFromEnv templateCouponCreate)
 
 couponGet
@@ -63,16 +63,16 @@ couponGet
 couponGet couponKey = do
   (StoreSession storeKey) <- getStoreKey
   maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
+  couponEntity <-
+    fromMaybeM (resp404 [label def StoreErrorCouponNotFound]) maybeCouponEntity
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
+  storeEntity <-
+    fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
   let maybeImage = couponImage . entityVal =<< maybeCouponEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
-  let
-    mdata = CouponView
-      <$> maybeStoreEntity
-      <*> maybeCouponEntity
-      <*> pure maybeImageUrl
-    aboutStore = renderRoute storeR
-    pageViewer = PageViewerStore
+  let coupon = CouponView storeEntity couponEntity maybeImageUrl
+      aboutStore = renderRoute storeR
+      pageViewer = PageViewerStore
   $(renderTemplateFromEnv templateCouponId)
 
 couponEditGet
@@ -85,9 +85,9 @@ couponEditGet
 couponEditGet couponKey = do
   (StoreSession storeKey) <- getStoreKey
   maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
-  let
-    action = renderRoute storeCouponVarEditR couponKey
-    mdata = maybeCouponEntity
+  coupon <-
+    fromMaybeM (resp404 [label def StoreErrorCouponNotFound]) maybeCouponEntity
+  let action = renderRoute storeCouponVarEditR couponKey
   $(renderTemplateFromEnv templateCouponIdEdit)
 
 couponEditPost
@@ -127,13 +127,12 @@ couponEditPost couponKey = do
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      p <- params
-      $(logDebug) $ "params: " <> tshow p
+      coupon <- params
+      $(logDebug) $ "params: " <> tshow coupon
       $(logDebug) $
         "got following error in store couponEditPost handler: " <> errMsg
       let errors = [errMsg]
           action = renderRoute storeCouponVarEditR couponKey
-          mdata = return p
       $(renderTemplateFromEnv templateCouponIdEdit)
 
 couponListGet
@@ -187,12 +186,11 @@ couponPost = do
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      p <- params
-      $(logDebug) $ "params: " <> tshow p
+      coupon <- params
+      $(logDebug) $ "params: " <> tshow coupon
       $(logDebug) $ "got following error in store couponPost handler: " <> errMsg
       let errors = [errMsg]
           action = renderRoute storeCouponCreateR
-          mdata = return p
       $(renderTemplateFromEnv templateCouponIdEdit)
 
 -- | Return the coupon delete page for a store.
