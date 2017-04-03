@@ -139,8 +139,8 @@ storeEditGet
 storeEditGet = do
   (StoreSession storeKey) <- getStoreKey
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
-  let
-    mdata = maybeStoreEntity
+  store <-
+    fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
   $(renderTemplateFromEnv templateStoreEdit)
 
 storeEditPost
@@ -188,9 +188,7 @@ storeEditPost = do
       filter (isValidBusinessCategoryDetailFor busiCat) busiCatDets
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      p <- params
-      let
-        mdata = pure p
+      store <- params
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv templateStoreEdit)
