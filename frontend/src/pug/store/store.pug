@@ -4,9 +4,6 @@ include ../common/_layout
     include _header
       | 店舗情報
     include ../common/_messageArea
-    | %{ case mdata }
-    | %{ of Just store }
-
     .store
       .store_editBtn
         a.btn.outerBtn(href="\#{renderRoute storeEditR}") 店舗情報編集
@@ -76,10 +73,3 @@ include ../common/_layout
                 | \#{format StoreRegularHoliday store}
             .storeBody_info_body_btnRow
               a.btn.outerBtn(href="\#{format StoreUrl store}") オフィシャルサイト
-
-    | %{ of Nothing }
-    | No store info.
-    | %{ endcase }
-
-
-

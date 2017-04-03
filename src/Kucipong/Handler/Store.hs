@@ -26,10 +26,12 @@ import Kucipong.Db
 import Kucipong.Email (EmailError)
 import Kucipong.Form
        (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
+import Kucipong.Handler.Error (resp404)
 import Kucipong.Handler.Route
        (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.TemplatePath
+       (templateLogin, templateStore, templateStoreEdit)
 import Kucipong.Handler.Store.Types
        (StoreError(..), StoreMsg(..), StoreView(..), StoreViewText(..),
         StoreViewTexts(..), StoreViewBusinessCategory(..),
@@ -120,12 +122,11 @@ storeGet
 storeGet = do
   (StoreSession storeKey) <- getStoreKey
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
-  let maybeImage = storeImage . entityVal =<< maybeStoreEntity
+  storeEntity <-
+    fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
+  let maybeImage = storeImage $ entityVal storeEntity
   maybeImageUrl <- traverse awsImageS3Url maybeImage
-  let
-    mdata = StoreView
-      <$> maybeStoreEntity
-      <*> pure maybeImageUrl
+  let store = StoreView storeEntity maybeImageUrl
   $(renderTemplateFromEnv templateStore)
 
 storeEditGet
@@ -138,8 +139,8 @@ storeEditGet
 storeEditGet = do
   (StoreSession storeKey) <- getStoreKey
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
-  let
-    mdata = maybeStoreEntity
+  store <-
+    fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
   $(renderTemplateFromEnv templateStoreEdit)
 
 storeEditPost
@@ -187,9 +188,7 @@ storeEditPost = do
       filter (isValidBusinessCategoryDetailFor busiCat) busiCatDets
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
-      p <- params
-      let
-        mdata = pure p
+      store <- params
       $(logDebug) $ "got following error in storeEditPost handler: " <> errMsg
       let errors = [errMsg]
       $(renderTemplateFromEnv templateStoreEdit)

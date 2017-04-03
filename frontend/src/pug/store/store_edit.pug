@@ -5,8 +5,6 @@ include ../common/_layout
       | 店舗情報 編集
     include ../common/_messageArea
     form.store(enctype="multipart/form-data" method="POST")
-      | %{ case mdata }
-      | %{ of Just store }
       .storeBody
         .storeBody_info
           .storeBody_info_titleArea
@@ -131,6 +129,3 @@ include ../common/_layout
             .storeSubmit
               button.btn.outerBtn(type="submit")
                 | この内容で店舗情報を更新する
-      | %{ of Nothing }
-      | No store info.
-      | %{ endcase }
