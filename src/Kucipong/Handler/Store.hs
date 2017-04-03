@@ -43,7 +43,7 @@ import Kucipong.Monad
         dbUpdateStore)
 import Kucipong.RenderTemplate
        (renderTemplateFromEnv)
-import Kucipong.Session (Store, Session)
+import Kucipong.Session (Session, SessionType(SessionTypeStore))
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreCookie, getStoreKey, setStoreCookie)
@@ -196,7 +196,7 @@ storeEditPost = do
 
 storeAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
-  => ActionCtxT (HVect xs) m (HVect ((Session Kucipong.Session.Store) ': xs))
+  => ActionCtxT (HVect xs) m (HVect ((Session 'SessionTypeStore) ': xs))
 storeAuthHook = do
   maybeStoreSession <- getStoreCookie
   case maybeStoreSession of

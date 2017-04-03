@@ -22,7 +22,8 @@ import Kucipong.Db (Key)
 import qualified Kucipong.Db as Db
 import Kucipong.Monad (MonadKucipongCookie(..))
 import Kucipong.Session
-       (Admin, Session(AdminSession, StoreSessionRaw), Store)
+       (Session(AdminSession, StoreSessionRaw),
+        SessionType(SessionTypeAdmin, SessionTypeStore))
 import Kucipong.Spock.ReqParam
 
 setAdminCookie
@@ -49,14 +50,14 @@ getAdminCookie
     :: ( MonadIO m
        , MonadKucipongCookie m
        )
-    => ActionCtxT ctx m (Maybe (Session Admin))
+    => ActionCtxT ctx m (Maybe (Session 'SessionTypeAdmin))
 getAdminCookie = getCookieGeneic "adminEmail" decryptAdminSessionCookie
 
 getStoreCookie
     :: ( MonadIO m
        , MonadKucipongCookie m
        )
-    => ActionCtxT ctx m (Maybe (Session Store))
+    => ActionCtxT ctx m (Maybe (Session 'SessionTypeStore))
 getStoreCookie = getCookieGeneic "storeEmail" decryptStoreSessionCookie
 
 getCookieGeneic
@@ -73,20 +74,20 @@ getAdminEmail
      . ( ContainsAdminSession n xs
        , MonadIO m
        )
-    => ActionCtxT (HVect xs) m (Session Admin)
+    => ActionCtxT (HVect xs) m (Session 'SessionTypeAdmin)
 getAdminEmail = findFirst <$> getContext
 
-type ContainsAdminSession n xs = ListContains n (Session Admin) xs
+type ContainsAdminSession n xs = ListContains n (Session 'SessionTypeAdmin) xs
 
 getStoreKey
     :: forall n xs m
      . ( ContainsStoreSession n xs
        , MonadIO m
        )
-    => ActionCtxT (HVect xs) m (Session Store)
+    => ActionCtxT (HVect xs) m (Session 'SessionTypeStore)
 getStoreKey = findFirst <$> getContext
 
-type ContainsStoreSession n xs = ListContains n (Session Store) xs
+type ContainsStoreSession n xs = ListContains n (Session 'SessionTypeStore) xs
 
-pattern StoreSession :: Key Db.Store -> Session Store
+pattern StoreSession :: Key Db.Store -> Session 'SessionTypeStore
 pattern StoreSession storeKey <- StoreSessionRaw (toSqlKey -> storeKey)

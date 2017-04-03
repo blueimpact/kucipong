@@ -42,7 +42,7 @@ import Kucipong.Monad
         dbCreateInitStore, dbFindAdmin, dbFindAdminLoginToken,
         dbFindStoreByEmail)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
-import Kucipong.Session (Admin, Session(..))
+import Kucipong.Session (Session(..), SessionType(SessionTypeAdmin))
 import Kucipong.Spock
        (ContainsAdminSession, getAdminCookie, getAdminEmail,
         getReqParamErr, setAdminCookie, setStoreCookie)
@@ -234,7 +234,7 @@ storeDeletePost = do
 
 adminAuthHook
   :: (MonadIO m, MonadKucipongCookie m)
-  => ActionCtxT (HVect xs) m (HVect ((Session Kucipong.Session.Admin) ': xs))
+  => ActionCtxT (HVect xs) m (HVect ((Session 'SessionTypeAdmin) ': xs))
 adminAuthHook = do
   maybeAdminSession <- getAdminCookie
   case maybeAdminSession of

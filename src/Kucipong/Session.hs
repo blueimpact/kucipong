@@ -3,8 +3,7 @@ module Kucipong.Session
   ( -- * Session type
     Session(..)
     -- * Markers for either AdminSession or StoreSession
-  , Admin
-  , Store
+  , SessionType(..)
     -- * Helper functions for encrypting / decrypting a 'Session'
   , decryptAdminSession
   , decryptStoreSession
@@ -21,18 +20,20 @@ import Web.ClientSession (IV, Key, decrypt, encrypt, randomIV)
 
 -- $setup
 --
--- import Web.ClientSession (initKey, mkIV)
+-- >>> import Control.FromSum (fromEither)
+-- >>> import Data.ByteString.Base64 (decode)
+-- >>> import Web.ClientSession (initKey, mkIV)
 --
 -- Create a @testKey@ that can be used in tests:
 --
 -- >>> let rawTestKey = "lCNWb2gFVE8QtvV+dqjmYMWK6aq1Y9vQ5PmJb0ZMiZ5AG6G9zp+bJY8aficESqo+uX+UEbhQN5dUqQXSEk0H8F/FGLUGywKCvnw8e7UcPx5rgK7xCdeGLJXm8R4B2ihK"
--- >>> let eitherTestKey = initKey rawTestKey
+-- >>> let eitherTestKey = initKey =<< decode rawTestKey
 -- >>> let testKey = fromEither (error "bad test key") eitherTestKey
 --
 -- Also create a @testIV@ that can be used in tests:
 --
 -- >>> let rawTestIV = "\208\228\130\ESC\212\f\155a\DC1\141\158\204\163\SI\184\225"
--- >>> let maybeTestIV = mkIV rawTestIv
+-- >>> let maybeTestIV = mkIV rawTestIV
 -- >>> let testIV = fromMaybe (error "bad test iv") maybeTestIV
 
 class HasSessionKey r where
@@ -42,15 +43,14 @@ instance HasSessionKey Key where
   getSessionKey :: Key -> Key
   getSessionKey = id
 
--- | Tag for 'AdminSession'
-data Admin
+-- | Tag for 'Session' types.
+data SessionType = SessionTypeAdmin | SessionTypeStore
 
--- | Tag for 'StoreSession'.
-data Store
+data Session :: SessionType -> * where
+  AdminSession :: EmailAddress -> Session 'SessionTypeAdmin
+  StoreSessionRaw :: Int64 -> Session 'SessionTypeStore
 
-data Session :: * -> * where
-  AdminSession :: EmailAddress -> Session Admin
-  StoreSessionRaw :: Int64 -> Session Store
+deriving instance Show (Session a)
 
 encryptSession
   :: ( HasSessionKey r
@@ -69,7 +69,7 @@ encryptText
   => Text -> m Text
 encryptText text = liftIO randomIV >>= encryptTextWithIV text
 
--- |
+-- | Encrypt a given 'Text' with an 'IV'.
 --
 -- >>> encryptTextWithIV "hello" testIV testKey
 -- "w9U4hpRrNbOVJwVNIC1eOsl5FoGopw9tGOzzEPQsgS/Q5IIb1AybYRGNnsyjD7jhADUg+xg="
@@ -83,29 +83,31 @@ encryptTextWithIV text iv = do
   let encryptedByteString = encrypt key iv $ encodeUtf8 text
   pure $ decodeUtf8 encryptedByteString
 
--- |
+-- | Decrypt an input 'Text' from an 'Admin' user's coookie representing a
+-- @'Session' 'Admin'@.
 --
 -- >>> let encryptedSession = encryptTextWithIV "foo@bar.com" testIV testKey
--- >>> decryptAdminSession encryptedSession
--- AdminSession "foo@bar.com"
+-- >>> decryptAdminSession encryptedSession testKey
+-- Just (AdminSession "foo@bar.com")
 decryptAdminSession
   :: ( HasSessionKey r
      , MonadReader r m
      )
-  => Text -> m (Maybe (Session Admin))
+  => Text -> m (Maybe (Session 'SessionTypeAdmin))
 decryptAdminSession =
   decryptSessionGeneric $ Just . AdminSession <=< emailAddressFromText
 
--- |
+-- | Decrypt an input 'Text' from an 'Store' user's coookie representing a
+-- @'Session' 'Store'@.
 --
 -- >>> let encryptedSession = encryptTextWithIV "13" testIV testKey
--- >>> decryptStoreSession encryptedSession
--- StoreSession 13
+-- >>> decryptStoreSession encryptedSession testKey
+-- Just (StoreSessionRaw 13)
 decryptStoreSession
   :: ( HasSessionKey r
      , MonadReader r m
      )
-  => Text -> m (Maybe (Session Store))
+  => Text -> m (Maybe (Session 'SessionTypeStore))
 decryptStoreSession = decryptSessionGeneric $ Just . StoreSessionRaw <=< readMay
 
 decryptSessionGeneric
