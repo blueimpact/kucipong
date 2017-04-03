@@ -71,8 +71,8 @@ instance I18n StoreError where
     "Could not upload image. Please try again."
   label EnUS StoreErrorCouponNotFound =
     "Could not find the specified coupon."
-  label EnUS StoreErrorNoImage =
-    "Failed to upload image. Please try again."
+  label EnUS StoreErrorNoStore =
+    "Store not found."
   label EnUS (StoreErrorNoStoreEmail email) =
     "Could not find store for email " <> tshow email <> "."
   label EnUS StoreErrorNotAnImage =

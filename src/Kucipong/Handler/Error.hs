@@ -12,7 +12,10 @@ import Web.Spock (ActionCtxT, setStatus)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Handler.Error.TemplatePath (template404)
 
-resp404 :: MonadIO m => [Text] -> ActionCtxT ctx m ()
+resp404
+  :: forall ctx m a.
+     MonadIO m
+  => [Text] -> ActionCtxT ctx m a
 resp404 errors = do
   setStatus status404
   $(renderTemplateFromEnv template404)

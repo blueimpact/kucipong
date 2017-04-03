@@ -27,7 +27,7 @@ data StoreError
   | StoreErrorCouldNotSendEmail
   | StoreErrorCouldNotUploadImage
   | StoreErrorCouponNotFound
-  | StoreErrorNoImage
+  | StoreErrorNoStore
   | StoreErrorNoStoreEmail EmailAddress
   | StoreErrorNotAnImage
   deriving (Show, Eq, Ord, Read)
