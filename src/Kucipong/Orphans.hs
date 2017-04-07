@@ -47,5 +47,3 @@ instance ToMarkup Natural where
   toMarkup = string . show
 
 deriving instance Data UploadedFile
-deriving instance Show UploadedFile
-

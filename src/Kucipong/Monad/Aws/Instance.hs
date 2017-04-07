@@ -21,7 +21,7 @@ import Web.Spock (UploadedFile(..))
 
 import Kucipong.Aws
        (HasS3ImageBucketName(..), S3ImageBucketName(..), getAwsBucketM)
-import Kucipong.Db (Image(..))
+import Kucipong.Db (ImageName(..))
 import Kucipong.Monad.Aws.Class
        (FileUploadError(..), MonadKucipongAws(..))
 import Kucipong.Monad.Aws.Trans (KucipongAwsT(..))
@@ -35,7 +35,7 @@ instance ( HasEnv r
          ) =>
          MonadKucipongAws (KucipongAwsT m) where
   awsS3PutUploadedFile :: UploadedFile
-                       -> KucipongAwsT m (Either FileUploadError Image)
+                       -> KucipongAwsT m (Either FileUploadError ImageName)
   awsS3PutUploadedFile uploadedFile =
     runExceptT $ do
       bucket <- getAwsBucketM
@@ -48,7 +48,7 @@ instance ( HasEnv r
             putObject bucket objectKey reqBody
               & poACL .~ Just OPublicRead
               & poContentType .~ Just contentType
-      const (Image s3FileName) <$> runReq putObjectReq
+      const (ImageName s3FileName) <$> runReq putObjectReq
 
   awsGetBucketName :: KucipongAwsT m S3ImageBucketName
   awsGetBucketName = reader getS3ImageBucketName

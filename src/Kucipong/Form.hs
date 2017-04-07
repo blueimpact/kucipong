@@ -13,12 +13,13 @@ import Kucipong.Prelude
 
 import Control.Lens ((.~))
 import Control.Lens.TH (makeLensesFor, makeWrapped)
+import Data.Aeson.TH (defaultOptions, deriveJSON)
 import Web.FormUrlEncoded (FromForm)
 import Web.HttpApiData (FromHttpApiData(..))
 
 import Kucipong.Db
-       (BusinessCategory(..), BusinessCategoryDetail(..),
-        CouponType(..), Percent(..), Price(..))
+       (BusinessCategory(..), BusinessCategoryDetail(..), Image(..),
+        Key(..), CouponType(..), Percent(..), Price(..))
 
 newtype MaybeEmpty a = MaybeEmpty
   { unMaybeEmpty :: Maybe a
@@ -80,15 +81,22 @@ data StoreEditForm = StoreEditForm
   { name :: !(Maybe Text)
   , businessCategory :: !(Maybe BusinessCategory)
   , businessCategoryDetails :: ![BusinessCategoryDetail]
+  , imageKey :: !(Maybe (Key Image))
   , salesPoint :: !(Maybe Text)
   , address :: !(Maybe Text)
   , phoneNumber :: !(Maybe Text)
   , businessHours :: !(Maybe Text)
   , regularHoliday :: !(Maybe Text)
   , url :: !(Maybe Text)
-  } deriving (Data, Eq, Generic, Read, Show, Typeable)
+  } deriving (Eq, Generic, Read, Show, Typeable)
 
 instance FromForm StoreEditForm
+
+data StoreSetImageForm = StoreSetImageForm
+  { imageKey :: !(Maybe (Key Image))
+  } deriving (Eq, Generic, Read, Show, Typeable)
+
+$(deriveJSON defaultOptions ''StoreSetImageForm)
 
 ------------------
 -- Store Coupon --

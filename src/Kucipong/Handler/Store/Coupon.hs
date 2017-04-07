@@ -9,19 +9,23 @@ import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist.Sql (Entity(..), fromSqlKey)
+import Network.HTTP.Types.Status
+       (badRequest400, serviceUnavailable503)
 import Web.Spock (ActionCtxT, params, redirect, renderRoute)
 import Web.Spock.Core
-       (ClientPreferredFormat(PrefJSON), SpockCtxT, get, json,
+       (ClientPreferredFormat(PrefJSON), SpockCtxT, get, json, jsonBody',
         preferredFormat, post)
 
 import Kucipong.Db
-       (Coupon(..), CouponType(..), Key(..))
+       (Coupon(..), CouponType(..), Image(..), Key(..), Store(..))
 import Kucipong.Form
-       (StoreNewCouponForm(..), removeNonUsedCouponInfo)
+       (StoreNewCouponForm(..), StoreSetImageForm(..),
+        removeNonUsedCouponInfo)
 import Kucipong.Handler.Error (resp404)
 import Kucipong.Handler.Route
        (storeCouponR, storeCouponCreateR, storeCouponDeleteVarR,
-        storeCouponVarR, storeCouponVarEditR, storeR)
+        storeCouponVarR, storeCouponVarEditR, storeCouponVarSetImageR,
+        storeR)
 import Kucipong.Handler.Store.TemplatePath
        (templateCoupon, templateCouponCreate, templateCouponDelete,
         templateCouponId, templateCouponIdEdit)
@@ -29,19 +33,22 @@ import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewImageUrl(..),
         CouponViewKey(..), CouponViewTypes(..), CouponViewConditions(..),
         CouponViewCouponType(..), StoreViewText(..))
+import Kucipong.Handler.Store.Util
+       (awsUrlFromMaybeImageKey, guardMaybeImageKeyOwnedByStore)
 import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
-       (CouponDeleteResult(..), MonadKucipongAws(..),
-        MonadKucipongDb(..), awsGetBucketName, awsImageS3Url,
-        awsUrlFromImageAndBucket, dbFindCouponByStoreKeyAndCouponKey,
-        dbFindCouponsByStoreKey, dbFindStoreByStoreKey, dbInsertCoupon,
-        dbUpdateCoupon)
+       (CouponDeleteResult(..), MonadKucipongAws(..), MonadKucipongDb(..),
+        awsGetBucketName, awsImageS3Url, awsUrlFromImageAndBucket,
+        dbFindCouponByStoreKeyAndCouponKey, dbFindCouponsByStoreKey,
+        dbFindImageWithStoreKey, dbFindImagesForCoupons,
+        dbFindStoreByStoreKey, dbInsertCoupon, dbUpdateCoupon,
+        dbUpdateCouponImage)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Session, SessionType(SessionTypeStore))
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
-        getStoreKey)
+        getStoreKey, jsonErrorStatus, jsonSuccess)
 
 couponNewGet
   :: forall xs m.
@@ -68,8 +75,8 @@ couponGet couponKey = do
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
   storeEntity <-
     fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
-  let maybeImage = couponImage . entityVal =<< maybeCouponEntity
-  maybeImageUrl <- traverse awsImageS3Url maybeImage
+  let maybeImageKey = couponImage $ entityVal couponEntity
+  maybeImageUrl <- awsUrlFromMaybeImageKey maybeImageKey
   let coupon = CouponView storeEntity couponEntity maybeImageUrl
       aboutStore = renderRoute storeR
       pageViewer = PageViewerStore
@@ -147,8 +154,11 @@ couponListGet = do
   (StoreSession storeKey) <- getStoreKey
   couponEntities <- dbFindCouponsByStoreKey storeKey
   bucketName <- awsGetBucketName
-  let awsImageUrlFunc = fmap $ awsUrlFromImageAndBucket bucketName
+  couponEntitiesAndImages <- dbFindImagesForCoupons couponEntities
+  let awsImageUrlFunc =
+        fmap $ awsUrlFromImageAndBucket bucketName . imageS3Name . entityVal
   $(renderTemplateFromEnv templateCoupon)
+
 
 couponPost
   :: forall xs n m.
@@ -235,6 +245,29 @@ couponDeletePostJson couponKey = do
   deleteCouponResult <- dbDeleteCoupon storeKey couponKey
   json deleteCouponResult
 
+couponSetImagePost
+  :: forall n xs m.
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     , MonadLogger m
+     )
+  => Key Coupon -> ActionCtxT (HVect xs) m ()
+couponSetImagePost couponKey = do
+  (StoreSession storeKey) <- getStoreKey
+  StoreSetImageForm maybeImageKey <- jsonBody'
+  guardMaybeImageKeyOwnedByStore storeKey maybeImageKey handleErr
+  void $ dbUpdateCouponImage couponKey storeKey maybeImageKey
+  jsonSuccess maybeImageKey
+  where
+    handleErr :: ActionCtxT (HVect xs) m a
+    handleErr =
+      jsonErrorStatus
+        badRequest400
+        StoreErrorImageOwnedByStore
+        (label def StoreErrorImageOwnedByStore)
+
 allCouponTypes :: [CouponType]
 allCouponTypes = [minBound .. maxBound]
 
@@ -255,3 +288,4 @@ storeCouponComponent = do
   get storeCouponVarR couponGet
   get storeCouponVarEditR couponEditGet
   post storeCouponVarEditR couponEditPost
+  post storeCouponVarSetImageR couponSetImagePost

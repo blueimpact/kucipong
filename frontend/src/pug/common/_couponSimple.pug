@@ -2,7 +2,7 @@
   a.card(href="\#{renderRoute storeCouponVarR couponKey}")
     .annotatedImageGroup
       img.annotatedImageGroup-image(
-        src="\#{ fromMaybe mempty (awsImageUrlFunc (couponImage coupon))}"
+        src="\#{ fromMaybe mempty (awsImageUrlFunc maybeImageEntity)}"
         alt="\#{ couponTitle coupon }"
       )
       span.annotatedImageGroup-annotation 画像は一例です

@@ -6,11 +6,11 @@ include ../common/_layout
       .store_editBtn
         a.btn.outerBtn(href="\#{renderRoute storeCouponCreateR}") クーポン追加
 
-    | %{ case couponEntities }
+    | %{ case couponEntitiesAndImages }
     | %{ of [] }
     |   No Coupons
     | %{ of entities }
-    |   %{ forall (Entity couponKey coupon) <- entities }
+    |   %{ forall (Entity couponKey coupon, maybeImageEntity) <- entities }
     include ../common/_couponSimple
     |   %{ endforall }
     | %{ endcase }
