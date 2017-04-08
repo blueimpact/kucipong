@@ -20,6 +20,8 @@ extra-deps:
     - emailaddress-0.2.0.0
     # This should be available in lts-8.
     - pretty-simple-1.1.0.3
+    # This should be available in lts-8.
+    - envelope-0.2.1.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}

@@ -1,6 +1,7 @@
 
 module Kucipong.Spock
-    ( module Kucipong.Spock.ReqParam
+    ( module Kucipong.Spock.Json
+    , module Kucipong.Spock.ReqParam
     , setAdminCookie
     , setStoreCookie
     , getAdminCookie
@@ -24,6 +25,7 @@ import Kucipong.Monad (MonadKucipongCookie(..))
 import Kucipong.Session
        (Session(AdminSession, StoreSessionRaw),
         SessionType(SessionTypeAdmin, SessionTypeStore))
+import Kucipong.Spock.Json
 import Kucipong.Spock.ReqParam
 
 setAdminCookie
