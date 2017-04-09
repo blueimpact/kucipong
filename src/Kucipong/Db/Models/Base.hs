@@ -9,6 +9,7 @@ import Data.Aeson ( FromJSON, ToJSON, Value, parseJSON, toJSON )
 import Data.Aeson.TH (defaultOptions, deriveJSON)
 import Data.Aeson.Types (parseMaybe, typeMismatch)
 import Data.Data (toConstr)
+import Data.Default (Default(..))
 import Data.Kind (Constraint)
 import Database.Persist ( PersistField(..), PersistValue )
 import Database.Persist.Sql ( PersistFieldSql(..), SqlType )
@@ -56,6 +57,9 @@ instance PersistField CouponType where
 instance PersistFieldSql CouponType where
   sqlType :: Proxy CouponType -> SqlType
   sqlType _ = sqlType (Proxy :: Proxy Text)
+
+instance Default CouponType where
+  def = minBound
 
 ------------------------------------
 -- Created, modified, delete time --
@@ -214,6 +218,9 @@ data BusinessCategory
            )
 derivePersistField "BusinessCategory"
 deriveJSON defaultOptions ''BusinessCategory
+
+instance Default BusinessCategory where
+  def = minBound
 
 instance FromHttpApiData BusinessCategory where
   parseUrlPiece = businessCategoryFromText
@@ -591,6 +598,9 @@ instance FromJSON BusinessCategoryDetail where
 
 instance FromHttpApiData BusinessCategoryDetail where
   parseUrlPiece = businessCategoryDetailFromText
+
+instance Default BusinessCategoryDetail where
+  def = GourmetDetail minBound
 
 -- | Returns whether a given 'BusinessCategoryDetail' works in a
 -- 'BusinessCategory'. 'CommonDetail's are valid for every 'BusinessCategory'.

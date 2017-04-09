@@ -4,9 +4,10 @@ module Kucipong.View.Instance where
 
 import Kucipong.Prelude
 
+import Data.Default (Default, def)
 import Database.Persist (Entity(..))
 import Database.Persist.Sql (fromSqlKey)
-import Web.HttpApiData (parseQueryParamMaybe)
+import Web.HttpApiData (FromHttpApiData, parseQueryParamMaybe)
 
 import Kucipong.Db
        (BusinessCategory, BusinessCategoryDetail, Coupon(..),
@@ -84,6 +85,10 @@ instance (View v a) => View (Entity v) a where
   format :: a -> Entity v -> ViewO a
   format a (Entity _ v) = format a v
 
+instance (Default (ViewO t), FromHttpApiData (ViewO t), ToName t) =>
+         View [(Text, Text)] t where
+  format a = fromMaybe def . (parseQueryParamMaybe =<<) . lookup (toName a)
+
 instance View CouponView CouponViewKey where
   format StoreId = fromSqlKey . entityKey . couponStore
   format CouponId = fromSqlKey . entityKey . couponCoupon
@@ -91,21 +96,11 @@ instance View CouponView CouponViewKey where
 instance View CouponView CouponViewTypes where
   format a = format a . entityVal . couponCoupon
 
-instance View [(Text, Text)] CouponViewTypes where
-  format a = fromMaybe mempty . lookup (toName a)
-
 instance View CouponView CouponViewConditions where
   format a = format a . entityVal . couponCoupon
 
-instance View [(Text, Text)] CouponViewConditions where
-  format a =
-    fromMaybe mempty . (lines <$>) . lookup (toName a)
-
 instance View CouponView CouponViewCouponType where
   format a = format a . entityVal . couponCoupon
-
-instance View [(Text, Text)] CouponViewCouponType where
-  format a = fromMaybe minBound . (parseQueryParamMaybe =<<) . lookup (toName a)
 
 instance View CouponView CouponViewImageUrl where
   format CouponImageUrl = fromMaybe mempty . couponImageUrl
@@ -163,19 +158,12 @@ instance View Store StoreViewText where
 instance View StoreView StoreViewText where
   format a = format a . entityVal . storeEntity
 
-instance View [(Text, Text)] StoreViewText where
-  format a = fromMaybe mempty . lookup (toName a)
-
 instance View Store StoreViewTexts where
   format StoreBusinessHour =
     concatMap lines . storeBusinessHours
 
 instance View StoreView StoreViewTexts where
   format a = format a . entityVal . storeEntity
-
-instance View [(Text, Text)] StoreViewTexts where
-  format a =
-    fromMaybe mempty . (lines <$>) . lookup (toName a)
 
 instance View StoreView StoreViewImageUrl where
   format StoreImageUrl = fromMaybe mempty . storeImageUrl
@@ -186,21 +174,16 @@ instance View Store StoreViewBusinessCategory where
 instance View StoreView StoreViewBusinessCategory where
   format a = format a . entityVal . storeEntity
 
-instance View [(Text, Text)] StoreViewBusinessCategory where
-  format a =
-    fromMaybe minBound . (parseQueryParamMaybe =<<) . lookup (toName a)
-
 instance View Store StoreViewBusinessCategoryDetails where
   format StoreBusinessCategoryDetails = storeBusinessCategoryDetails
 
 instance View StoreView StoreViewBusinessCategoryDetails where
   format a = format a . entityVal . storeEntity
 
-instance View [(Text, Text)] StoreViewBusinessCategoryDetails where
-  format a =
-    mapMaybe (parseQueryParamMaybe . snd) . filter ((== toName a) . fst)
+-- ------------------
+--  Helper functions
+-- ------------------
 
--- Helper functions
 formatValidFrom :: Day -> Text
 formatValidFrom day = "From " <> tshow day
 
@@ -212,3 +195,4 @@ formatCurrency p = "$" <> priceToText p
 
 formatDiscountPercent :: Percent -> Text
 formatDiscountPercent p = percentToText p <> "%"
+
