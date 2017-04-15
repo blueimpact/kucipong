@@ -9,15 +9,13 @@ import Control.Lens (_Wrapped, view)
 import Data.Default (def)
 import Data.HVect (HVect(..))
 import Database.Persist.Sql (Entity(..), fromSqlKey)
-import Network.HTTP.Types.Status
-       (badRequest400, serviceUnavailable503)
+import Network.HTTP.Types.Status (badRequest400)
 import Web.Spock (ActionCtxT, params, redirect, renderRoute)
 import Web.Spock.Core
        (ClientPreferredFormat(PrefJSON), SpockCtxT, get, json, jsonBody',
         preferredFormat, post)
 
-import Kucipong.Db
-       (Coupon(..), CouponType(..), Image(..), Key(..), Store(..))
+import Kucipong.Db (Coupon(..), CouponType(..), Image(..), Key(..))
 import Kucipong.Form
        (StoreNewCouponForm(..), StoreSetImageForm(..),
         removeNonUsedCouponInfo)
@@ -39,11 +37,10 @@ import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (CouponDeleteResult(..), MonadKucipongAws(..), MonadKucipongDb(..),
-        awsGetBucketName, awsImageS3Url, awsUrlFromImageAndBucket,
+        awsGetBucketName, awsUrlFromImageAndBucket,
         dbFindCouponByStoreKeyAndCouponKey, dbFindCouponsByStoreKey,
-        dbFindImageWithStoreKey, dbFindImagesForCoupons,
-        dbFindStoreByStoreKey, dbInsertCoupon, dbUpdateCoupon,
-        dbUpdateCouponImage)
+        dbFindImagesForCoupons, dbFindStoreByStoreKey, dbInsertCoupon,
+        dbUpdateCoupon, dbUpdateCouponImage)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 import Kucipong.Session (Session, SessionType(SessionTypeStore))
 import Kucipong.Spock
@@ -251,9 +248,7 @@ couponSetImagePost
   :: forall n xs m.
      ( ContainsStoreSession n xs
      , MonadIO m
-     , MonadKucipongAws m
      , MonadKucipongDb m
-     , MonadLogger m
      )
   => Key Coupon -> ActionCtxT (HVect xs) m ()
 couponSetImagePost couponKey = do

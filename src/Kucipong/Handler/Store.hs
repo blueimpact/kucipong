@@ -15,15 +15,14 @@ import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
 import Network.HTTP.Types.Status
        (badRequest400, serviceUnavailable503)
-import Network.Wai (strictRequestBody)
 import Web.Spock
        (ActionCtxT, getContext, params, prehook, redirect, renderRoute)
 import Web.Spock.Core
-       (SpockCtxT, body, get, files, jsonBody', post, put, request)
+       (SpockCtxT, get, files, jsonBody', post)
 
 import Kucipong.Db
-       (BusinessCategory(..), BusinessCategoryDetail(..), Image(..),
-        ImageName(..), Key(..), LoginTokenExpirationTime(..), Store(..),
+       (BusinessCategory(..), BusinessCategoryDetail(..), Key(..),
+        LoginTokenExpirationTime(..), Store(..),
         StoreLoginToken(storeLoginTokenExpirationTime,
                         storeLoginTokenLoginToken),
         isValidBusinessCategoryDetailFor,
@@ -49,10 +48,9 @@ import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
        (FileUploadError(..), MonadKucipongAws(..), MonadKucipongCookie,
-        MonadKucipongDb(..), MonadKucipongSendEmail(..), awsImageS3Url,
-        dbFindImage, dbFindImageWithStoreKey, dbFindStoreByEmail, dbFindStoreByStoreKey,
-        dbFindStoreLoginToken, dbInsertImage, dbUpdateStore,
-        dbUpdateStoreImage)
+        MonadKucipongDb(..), MonadKucipongSendEmail(..),
+        dbFindStoreByEmail, dbFindStoreByStoreKey, dbFindStoreLoginToken,
+        dbInsertImage, dbUpdateStore, dbUpdateStoreImage)
 import Kucipong.RenderTemplate
        (renderTemplateFromEnv)
 import Kucipong.Session (Session, SessionType(SessionTypeStore))
@@ -203,9 +201,7 @@ storeSetImagePost
   :: forall n xs m.
      ( ContainsStoreSession n xs
      , MonadIO m
-     , MonadKucipongAws m
      , MonadKucipongDb m
-     , MonadLogger m
      )
   => ActionCtxT (HVect xs) m ()
 storeSetImagePost = do
