@@ -107,6 +107,7 @@ data StoreNewCouponForm = StoreNewCouponForm
   , couponType :: CouponType
   , validFrom :: !(MaybeEmpty Day)
   , validUntil :: !(MaybeEmpty Day)
+  , imageKey :: !(MaybeEmpty (Key Image))
   , discountPercent :: !(MaybeEmpty Percent)
   , discountMinimumPrice :: !(MaybeEmpty Price)
   , discountOtherConditions :: !(MaybeEmpty Text)
@@ -120,7 +121,7 @@ data StoreNewCouponForm = StoreNewCouponForm
   , setOtherConditions :: !(MaybeEmpty Text)
   , otherContent :: !(MaybeEmpty Text)
   , otherConditions :: !(MaybeEmpty Text)
-  } deriving (Data, Eq, Generic, Read, Show, Typeable)
+  } deriving (Eq, Generic, Read, Show, Typeable)
 
 $(makeLensesFor
     [ ("discountPercent", "discountPercentLens")

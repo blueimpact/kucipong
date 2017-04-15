@@ -117,6 +117,7 @@ couponEditPost couponKey = do
       couponType
       (view _Wrapped validFrom)
       (view _Wrapped validUntil)
+      (view _Wrapped imageKey)
       (view _Wrapped discountPercent)
       (view _Wrapped discountMinimumPrice)
       (view _Wrapped discountOtherConditions)
@@ -179,6 +180,7 @@ couponPost = do
       couponType
       (view _Wrapped validFrom)
       (view _Wrapped validUntil)
+      (view _Wrapped imageKey)
       (view _Wrapped discountPercent)
       (view _Wrapped discountMinimumPrice)
       (view _Wrapped discountOtherConditions)

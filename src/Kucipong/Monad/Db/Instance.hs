@@ -529,6 +529,7 @@ dbInsertCoupon
   -> CouponType
   -> Maybe Day
   -> Maybe Day
+  -> Maybe (Key Image)
   -> Maybe Percent
   -> Maybe Price
   -> Maybe Text
@@ -543,7 +544,7 @@ dbInsertCoupon
   -> Maybe Text
   -> Maybe Text
   -> m (Entity Coupon)
-dbInsertCoupon storeKey title couponType validFrom validUntil discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbInsertCoupon storeKey title couponType validFrom validUntil imageKey discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbInsertWithTime $ \createdTime updatedTime deletedTime ->
     Coupon
       storeKey
@@ -554,7 +555,7 @@ dbInsertCoupon storeKey title couponType validFrom validUntil discountPercent di
       couponType
       validFrom
       validUntil
-      Nothing
+      imageKey
       discountPercent
       discountMinimumPrice
       discountOtherConditions
@@ -619,6 +620,7 @@ dbUpdateCoupon
   -> CouponType
   -> Maybe Day
   -> Maybe Day
+  -> Maybe (Key Image)
   -> Maybe Percent
   -> Maybe Price
   -> Maybe Text
@@ -633,13 +635,14 @@ dbUpdateCoupon
   -> Maybe Text
   -> Maybe Text
   -> m ()
-dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil imageKey discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbUpdateWithTime
     [CouponId ==. couponKey, CouponStoreId ==. storeKey]
     [ CouponTitle =. title
     , CouponCouponType =. couponType
     , CouponValidFrom =. validFrom
     , CouponValidUntil =. validUntil
+    , CouponImage =. imageKey
     , CouponDiscountPercent =. discountPercent
     , CouponDiscountMinimumPrice =. discountMinimumPrice
     , CouponDiscountOtherConditions =. discountOtherConditions
