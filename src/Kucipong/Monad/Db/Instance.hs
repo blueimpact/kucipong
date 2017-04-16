@@ -9,18 +9,19 @@ import Control.Monad.Random (MonadRandom(..))
 import Control.Monad.Time (MonadTime(..))
 import Database.Persist.Sql
        (Entity(..), Filter, PersistRecordBackend, PersistStoreRead,
-        SelectOpt, SqlBackend, Update, (==.), (=.), (>=.), (<=.), (||.),
-        get, insert, insertEntity, insertUnique, repsert, selectFirst,
-        selectList, update, updateGet, updateWhere)
+        SelectOpt, SqlBackend, Update, (==.), (=.), (>=.), (<=.), (<-.),
+        (||.), get, insert, insertEntity, insertUnique, repsert,
+        selectFirst, selectList, update, updateGet, updateWhere)
 
 import Kucipong.Config (Config)
 import Kucipong.Db
        (Admin(..), AdminLoginToken(..), BusinessCategory(..),
         BusinessCategoryDetail(..), Coupon(..), CouponType(..),
         CreatedTime(..), DeletedTime(..), EntityField(..),
-        EntityDateFields(..), Key(..), LoginTokenExpirationTime(..),
-        Percent(..), Price(..), Store(..), StoreLoginToken(..),
-        UpdatedTime(..), emailToAdminKey, runDb, runDbCurrTime)
+        EntityDateFields(..), Image(..), ImageName(..), Key(..),
+        LoginTokenExpirationTime(..), Percent(..), Price(..), Store(..),
+        StoreLoginToken(..), UpdatedTime(..), emailToAdminKey, runDb,
+        runDbCurrTime)
 import Kucipong.LoginToken (LoginToken, createRandomLoginToken)
 import Kucipong.Monad.Db.Class
        (CouponDeleteResult(..), MonadKucipongDb(..),
@@ -439,6 +440,17 @@ dbFindAdmin = dbFindByKeyNotDeleted . emailToAdminKey
 -- Store --
 -----------
 
+dbFindImageWithStoreKey
+  :: MonadKucipongDb m
+  => Key Store -> Key Image -> m (Maybe (Entity Image))
+dbFindImageWithStoreKey storeKey imageKey =
+  dbSelectFirstNotDeleted [ImageStoreId ==. storeKey, ImageId ==. imageKey] []
+
+dbFindImage
+  :: MonadKucipongDb m
+  => Key Image -> m (Maybe (Entity Image))
+dbFindImage = dbFindByKeyNotDeleted
+
 dbFindStoreByStoreKey
   :: MonadKucipongDb m
   => Key Store -> m (Maybe (Entity Store))
@@ -455,12 +467,27 @@ dbFindStoreLoginToken
 dbFindStoreLoginToken loginToken =
   dbSelectFirstNotDeleted [StoreLoginTokenLoginToken ==. loginToken] []
 
+dbInsertImage
+  :: MonadKucipongDb m
+  => Key Store
+  -> ImageName
+  -> m (Entity Image)
+dbInsertImage storeKey imageName =
+  dbInsertWithTime $ \createdTime updatedTime deletedTime ->
+    Image
+      createdTime
+      updatedTime
+      deletedTime
+      storeKey
+      imageName
+
 dbUpdateStore
   :: MonadKucipongDb m
   => Key Store
   -> Maybe Text
   -> Maybe BusinessCategory
   -> [BusinessCategoryDetail]
+  -> Maybe (Key Image)
   -> Maybe Text
   -> Maybe Text
   -> Maybe Text
@@ -468,12 +495,13 @@ dbUpdateStore
   -> Maybe Text
   -> Maybe Text
   -> m ()
-dbUpdateStore storeKey name businessCategory businessCategoryDetails salesPoint address phoneNumber businessHours regularHoliday url =
+dbUpdateStore storeKey name businessCategory businessCategoryDetails imageKey salesPoint address phoneNumber businessHours regularHoliday url =
   dbUpdateWithTime
     [StoreId ==. storeKey]
     [ StoreName =. name
     , StoreBusinessCategory =. businessCategory
     , StoreBusinessCategoryDetails =. businessCategoryDetails
+    , StoreImage =. imageKey
     , StoreSalesPoint =. salesPoint
     , StoreAddress =. address
     , StorePhoneNumber =. phoneNumber
@@ -481,6 +509,14 @@ dbUpdateStore storeKey name businessCategory businessCategoryDetails salesPoint 
     , StoreRegularHoliday =. regularHoliday
     , StoreUrl =. url
     ]
+
+dbUpdateStoreImage
+  :: MonadKucipongDb m
+  => Key Store
+  -> Maybe (Key Image)
+  -> m ()
+dbUpdateStoreImage storeKey maybeImageKey =
+  dbUpdateWithTime [StoreId ==. storeKey] [StoreImage =. maybeImageKey]
 
 ------------
 -- Coupon --
@@ -493,6 +529,7 @@ dbInsertCoupon
   -> CouponType
   -> Maybe Day
   -> Maybe Day
+  -> Maybe (Key Image)
   -> Maybe Percent
   -> Maybe Price
   -> Maybe Text
@@ -507,7 +544,7 @@ dbInsertCoupon
   -> Maybe Text
   -> Maybe Text
   -> m (Entity Coupon)
-dbInsertCoupon storeKey title couponType validFrom validUntil discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbInsertCoupon storeKey title couponType validFrom validUntil imageKey discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbInsertWithTime $ \createdTime updatedTime deletedTime ->
     Coupon
       storeKey
@@ -518,7 +555,7 @@ dbInsertCoupon storeKey title couponType validFrom validUntil discountPercent di
       couponType
       validFrom
       validUntil
-      Nothing
+      imageKey
       discountPercent
       discountMinimumPrice
       discountOtherConditions
@@ -547,6 +584,34 @@ dbFindCouponsByStoreKey
 dbFindCouponsByStoreKey storeKey =
   dbSelectListNotDeleted [CouponStoreId ==. storeKey] []
 
+dbFindImagesForCoupons
+  :: MonadKucipongDb m
+  => [Entity Coupon] -> m [(Entity Coupon, Maybe (Entity Image))]
+dbFindImagesForCoupons couponEntities = do
+  let couponImageKeys =
+        catMaybes $ fmap (couponImage . entityVal) couponEntities
+  imageEntities <- dbSelectListNotDeleted [ImageId <-. couponImageKeys] []
+  pure $ matchCouponsWithImages imageEntities couponEntities
+  where
+    matchCouponsWithImages
+      :: [Entity Image]
+      -> [Entity Coupon]
+      -> [(Entity Coupon, Maybe (Entity Image))]
+    matchCouponsWithImages images = fmap $ findImageForCouponEntity images
+
+    findImageForCouponEntity
+      :: [Entity Image]
+      -> Entity Coupon
+      -> (Entity Coupon, Maybe (Entity Image))
+    findImageForCouponEntity images couponEntity =
+      let maybeImageKey = couponImage $ entityVal couponEntity
+          maybeImageEntity = maybeImageKey >>= findImageWithKey images
+      in (couponEntity, maybeImageEntity)
+
+    findImageWithKey :: [Entity Image] -> Key Image -> Maybe (Entity Image)
+    findImageWithKey images imageKey =
+      find (\imageEntity -> entityKey imageEntity == imageKey) images
+
 dbUpdateCoupon
   :: MonadKucipongDb m
   => Key Coupon
@@ -555,6 +620,7 @@ dbUpdateCoupon
   -> CouponType
   -> Maybe Day
   -> Maybe Day
+  -> Maybe (Key Image)
   -> Maybe Percent
   -> Maybe Price
   -> Maybe Text
@@ -569,13 +635,14 @@ dbUpdateCoupon
   -> Maybe Text
   -> Maybe Text
   -> m ()
-dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
+dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil imageKey discountPercent discountMinimumPrice discountOtherConditions giftContent giftReferencePrice giftMinimumPrice giftOtherConditions setContent setPrice setReferencePrice setOtherConditions otherContent otherConditions =
   dbUpdateWithTime
     [CouponId ==. couponKey, CouponStoreId ==. storeKey]
     [ CouponTitle =. title
     , CouponCouponType =. couponType
     , CouponValidFrom =. validFrom
     , CouponValidUntil =. validUntil
+    , CouponImage =. imageKey
     , CouponDiscountPercent =. discountPercent
     , CouponDiscountMinimumPrice =. discountMinimumPrice
     , CouponDiscountOtherConditions =. discountOtherConditions
@@ -590,6 +657,17 @@ dbUpdateCoupon couponKey storeKey title couponType validFrom validUntil discount
     , CouponOtherContent =. otherContent
     , CouponOtherConditions =. otherConditions
     ]
+
+dbUpdateCouponImage
+  :: MonadKucipongDb m
+  => Key Coupon
+  -> Key Store
+  -> Maybe (Key Image)
+  -> m ()
+dbUpdateCouponImage couponKey storeKey maybeImageKey =
+  dbUpdateWithTime
+    [CouponId ==. couponKey, CouponStoreId ==. storeKey]
+    [CouponImage =. maybeImageKey]
 
 --------------
 -- Consumer --

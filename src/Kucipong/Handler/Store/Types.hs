@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Kucipong.Handler.Store.Types
   ( StoreError(..)
   , StoreMsg(..)
@@ -17,6 +19,7 @@ module Kucipong.Handler.Store.Types
 
 import Kucipong.Prelude
 
+import Data.Aeson.TH (defaultOptions, deriveJSON)
 import Database.Persist (Entity(..))
 
 import Kucipong.Db (Coupon(..), Store(..))
@@ -27,10 +30,13 @@ data StoreError
   | StoreErrorCouldNotSendEmail
   | StoreErrorCouldNotUploadImage
   | StoreErrorCouponNotFound
+  | StoreErrorImageOwnedByStore
   | StoreErrorNoStore
   | StoreErrorNoStoreEmail EmailAddress
   | StoreErrorNotAnImage
   deriving (Show, Eq, Ord, Read)
+
+$(deriveJSON defaultOptions ''StoreError)
 
 data StoreMsg =
   StoreMsgSentVerificationEmail

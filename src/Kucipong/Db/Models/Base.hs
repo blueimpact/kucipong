@@ -110,8 +110,8 @@ newtype DeletedTime = DeletedTime
 -- Image --
 -----------
 
-newtype Image = Image
-  { unImage :: Text
+newtype ImageName = ImageName
+  { unImageName :: Text
   } deriving ( Data
              , Eq
              , FromHttpApiData

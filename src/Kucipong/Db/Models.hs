@@ -74,6 +74,15 @@ instance EntityDateFields Coupon where
   getDeletedEntityFieldValue = couponDeleted
   getUpdatedEntityFieldValue = couponUpdated
 
+instance EntityDateFields Image where
+  createdEntityField = ImageCreated
+  deletedEntityField = ImageDeleted
+  updatedEntityField = ImageUpdated
+
+  getCreatedEntityFieldValue = imageCreated
+  getDeletedEntityFieldValue = imageDeleted
+  getUpdatedEntityFieldValue = imageUpdated
+
 instance EntityDateFields Store where
   createdEntityField = StoreCreated
   deletedEntityField = StoreDeleted

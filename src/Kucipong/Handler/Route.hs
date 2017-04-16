@@ -29,11 +29,17 @@ deleteR = "delete"
 editR :: Path '[] 'Open
 editR = "edit"
 
+imageR :: Path '[] 'Open
+imageR = "image"
+
 loginR :: Path '[] 'Open
 loginR = "login"
 
 rootR :: Path '[] 'Open
 rootR = ""
+
+setR :: Path '[] 'Open
+setR = "set"
 
 staticR :: Path '[] 'Open
 staticR = "static"
@@ -84,14 +90,23 @@ storeCouponVarR = storeR <//> couponR <//> var
 storeCouponVarEditR :: Path '[Key Coupon] 'Open
 storeCouponVarEditR = storeR <//> couponR <//> var <//> editR
 
+storeCouponVarSetImageR :: Path '[Key Coupon] 'Open
+storeCouponVarSetImageR = storeR <//> couponR <//> var <//> setR <//> imageR
+
 storeEditR :: Path '[] 'Open
 storeEditR = storeR <//> editR
+
+storeImageR :: Path '[] 'Open
+storeImageR = storeR <//> imageR
 
 storeLoginR :: Path '[] 'Open
 storeLoginR = storeR <//> loginR
 
 storeLoginVarR :: Path '[LoginToken] 'Open
 storeLoginVarR = storeR <//> loginR <//> var
+
+storeSetImageR :: Path '[] 'Open
+storeSetImageR = storeR <//> setR <//> imageR
 
 consumerCouponVarR :: Path '[Key Coupon] 'Open
 consumerCouponVarR = consumerR <//> couponR <//> var

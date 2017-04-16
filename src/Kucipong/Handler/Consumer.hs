@@ -12,7 +12,7 @@ import Database.Persist.Sql (Entity(..))
 import Web.Spock (ActionCtxT, renderRoute)
 import Web.Spock.Core (SpockCtxT, get)
 
-import Kucipong.Db (Coupon(..), CouponType(..), Key(..))
+import Kucipong.Db (Coupon(..), CouponType(..), Image(..), Key(..))
 import Kucipong.Handler.Consumer.TemplatePath
 import Kucipong.Handler.Consumer.Types (ConsumerError(..))
 import Kucipong.Handler.Route
@@ -25,7 +25,7 @@ import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (MonadKucipongAws(..), MonadKucipongDb(..), awsImageS3Url,
-        dbFindStoreByStoreKey, dbFindPublicCouponById)
+        dbFindImage, dbFindPublicCouponById, dbFindStoreByStoreKey)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
 
 couponGet
@@ -37,8 +37,10 @@ couponGet couponKey = do
   Entity _ coupon <-
     fromMaybeM (handleErr $ label def ConsumerErrorCouldNotFindCoupon) maybeCouponEntity
   maybeStoreEntity <- dbFindStoreByStoreKey $ couponStoreId coupon
-  let maybeImage = couponImage . entityVal =<< maybeCouponEntity
-  maybeImageUrl <- traverse awsImageS3Url maybeImage
+  let maybeImageKey = couponImage . entityVal =<< maybeCouponEntity
+  maybeImageEntity <- join <$> traverse dbFindImage maybeImageKey
+  let maybeImageName = imageS3Name . entityVal <$> maybeImageEntity
+  maybeImageUrl <- traverse awsImageS3Url maybeImageName
   let
     mdata = CouponView
       <$> maybeStoreEntity

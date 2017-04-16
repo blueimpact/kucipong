@@ -78,6 +78,7 @@ library
                      , Kucipong.RenderTemplate
                      , Kucipong.Session
                      , Kucipong.Spock
+                     , Kucipong.Spock.Json
                      , Kucipong.Spock.ReqParam
                      , Kucipong.Util
                      , Kucipong.View

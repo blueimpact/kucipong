@@ -6,15 +6,19 @@ module Kucipong.Handler.Store
 
 import Kucipong.Prelude
 
-import Control.FromSum (fromMaybeM)
+import Control.FromSum (fromEitherM, fromMaybeM)
 import Control.Monad.Time (MonadTime(..))
+import Data.Aeson (ToJSON(toJSON), Value(String))
 import Data.Default (def)
 import Data.List (nub)
 import Data.HVect (HVect(..))
 import Database.Persist (Entity(..))
+import Network.HTTP.Types.Status
+       (badRequest400, serviceUnavailable503)
 import Web.Spock
        (ActionCtxT, getContext, params, prehook, redirect, renderRoute)
-import Web.Spock.Core (SpockCtxT, get, post)
+import Web.Spock.Core
+       (SpockCtxT, get, files, jsonBody', post)
 
 import Kucipong.Db
        (BusinessCategory(..), BusinessCategoryDetail(..), Key(..),
@@ -25,10 +29,12 @@ import Kucipong.Db
         unfoldAllBusinessCategoryDetailAlt)
 import Kucipong.Email (EmailError)
 import Kucipong.Form
-       (StoreEditForm(..), StoreLoginForm(StoreLoginForm))
+       (StoreEditForm(..), StoreLoginForm(StoreLoginForm),
+        StoreSetImageForm(StoreSetImageForm))
 import Kucipong.Handler.Error (resp404)
 import Kucipong.Handler.Route
-       (storeCouponR, storeEditR, storeLoginR, storeLoginVarR, storeR)
+       (storeCouponR, storeEditR, storeImageR, storeLoginR,
+        storeLoginVarR, storeR, storeSetImageR)
 import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.TemplatePath
        (templateLogin, templateStore, templateStoreEdit)
@@ -36,19 +42,22 @@ import Kucipong.Handler.Store.Types
        (StoreError(..), StoreMsg(..), StoreView(..), StoreViewText(..),
         StoreViewTexts(..), StoreViewBusinessCategory(..),
         StoreViewBusinessCategoryDetails(..), StoreViewImageUrl(..))
+import Kucipong.Handler.Store.Util
+       (awsUrlFromMaybeImageKey, guardMaybeImageKeyOwnedByStore)
 import Kucipong.I18n (label)
 import Kucipong.LoginToken (LoginToken)
 import Kucipong.Monad
-       (MonadKucipongAws(..), MonadKucipongCookie,
-        MonadKucipongDb(..), MonadKucipongSendEmail(..), awsImageS3Url,
+       (FileUploadError(..), MonadKucipongAws(..), MonadKucipongCookie,
+        MonadKucipongDb(..), MonadKucipongSendEmail(..),
         dbFindStoreByEmail, dbFindStoreByStoreKey, dbFindStoreLoginToken,
-        dbUpdateStore)
+        dbInsertImage, dbUpdateStore, dbUpdateStoreImage)
 import Kucipong.RenderTemplate
        (renderTemplateFromEnv)
 import Kucipong.Session (Session, SessionType(SessionTypeStore))
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
-        getStoreCookie, getStoreKey, setStoreCookie)
+        getStoreCookie, getStoreKey, jsonErrorStatus, jsonSuccess,
+        setStoreCookie)
 
 -- | Handler for returning the store login page.
 loginGet
@@ -124,8 +133,8 @@ storeGet = do
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
   storeEntity <-
     fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
-  let maybeImage = storeImage $ entityVal storeEntity
-  maybeImageUrl <- traverse awsImageS3Url maybeImage
+  let maybeImageKey = storeImage $ entityVal storeEntity
+  maybeImageUrl <- awsUrlFromMaybeImageKey maybeImageKey
   let store = StoreView storeEntity maybeImageUrl
   $(renderTemplateFromEnv templateStore)
 
@@ -143,6 +152,72 @@ storeEditGet = do
     fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
   $(renderTemplateFromEnv templateStoreEdit)
 
+data ImgPostErr
+  = ImgPostErrNoImg
+  | ImgPostErr FileUploadError
+  deriving (Show, Typeable)
+
+instance ToJSON ImgPostErr where
+  toJSON :: ImgPostErr -> Value
+  toJSON ImgPostErrNoImg = String "ImgPostErrNoImg"
+  toJSON (ImgPostErr fileUploadError) = toJSON fileUploadError
+
+storeImagePost
+  :: forall n xs m.
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongAws m
+     , MonadKucipongDb m
+     )
+  => ActionCtxT (HVect xs) m ()
+storeImagePost = do
+  (StoreSession storeKey) <- getStoreKey
+  filesHashMap <- files
+  print filesHashMap
+  uploadedImage <-
+    fromMaybeM (handleErr ImgPostErrNoImg) $ lookup "image" filesHashMap
+  eitherImageName <- first ImgPostErr <$> awsS3PutUploadedFile uploadedImage
+  s3ImageName <- fromEitherM handleErr eitherImageName
+  (Entity imageKey _) <- dbInsertImage storeKey s3ImageName
+  jsonSuccess imageKey
+  where
+    handleErr :: ImgPostErr -> ActionCtxT (HVect xs) m a
+    handleErr err@ImgPostErrNoImg =
+      jsonErrorStatus badRequest400 err "image not found in upload"
+    handleErr err@(ImgPostErr (AwsError _)) =
+      jsonErrorStatus serviceUnavailable503 err "error with aws"
+    handleErr err@(ImgPostErr FileContentTypeError) =
+      jsonErrorStatus
+        badRequest400
+        err
+        "content type of the image is not supported"
+    handleErr err@(ImgPostErr (FileReadError _)) =
+      jsonErrorStatus
+        serviceUnavailable503
+        err
+        "server error with reading the file uploaded"
+
+storeSetImagePost
+  :: forall n xs m.
+     ( ContainsStoreSession n xs
+     , MonadIO m
+     , MonadKucipongDb m
+     )
+  => ActionCtxT (HVect xs) m ()
+storeSetImagePost = do
+  (StoreSession storeKey) <- getStoreKey
+  StoreSetImageForm maybeImageKey <- jsonBody'
+  guardMaybeImageKeyOwnedByStore storeKey maybeImageKey handleErr
+  void $ dbUpdateStoreImage storeKey maybeImageKey
+  jsonSuccess maybeImageKey
+  where
+    handleErr :: ActionCtxT (HVect xs) m a
+    handleErr =
+      jsonErrorStatus
+        badRequest400
+        StoreErrorImageOwnedByStore
+        (label def StoreErrorImageOwnedByStore)
+
 storeEditPost
   :: forall xs n m.
      ( ContainsStoreSession n xs
@@ -156,6 +231,7 @@ storeEditPost = do
   StoreEditForm { name
                 , businessCategory
                 , businessCategoryDetails
+                , imageKey
                 , salesPoint
                 , address
                 , phoneNumber
@@ -165,12 +241,15 @@ storeEditPost = do
                 } <- getReqParamErr handleErr
   let businessCategoryDetails' =
         filterBusinessCategoryDetails businessCategory businessCategoryDetails
+  guardMaybeImageKeyOwnedByStore storeKey imageKey $
+    handleErr (label def StoreErrorImageOwnedByStore)
   void $
     dbUpdateStore
       storeKey
       name
       businessCategory
       (nub businessCategoryDetails')
+      imageKey
       salesPoint
       address
       phoneNumber
@@ -186,6 +265,7 @@ storeEditPost = do
     filterBusinessCategoryDetails Nothing _ = []
     filterBusinessCategoryDetails (Just busiCat) busiCatDets =
       filter (isValidBusinessCategoryDetailFor busiCat) busiCatDets
+
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
       store <- params
@@ -223,6 +303,8 @@ storeComponent = do
     get storeR storeGet
     get storeEditR storeEditGet
     post storeEditR storeEditPost
+    post storeImageR storeImagePost
+    post storeSetImageR storeSetImagePost
     storeCouponComponent
 
 allBusinessCategories :: [BusinessCategory]

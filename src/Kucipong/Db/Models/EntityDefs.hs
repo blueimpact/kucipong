@@ -8,7 +8,7 @@ import Database.Persist ( EntityDef )
 import Database.Persist.TH ( persistLowerCase )
 
 import Kucipong.Db.Models.Base
-       (BusinessCategory, CouponType, CreatedTime, DeletedTime, Image,
+       (BusinessCategory, CouponType, CreatedTime, DeletedTime, ImageName,
         LoginTokenExpirationTime, Percent, Price, UpdatedTime)
 import Kucipong.LoginToken ( LoginToken )
 
@@ -49,7 +49,7 @@ kucipongEntityDefs = [persistLowerCase|
         name                    Text Maybe
         businessCategory        BusinessCategory Maybe
         businessCategoryDetails [BusinessCategoryDetail]
-        image                   Image Maybe
+        image                   ImageId Maybe
         salesPoint              Text Maybe
         address                 Text Maybe
         phoneNumber             Text Maybe
@@ -84,7 +84,7 @@ kucipongEntityDefs = [persistLowerCase|
         couponType              CouponType
         validFrom               Day Maybe
         validUntil              Day Maybe
-        image                   Image Maybe
+        image                   ImageId Maybe
         discountPercent         Percent Maybe
         discountMinimumPrice    Price Maybe
         discountOtherConditions Text Maybe
@@ -102,4 +102,16 @@ kucipongEntityDefs = [persistLowerCase|
         deriving Eq
         deriving Show
         deriving Typeable
+
+    Image
+        created                 CreatedTime
+        updated                 UpdatedTime
+        deleted                 DeletedTime Maybe
+        storeId                 StoreId
+        s3Name                  ImageName
+
+        deriving Eq
+        deriving Show
+        deriving Typeable
+
     |]
