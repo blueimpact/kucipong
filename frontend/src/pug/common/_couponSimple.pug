@@ -1,75 +1,37 @@
 .couponSimple
-  a.card(href="\#{renderRoute storeCouponVarR couponKey}")
+  a.card(href="\#{renderRoute storeCouponVarR (key coupon)}")
     .annotatedImageGroup
+      | %{ case format ImageUrl imageUrl }
+      | %{ of Just url }
       img.annotatedImageGroup-image(
-        src="\#{ fromMaybe mempty (awsImageUrlFunc maybeImageEntity)}"
-        alt="\#{ couponTitle coupon }"
+        src="\#{url}"
+        alt="\#{format CouponTitle coupon}"
       )
       span.annotatedImageGroup-annotation 画像は一例です
+      | %{ of _ }
+      div
+        | 画像が設定されていません
+      | %{ endcase }
     .card_body
       .couponSimple_abstraction
-        h2.couponSimple_abstraction-store \#{ couponTitle coupon }
+        h2.couponSimple_abstraction-store \#{ format CouponTitle coupon }
         .couponSimple_abstraction-summary
 
-          | %{ case couponCouponType coupon }
+          | %{ case format CouponCouponType coupon }
           | %{ of CouponTypeDiscount }
-          |     %{ case couponDiscountPercent coupon }
-          |     %{ of Just discountPercent }
-          span.couponSimple_abstraction-summary-sub \#{ discountPercent }% OFF
-          |     %{ of Nothing }
-          |     %{ endcase }
-
-          |     %{ case couponDiscountMinimumPrice coupon }
-          |     %{ of Just discountMinimumPrice }
-          span.couponSimple_abstraction-summary-main \#{ discountMinimumPrice }円
-          |     %{ of Nothing }
-          |     %{ endcase }
-
+          span.couponSimple_abstraction-summary-sub \#{ format CouponDiscountPercent coupon }
+          span.couponSimple_abstraction-summary-main \#{ format CouponDiscountMinimumPrice coupon }
 
           | %{ of CouponTypeGift }
-          |     %{ case couponGiftContent coupon }
-          |     %{ of Just giftContent }
-          span.couponSimple_abstraction-summary-sub \#{ giftContent }
-          |     %{ of Nothing }
-          |     %{ endcase }
-
-          |     %{ case couponGiftMinimumPrice coupon }
-          |     %{ of Just giftMinimumPrice }
-          span.couponSimple_abstraction-summary-main \#{ giftMinimumPrice }円
-          |     %{ of Nothing }
-          |     %{ endcase }
-
-          |     %{ case couponGiftReferencePrice coupon }
-          |     %{ of Just giftReferencePrice }
-          span.couponSimple_abstraction-summary-main \#{ giftReferencePrice }円
-          |     %{ of Nothing }
-          |     %{ endcase }
-
+          span.couponSimple_abstraction-summary-sub \#{ format CouponGiftContent coupon }
+          span.couponSimple_abstraction-summary-main \#{ format CouponGiftMinimumPrice coupon }
+          span.couponSimple_abstraction-summary-main \#{ format CouponGiftReferencePrice coupon }
 
           | %{ of CouponTypeSet }
-          |     %{ case couponSetContent coupon }
-          |     %{ of Just setContent }
-          span.couponSimple_abstraction-summary-sub \#{ setContent }
-          |     %{ of Nothing }
-          |     %{ endcase }
-
-          |     %{ case couponSetPrice coupon }
-          |     %{ of Just setPrice }
-          span.couponSimple_abstraction-summary-main \#{ setPrice }円
-          |     %{ of Nothing }
-          |     %{ endcase }
-
-          |     %{ case couponSetReferencePrice coupon }
-          |     %{ of Just setReferencePrice }
-          span.couponSimple_abstraction-summary-main \#{ setReferencePrice }円
-          |     %{ of Nothing }
-          |     %{ endcase }
-
+          span.couponSimple_abstraction-summary-sub \#{ format CouponSetContent coupon }
+          span.couponSimple_abstraction-summary-main \#{ format CouponSetPrice coupon }
+          span.couponSimple_abstraction-summary-main \#{ format CouponSetReferencePrice coupon }
 
           | %{ of CouponTypeOther }
-          |     %{ case couponOtherContent coupon }
-          |     %{ of Just otherContent }
-          span.couponSimple_abstraction-summary-sub \#{ otherContent }
-          |     %{ of Nothing }
-          |     %{ endcase }
+          span.couponSimple_abstraction-summary-sub \#{ format CouponOtherContent coupon }
           | %{ endcase }
