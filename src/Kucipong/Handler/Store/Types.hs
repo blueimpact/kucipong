@@ -3,14 +3,9 @@
 module Kucipong.Handler.Store.Types
   ( StoreError(..)
   , StoreMsg(..)
-  , CouponView(..)
-  , CouponViewKey(..)
-  , CouponViewTypes(..)
-  , CouponViewConditions(..)
+  , CouponViewText(..)
+  , CouponViewTexts(..)
   , CouponViewCouponType(..)
-  , CouponViewImageUrl(..)
-  , StoreView(..)
-  , StoreViewImageUrl(..)
   , StoreViewBusinessCategory(..)
   , StoreViewBusinessCategoryDetails(..)
   , StoreViewText(..)
@@ -42,47 +37,28 @@ data StoreMsg =
   StoreMsgSentVerificationEmail
   deriving (Show, Eq, Ord, Read, Enum, Bounded)
 
--- For View.
-data CouponView = CouponView
-  { couponStore :: Entity Store
-  , couponCoupon :: Entity Coupon
-  , couponImageUrl :: Maybe Text
-  } deriving (Show, Eq)
+data CouponViewText
+  = CouponTitle
+  | CouponValidFrom
+  | CouponValidUntil
+  | CouponDiscountPercent
+  | CouponDiscountMinimumPrice
+  | CouponGiftContent
+  | CouponGiftMinimumPrice
+  | CouponGiftReferencePrice
+  | CouponSetContent
+  | CouponSetPrice
+  | CouponSetReferencePrice
+  | CouponOtherContent
 
-data CouponViewKey
-  = StoreId
-  | CouponId
-
-data CouponViewImageUrl
-  = CouponImageUrl
-
-data CouponViewTypes
-  = Title
-  | ValidFrom
-  | ValidUntil
-  | DiscountPercent
-  | DiscountMinimumPrice
-  | GiftContent
-  | GiftMinimumPrice
-  | GiftReferencePrice
-  | SetContent
-  | SetPrice
-  | SetReferencePrice
-  | OtherContent
-
-data CouponViewConditions
-  = DiscountOtherConditions
-  | GiftOtherConditions
-  | SetOtherConditions
-  | OtherConditions
+data CouponViewTexts
+  = CouponDiscountOtherConditions
+  | CouponGiftOtherConditions
+  | CouponSetOtherConditions
+  | CouponOtherConditions
 
 data CouponViewCouponType =
-  CouponType
-
-data StoreView = StoreView
-  { storeEntity :: Entity Store
-  , storeImageUrl :: Maybe Text
-  } deriving (Show, Eq)
+  CouponCouponType
 
 data StoreViewText
   = StoreName
@@ -92,9 +68,6 @@ data StoreViewText
   | StoreRegularHoliday
   | StoreUrl
 
-data StoreViewImageUrl
-  = StoreImageUrl
-
 data StoreViewBusinessCategory
   = StoreBusinessCategory
 
@@ -103,4 +76,3 @@ data StoreViewBusinessCategoryDetails
 
 data StoreViewTexts
   = StoreBusinessHour
-

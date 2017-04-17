@@ -16,7 +16,7 @@ import Text.Heterocephalus
 import Web.Spock (html)
 
 import Kucipong.I18n (label)
-import Kucipong.View (format, toName)
+import Kucipong.View (format, key, toName)
 
 templateDirectory :: FilePath
 templateDirectory = "frontend" </> "dist" </> "templates"
@@ -80,9 +80,3 @@ isChecked
 isChecked ls k
   | k `elem` ls = "checked"
   | otherwise = ""
-
--- | Key
-key
-  :: (Show a)
-  => a -> Text
-key = tshow

@@ -12,21 +12,22 @@ import Database.Persist.Sql (Entity(..))
 import Web.Spock (ActionCtxT, renderRoute)
 import Web.Spock.Core (SpockCtxT, get)
 
-import Kucipong.Db (Coupon(..), CouponType(..), Image(..), Key(..))
+import Kucipong.Db (Coupon(..), CouponType(..), Key(..))
 import Kucipong.Handler.Consumer.TemplatePath
 import Kucipong.Handler.Consumer.Types (ConsumerError(..))
+import Kucipong.Handler.Error (resp404)
 import Kucipong.Handler.Route
-       (consumerCouponVarR, consumerStoreVarR, storeCouponDeleteVarR)
+       (consumerCouponVarR, consumerStoreVarR)
 import Kucipong.Handler.Store.Types
-       (CouponView(..), CouponViewKey(..), CouponViewTypes(..),
-        CouponViewImageUrl(..), CouponViewConditions(..),
-        CouponViewCouponType(..), StoreViewText(..))
-import Kucipong.Handler.Types (PageViewer(..))
+       (CouponViewText(..), CouponViewTexts(..), CouponViewCouponType(..),
+        StoreError(..), StoreViewText(..))
+import Kucipong.Handler.Store.Util (awsUrlFromMaybeImageKey)
 import Kucipong.I18n (label)
 import Kucipong.Monad
-       (MonadKucipongAws(..), MonadKucipongDb(..), awsImageS3Url,
-        dbFindImage, dbFindPublicCouponById, dbFindStoreByStoreKey)
+       (MonadKucipongAws(..), MonadKucipongDb(..), dbFindPublicCouponById,
+        dbFindStoreByStoreKey)
 import Kucipong.RenderTemplate (renderTemplateFromEnv)
+import Kucipong.View.Instance (ImageUrl(..))
 
 couponGet
   :: forall ctx m.
@@ -34,23 +35,18 @@ couponGet
   => Key Coupon -> ActionCtxT ctx m ()
 couponGet couponKey = do
   maybeCouponEntity <- dbFindPublicCouponById couponKey
-  Entity _ coupon <-
+  coupon <-
     fromMaybeM (handleErr $ label def ConsumerErrorCouldNotFindCoupon) maybeCouponEntity
-  maybeStoreEntity <- dbFindStoreByStoreKey $ couponStoreId coupon
+  maybeStoreEntity <- dbFindStoreByStoreKey . couponStoreId . entityVal $ coupon
+  store <-
+    fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
   let maybeImageKey = couponImage . entityVal =<< maybeCouponEntity
-  maybeImageEntity <- join <$> traverse dbFindImage maybeImageKey
-  let maybeImageName = imageS3Name . entityVal <$> maybeImageEntity
-  maybeImageUrl <- traverse awsImageS3Url maybeImageName
+  imageUrl <- awsUrlFromMaybeImageKey maybeImageKey
   let
-    mdata = CouponView
-      <$> maybeStoreEntity
-      <*> maybeCouponEntity
-      <*> pure maybeImageUrl
     aboutStore =
       maybe mempty
         (renderRoute consumerStoreVarR . entityKey)
         maybeStoreEntity
-    pageViewer = PageViewerEndUser
   $(renderTemplateFromEnv templateCouponId)
   where
     handleErr :: Text -> ActionCtxT ctx m a
