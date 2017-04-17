@@ -231,7 +231,6 @@ storeEditPost = do
   StoreEditForm { name
                 , businessCategory
                 , businessCategoryDetails
-                , imageKey
                 , salesPoint
                 , address
                 , phoneNumber
@@ -241,15 +240,12 @@ storeEditPost = do
                 } <- getReqParamErr handleErr
   let businessCategoryDetails' =
         filterBusinessCategoryDetails businessCategory businessCategoryDetails
-  guardMaybeImageKeyOwnedByStore storeKey imageKey $
-    handleErr (label def StoreErrorImageOwnedByStore)
   void $
     dbUpdateStore
       storeKey
       name
       businessCategory
       (nub businessCategoryDetails')
-      imageKey
       salesPoint
       address
       phoneNumber

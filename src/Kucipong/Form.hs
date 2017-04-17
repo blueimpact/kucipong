@@ -81,7 +81,6 @@ data StoreEditForm = StoreEditForm
   { name :: !(Maybe Text)
   , businessCategory :: !(Maybe BusinessCategory)
   , businessCategoryDetails :: ![BusinessCategoryDetail]
-  , imageKey :: !(Maybe (Key Image))
   , salesPoint :: !(Maybe Text)
   , address :: !(Maybe Text)
   , phoneNumber :: !(Maybe Text)
@@ -107,7 +106,6 @@ data StoreNewCouponForm = StoreNewCouponForm
   , couponType :: CouponType
   , validFrom :: !(MaybeEmpty Day)
   , validUntil :: !(MaybeEmpty Day)
-  , imageKey :: !(MaybeEmpty (Key Image))
   , discountPercent :: !(MaybeEmpty Percent)
   , discountMinimumPrice :: !(MaybeEmpty Price)
   , discountOtherConditions :: !(MaybeEmpty Text)
