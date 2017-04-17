@@ -7,6 +7,7 @@ import Kucipong.Prelude
 
 data ConsumerError
   = ConsumerErrorCouldNotFindCoupon
+  | ConsumerErrorCouldNotFindStore
   deriving (Show, Eq, Ord, Read, Enum, Bounded)
 
 -- data ConsumerMsg

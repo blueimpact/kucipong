@@ -5,17 +5,28 @@ include common/_layout
     .store
       header.storeHeader
         .annotatedImageGroup
-          img.annotatedImageGroup-image(src=require("../img/dummy.jpg") alt="七輪焼き肉・安安")
+          | %{ case format ImageUrl imageUrl }
+          | %{ of Just url }
+          img.annotatedImageGroup-image(
+            src="\#{url}"
+            alt="\#{format StoreName store}"
+          )
           span.annotatedImageGroup-annotation 画像は一例です
+          | %{ of _ }
+          div
+            | 画像が設定されていません
+          | %{ endcase }
         .highlightedBlock
           h2.highlightedBlock.storeHeader-title
-            | 七輪焼肉・安安
+            | \#{format StoreName store}
       .storeBody
         .storeBody_description
-          p 七輪焼き肉・安安は、美味しい焼肉を...
-          p ...
+          p \#{format StoreSalesPoint store}
         .storeBody_viewCoupon
-          a.btn.defaultBtn(href="/store/52/coupon") クーポンを見る
+          a.btn.defaultBtn(
+            href="\#{renderRoute consumerStoreVarCouponR (entityKey storeEntity)}"
+          )
+            | クーポンを見る
         .storeBody_info
           .storeBody_info_titleArea
             .storeBody_info_titleArea-text
@@ -25,21 +36,24 @@ include common/_layout
               .storeBody_info_body_row-header
                 | 住所
               .storeBody_info_body_row-body
-                | 渋谷区桜丘町2-12 渋谷亀八ビル4F
+                | \#{format StoreAddress store}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 電話番号
               .storeBody_info_body_row-body
-                | 03-3464-0722
+                | \#{format StorePhoneNumber store}
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 営業時間
               .storeBody_info_body_row-body
-                | 月〜木 17:00〜翌4:30\n金土日祝・祝前 16:00〜翌4:30
+                | %{ forall businessHour <- format StoreBusinessHour store }
+                p
+                  | \#{businessHour}
+                | %{ endforall }
             .storeBody_info_body_row
               .storeBody_info_body_row-header
                 | 定休日
               .storeBody_info_body_row-body
-                | 元旦のみ
+                | \#{format StoreRegularHoliday store}
             .storeBody_info_body_btnRow
-              a.btn.outerBtn(href="http://www.fuji-tatsu.co.jp/") オフィシャルサイト
+              a.btn.outerBtn(href="\#{format StoreUrl store}") オフィシャルサイト

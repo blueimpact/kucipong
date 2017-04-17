@@ -113,3 +113,6 @@ consumerCouponVarR = consumerR <//> couponR <//> var
 
 consumerStoreVarR :: Path '[Key Store] 'Open
 consumerStoreVarR = consumerR <//> storeR <//> var
+
+consumerStoreVarCouponR :: Path '[Key Store] 'Open
+consumerStoreVarCouponR = consumerR <//> storeR <//> var <//> couponR

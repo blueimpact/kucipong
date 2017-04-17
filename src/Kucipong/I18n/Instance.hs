@@ -48,6 +48,8 @@ instance I18n AdminMsg where
 instance I18n ConsumerError where
   label EnUS ConsumerErrorCouldNotFindCoupon =
     "Could not find coupon. The coupon you requested is not available or URL is invalid."
+  label EnUS ConsumerErrorCouldNotFindStore =
+    "Could not find store. The store you requested is not available or URL is invalid."
 
 instance I18n StoreDeleteResult where
   label EnUS StoreDeleteSuccess = "Successfully deleted store."

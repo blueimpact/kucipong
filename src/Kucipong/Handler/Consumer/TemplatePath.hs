@@ -15,3 +15,7 @@ templateCouponId = templateRoot </> "coupon_id.html"
 
 templateCategory :: FilePath
 templateCategory = templateRoot </> "category.html"
+
+templateStoreId :: FilePath
+templateStoreId = templateRoot </> "store_id.html"
+
