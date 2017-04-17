@@ -46,7 +46,6 @@ library
                      , Kucipong.Handler.Store.Util
                      , Kucipong.Handler.Static
                      , Kucipong.Handler.Static.TH
-                     , Kucipong.Handler.Types
                      , Kucipong.Host
                      , Kucipong.I18n
                      , Kucipong.I18n.Class

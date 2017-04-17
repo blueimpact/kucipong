@@ -3,18 +3,24 @@
   .card
     .card_header
       h2.card_header_text
-        | \#{format StoreName coupon}
+        | \#{format StoreName store}
       .card_header_icon
         .icon.icon-fav.checkableIcon
-          input#js-fav.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{format CouponId coupon}")
+          input#js-fav.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{key coupon}")
           label.checkableIcon-icon(for="js-fav")
 
     .annotatedImageGroup
+      | %{ case format ImageUrl imageUrl }
+      | %{ of Just url }
       img.annotatedImageGroup-image(
-        src="\#{format CouponImageUrl coupon}"
-        alt="\#{format StoreName coupon}"
+        src="\#{url}"
+        alt="\#{format StoreName store}"
       )
       span.annotatedImageGroup-annotation 画像は一例です
+      | %{ of _ }
+      div
+        | 画像が設定されていません
+      | %{ endcase }
     .card_body
       .card_body_title
         | \#{format CouponTitle coupon}
@@ -54,11 +60,11 @@
         frameborder="0"
         allowfullscreen
         data-api-key=data.googleMapApiKey
-        data-address!="\#{format StoreAddress coupon}"
+        data-address!="\#{format StoreAddress store}"
       )
   .aboutStore
     a.btn.outerBtn(href="\#{aboutStore}")
-      | \#{format StoreName coupon}
+      | \#{format StoreName store}
   .moreContents
     | %{ case format CouponCouponType coupon }
     | %{ of CouponTypeDiscount }
@@ -81,13 +87,3 @@
     p.moreContents_txt \#{condition}
     |     %{ endforall }
     | %{ endcase }
-
-  | %{ case pageViewer }
-  | %{ of PageViewerStore }
-  .deleteCoupon
-    // a.btn.outerBtn(
-    //   href="\#{renderRoute storeCouponDeleteVarR (entityKey (couponCoupon coupon))}"
-    // )
-    //   | クーポンの削除
-  | %{ of _ }
-  | %{ endcase}

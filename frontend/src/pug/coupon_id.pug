@@ -2,9 +2,4 @@ include common/_layout
   body#main.wrapper
     include common/_header
       | クーポン
-    | %{ case mdata }
-    | %{ of Just coupon }
     include common/_coupon_id
-    | %{ of Nothing }
-    | No coupon info.
-    | %{ endcase }

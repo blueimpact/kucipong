@@ -28,12 +28,10 @@ import Kucipong.Handler.Store.TemplatePath
        (templateCoupon, templateCouponCreate, templateCouponDelete,
         templateCouponId, templateCouponIdEdit)
 import Kucipong.Handler.Store.Types
-       (StoreError(..), CouponView(..), CouponViewImageUrl(..),
-        CouponViewKey(..), CouponViewText(..), CouponViewTexts(..),
+       (StoreError(..), CouponViewText(..), CouponViewTexts(..),
         CouponViewCouponType(..), StoreViewText(..))
 import Kucipong.Handler.Store.Util
        (awsUrlFromMaybeImageKey, guardMaybeImageKeyOwnedByStore)
-import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)
 import Kucipong.Monad
        (CouponDeleteResult(..), MonadKucipongAws(..), MonadKucipongDb(..),
@@ -46,6 +44,7 @@ import Kucipong.Session (Session, SessionType(SessionTypeStore))
 import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreKey, jsonErrorStatus, jsonSuccess)
+import Kucipong.View.Instance (ImageUrl(..))
 
 couponNewGet
   :: forall xs m.
@@ -67,16 +66,14 @@ couponGet
 couponGet couponKey = do
   (StoreSession storeKey) <- getStoreKey
   maybeCouponEntity <- dbFindCouponByStoreKeyAndCouponKey storeKey couponKey
-  couponEntity <-
+  coupon <-
     fromMaybeM (resp404 [label def StoreErrorCouponNotFound]) maybeCouponEntity
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
-  storeEntity <-
+  store <-
     fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
-  let maybeImageKey = couponImage $ entityVal couponEntity
-  maybeImageUrl <- awsUrlFromMaybeImageKey maybeImageKey
-  let coupon = CouponView storeEntity couponEntity maybeImageUrl
-      aboutStore = renderRoute storeR
-      pageViewer = PageViewerStore
+  let maybeImageKey = couponImage $ entityVal coupon
+  imageUrl <- awsUrlFromMaybeImageKey maybeImageKey
+  let aboutStore = renderRoute storeR
   $(renderTemplateFromEnv templateCouponId)
 
 couponEditGet

@@ -9,11 +9,17 @@ include ../common/_layout
         a.btn.outerBtn(href="\#{renderRoute storeEditR}") 店舗情報編集
       header.storeHeader
         .annotatedImageGroup
+          | %{ case format ImageUrl imageUrl }
+          | %{ of Just url }
           img.annotatedImageGroup-image(
-            src="\#{format StoreImageUrl store}"
-            alt!='\#{format StoreName store}'
+            src="\#{url}"
+            alt="\#{format StoreName store}"
           )
           span.annotatedImageGroup-annotation 画像は一例です
+          | %{ of _ }
+          div
+            | 画像が設定されていません
+          | %{ endcase }
         .highlightedBlock
           h2.highlightedBlock.storeHeader-title
             | \#{format StoreName store}

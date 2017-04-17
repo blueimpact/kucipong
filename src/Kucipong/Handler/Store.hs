@@ -39,9 +39,9 @@ import Kucipong.Handler.Store.Coupon (storeCouponComponent)
 import Kucipong.Handler.Store.TemplatePath
        (templateLogin, templateStore, templateStoreEdit)
 import Kucipong.Handler.Store.Types
-       (StoreError(..), StoreMsg(..), StoreView(..), StoreViewText(..),
+       (StoreError(..), StoreMsg(..), StoreViewText(..),
         StoreViewTexts(..), StoreViewBusinessCategory(..),
-        StoreViewBusinessCategoryDetails(..), StoreViewImageUrl(..))
+        StoreViewBusinessCategoryDetails(..))
 import Kucipong.Handler.Store.Util
        (awsUrlFromMaybeImageKey, guardMaybeImageKeyOwnedByStore)
 import Kucipong.I18n (label)
@@ -58,6 +58,7 @@ import Kucipong.Spock
        (pattern StoreSession, ContainsStoreSession, getReqParamErr,
         getStoreCookie, getStoreKey, jsonErrorStatus, jsonSuccess,
         setStoreCookie)
+import Kucipong.View.Instance (ImageUrl(..))
 
 -- | Handler for returning the store login page.
 loginGet
@@ -131,11 +132,10 @@ storeGet
 storeGet = do
   (StoreSession storeKey) <- getStoreKey
   maybeStoreEntity <- dbFindStoreByStoreKey storeKey
-  storeEntity <-
+  store <-
     fromMaybeM (resp404 [label def StoreErrorNoStore]) maybeStoreEntity
-  let maybeImageKey = storeImage $ entityVal storeEntity
-  maybeImageUrl <- awsUrlFromMaybeImageKey maybeImageKey
-  let store = StoreView storeEntity maybeImageUrl
+  let maybeImageKey = storeImage $ entityVal store
+  imageUrl <- awsUrlFromMaybeImageKey maybeImageKey
   $(renderTemplateFromEnv templateStore)
 
 storeEditGet

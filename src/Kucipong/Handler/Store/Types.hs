@@ -3,14 +3,9 @@
 module Kucipong.Handler.Store.Types
   ( StoreError(..)
   , StoreMsg(..)
-  , CouponView(..)
-  , CouponViewKey(..)
   , CouponViewText(..)
   , CouponViewTexts(..)
   , CouponViewCouponType(..)
-  , CouponViewImageUrl(..)
-  , StoreView(..)
-  , StoreViewImageUrl(..)
   , StoreViewBusinessCategory(..)
   , StoreViewBusinessCategoryDetails(..)
   , StoreViewText(..)
@@ -42,20 +37,6 @@ data StoreMsg =
   StoreMsgSentVerificationEmail
   deriving (Show, Eq, Ord, Read, Enum, Bounded)
 
--- For View.
-data CouponView = CouponView
-  { couponStore :: Entity Store
-  , couponCoupon :: Entity Coupon
-  , couponImageUrl :: Maybe Text
-  } deriving (Show, Eq)
-
-data CouponViewKey
-  = StoreId
-  | CouponId
-
-data CouponViewImageUrl
-  = CouponImageUrl
-
 data CouponViewText
   = CouponTitle
   | CouponValidFrom
@@ -79,11 +60,6 @@ data CouponViewTexts
 data CouponViewCouponType =
   CouponCouponType
 
-data StoreView = StoreView
-  { storeEntity :: Entity Store
-  , storeImageUrl :: Maybe Text
-  } deriving (Show, Eq)
-
 data StoreViewText
   = StoreName
   | StoreSalesPoint
@@ -91,9 +67,6 @@ data StoreViewText
   | StorePhoneNumber
   | StoreRegularHoliday
   | StoreUrl
-
-data StoreViewImageUrl
-  = StoreImageUrl
 
 data StoreViewBusinessCategory
   = StoreBusinessCategory
@@ -103,4 +76,3 @@ data StoreViewBusinessCategoryDetails
 
 data StoreViewTexts
   = StoreBusinessHour
-
