@@ -5,8 +5,8 @@ module Kucipong.Handler.Store.Types
   , StoreMsg(..)
   , CouponView(..)
   , CouponViewKey(..)
-  , CouponViewTypes(..)
-  , CouponViewConditions(..)
+  , CouponViewText(..)
+  , CouponViewTexts(..)
   , CouponViewCouponType(..)
   , CouponViewImageUrl(..)
   , StoreView(..)
@@ -56,28 +56,28 @@ data CouponViewKey
 data CouponViewImageUrl
   = CouponImageUrl
 
-data CouponViewTypes
-  = Title
-  | ValidFrom
-  | ValidUntil
-  | DiscountPercent
-  | DiscountMinimumPrice
-  | GiftContent
-  | GiftMinimumPrice
-  | GiftReferencePrice
-  | SetContent
-  | SetPrice
-  | SetReferencePrice
-  | OtherContent
+data CouponViewText
+  = CouponTitle
+  | CouponValidFrom
+  | CouponValidUntil
+  | CouponDiscountPercent
+  | CouponDiscountMinimumPrice
+  | CouponGiftContent
+  | CouponGiftMinimumPrice
+  | CouponGiftReferencePrice
+  | CouponSetContent
+  | CouponSetPrice
+  | CouponSetReferencePrice
+  | CouponOtherContent
 
-data CouponViewConditions
-  = DiscountOtherConditions
-  | GiftOtherConditions
-  | SetOtherConditions
-  | OtherConditions
+data CouponViewTexts
+  = CouponDiscountOtherConditions
+  | CouponGiftOtherConditions
+  | CouponSetOtherConditions
+  | CouponOtherConditions
 
 data CouponViewCouponType =
-  CouponType
+  CouponCouponType
 
 data StoreView = StoreView
   { storeEntity :: Entity Store

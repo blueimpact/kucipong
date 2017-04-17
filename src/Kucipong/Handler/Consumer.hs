@@ -18,8 +18,8 @@ import Kucipong.Handler.Consumer.Types (ConsumerError(..))
 import Kucipong.Handler.Route
        (consumerCouponVarR, consumerStoreVarR, storeCouponDeleteVarR)
 import Kucipong.Handler.Store.Types
-       (CouponView(..), CouponViewKey(..), CouponViewTypes(..),
-        CouponViewImageUrl(..), CouponViewConditions(..),
+       (CouponView(..), CouponViewKey(..), CouponViewText(..),
+        CouponViewImageUrl(..), CouponViewTexts(..),
         CouponViewCouponType(..), StoreViewText(..))
 import Kucipong.Handler.Types (PageViewer(..))
 import Kucipong.I18n (label)

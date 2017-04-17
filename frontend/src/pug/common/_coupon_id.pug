@@ -17,26 +17,26 @@
       span.annotatedImageGroup-annotation 画像は一例です
     .card_body
       .card_body_title
-        | \#{format Title coupon}
+        | \#{format CouponTitle coupon}
 
       .card_body_summary.highlightedBlock
-        | %{ case format CouponType coupon }
+        | %{ case format CouponCouponType coupon }
         | %{ of CouponTypeDiscount }
-        span.highlightedBlock-sub \#{format DiscountPercent coupon}
-        span.highlightedBlock-main \#{format DiscountMinimumPrice coupon}
+        span.highlightedBlock-sub \#{format CouponDiscountPercent coupon}
+        span.highlightedBlock-main \#{format CouponDiscountMinimumPrice coupon}
 
         | %{ of CouponTypeGift }
-        span.highlightedBlock-sub \#{format GiftContent coupon}
-        span.highlightedBlock-main \#{format GiftMinimumPrice coupon}
-        span.highlightedBlock-main \#{format GiftReferencePrice coupon}
+        span.highlightedBlock-sub \#{format CouponGiftContent coupon}
+        span.highlightedBlock-main \#{format CouponGiftMinimumPrice coupon}
+        span.highlightedBlock-main \#{format CouponGiftReferencePrice coupon}
 
         | %{ of CouponTypeSet }
-        span.highlightedBlock-sub \#{format SetContent coupon}
-        span.highlightedBlock-main \#{format SetPrice coupon}
-        span.highlightedBlock-main \#{format SetReferencePrice coupon}
+        span.highlightedBlock-sub \#{format CouponSetContent coupon}
+        span.highlightedBlock-main \#{format CouponSetPrice coupon}
+        span.highlightedBlock-main \#{format CouponSetReferencePrice coupon}
 
         | %{ of CouponTypeOther }
-        span.highlightedBlock-sub \#{format OtherContent coupon}
+        span.highlightedBlock-sub \#{format CouponOtherContent coupon}
 
         | %{ endcase }
 
@@ -45,8 +45,8 @@
         span.card_body_expiration-title
           | 有効期限
         span.card_body_expiration-body
-          | \#{format ValidFrom coupon}
-          | \#{format ValidUntil coupon}
+          | \#{format CouponValidFrom coupon}
+          | \#{format CouponValidUntil coupon}
   .annotation ※ この画面を店舗でご提示ください
   .location
     .location_map
@@ -60,24 +60,24 @@
     a.btn.outerBtn(href="\#{aboutStore}")
       | \#{format StoreName coupon}
   .moreContents
-    | %{ case format CouponType coupon }
+    | %{ case format CouponCouponType coupon }
     | %{ of CouponTypeDiscount }
-    |     %{ forall condition <- format DiscountOtherConditions coupon }
+    |     %{ forall condition <- format CouponDiscountOtherConditions coupon }
     p.moreContents_txt \#{condition}
     |     %{ endforall }
 
     | %{ of CouponTypeGift }
-    |     %{ forall condition <- format GiftOtherConditions coupon }
+    |     %{ forall condition <- format CouponGiftOtherConditions coupon }
     p.moreContents_txt \#{condition}
     |     %{ endforall }
 
     | %{ of CouponTypeSet }
-    |     %{ forall condition <- format SetOtherConditions coupon }
+    |     %{ forall condition <- format CouponSetOtherConditions coupon }
     p.moreContents_txt \#{condition}
     |     %{ endforall }
 
     | %{ of CouponTypeOther }
-    |     %{ forall condition <- format OtherConditions coupon }
+    |     %{ forall condition <- format CouponOtherConditions coupon }
     p.moreContents_txt \#{condition}
     |     %{ endforall }
     | %{ endcase }

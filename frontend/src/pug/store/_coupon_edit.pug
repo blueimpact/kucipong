@@ -9,8 +9,8 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
           | タイトル
         .labeledRow-body
           input#couponTitle(
-            name="\#{toName Title}" type="text"
-            value="\#{format Title coupon}"
+            name="\#{toName CouponTitle}" type="text"
+            value="\#{format CouponTitle coupon}"
           )
 
       .labeledRow
@@ -18,8 +18,8 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
           | 有効期限 (利用開始日)
         .labeledRow-body
           input#couponValidFrom(
-            name="\#{toName ValidFrom}" type="date"
-            value="\#{format ValidFrom coupon}"
+            name="\#{toName CouponValidFrom}" type="date"
+            value="\#{format CouponValidFrom coupon}"
           )
 
       .labeledRow
@@ -27,8 +27,8 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
           | 有効期限 (利用期限)
         .labeledRow-body
           input#couponExpire(
-            name="\#{toName ValidUntil}" type="date"
-            value="\#{format ValidUntil coupon}"
+            name="\#{toName CouponValidUntil}" type="date"
+            value="\#{format CouponValidUntil coupon}"
           )
 
       .labeledRow
@@ -36,14 +36,14 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
           | 種別
         .labeledRow-body
           select#couponType(
-            name="\#{toName CouponType}"
-            value="\#{key (format CouponType coupon)}"
+            name="\#{toName CouponCouponType}"
+            value="\#{key (format CouponCouponType coupon)}"
             data-select-child="type"
           )
             | %{ forall ctype <- allCouponTypes }
             option(
               value="\#{key ctype}"
-              #{isSelected (Just (format CouponType coupon)) ctype}
+              #{isSelected (Just (format CouponCouponType coupon)) ctype}
             )
               | \#{label ctype}
             | %{ endforall }
@@ -54,27 +54,27 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
             | 割引率 (ご購入総額から xx% OFF)
           .labeledRow-body
             input#discountRate(
-              name="\#{toName DiscountPercent}" type="number"
+              name="\#{toName CouponDiscountPercent}" type="number"
               min="0" max="100"
-              value="\#{format DiscountPercent coupon}"
+              value="\#{format CouponDiscountPercent coupon}"
             )
         .labeledRow
           label.labeledRow-header(for="discountMinimumPrice")
             | 最低購入額 (xx円以上お買い上げのお客様のみ割引)
           .labeledRow-body
             input#discountMinimumFee(
-              name="\#{toName DiscountMinimumPrice}" type="number"
+              name="\#{toName CouponDiscountMinimumPrice}" type="number"
               min="0"
-              value="\#{format DiscountMinimumPrice coupon}"
+              value="\#{format CouponDiscountMinimumPrice coupon}"
             )
         .labeledRow
           label.labeledRow-header(for="discountOtherConditions")
             | その他のクーポン適用条件
           .labeledRow-body
             textarea#discountOtherConditions(
-              name="\#{toName DiscountOtherConditions}"
+              name="\#{toName CouponDiscountOtherConditions}"
             )
-              | %{forall condition <- format DiscountOtherConditions coupon}
+              | %{forall condition <- format CouponDiscountOtherConditions coupon}
               p \#{condition}
               | %{endforall}
 
@@ -84,35 +84,35 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
             | プレゼント内容
           .labeledRow-body
             input#giftContent(
-              name="\#{toName GiftContent}" type="text"
-              value="\#{format GiftContent coupon}"
+              name="\#{toName CouponGiftContent}" type="text"
+              value="\#{format CouponGiftContent coupon}"
             )
         .labeledRow
           label.labeledRow-header(for="giftReferencePrice")
             | プレゼント参考価格 (非売品の場合は記入しないでください)
           .labeledRow-body
             input#giftReferencePrice(
-              name="\#{toName GiftReferencePrice}" type="number"
+              name="\#{toName CouponGiftReferencePrice}" type="number"
               min="0"
-              value!='\#{format GiftReferencePrice coupon}'
+              value!='\#{format CouponGiftReferencePrice coupon}'
             )
         .labeledRow
           label.labeledRow-header(for="giftMinimumPrice")
             | 最低購入額 (xx円以上お買い上げのお客様にプレゼント)
           .labeledRow-body
             input#giftMinimumFee(
-              name="\#{toName GiftMinimumPrice}" type="number"
+              name="\#{toName CouponGiftMinimumPrice}" type="number"
               min="0"
-              value!='\#{format GiftMinimumPrice coupon}'
+              value!='\#{format CouponGiftMinimumPrice coupon}'
             )
         .labeledRow
           label.labeledRow-header(for="giftOtherConditions")
             | その他のクーポン適用条件
           .labeledRow-body
             textarea#giftOtherConditions(
-              name="\#{toName GiftOtherConditions}"
+              name="\#{toName CouponGiftOtherConditions}"
             )
-              | %{forall condition <- format GiftOtherConditions coupon}
+              | %{forall condition <- format CouponGiftOtherConditions coupon}
               p \#{condition}
               | %{endforall}
 
@@ -122,35 +122,35 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
             | セット内容
           .labeledRow-body
             textarea#setContent(
-              name="\#{toName SetContent}"
+              name="\#{toName CouponSetContent}"
             )
-              | \#{format SetContent coupon}
+              | \#{format CouponSetContent coupon}
         .labeledRow
           label.labeledRow-header(for="setPrice")
             | セット価格
           .labeledRow-body
             input#setPrice(
-              name="\#{toName SetPrice}" type="number"
+              name="\#{toName CouponSetPrice}" type="number"
               min="0"
-              value!='\#{format SetPrice coupon}'
+              value!='\#{format CouponSetPrice coupon}'
             )
         .labeledRow
           label.labeledRow-header(for="setReferencePrice")
             | セット参考価格 (非売品の場合は記入しないでください)
           .labeledRow-body
             input#setReferencePrice(
-              name="\#{toName SetReferencePrice}" type="number"
+              name="\#{toName CouponSetReferencePrice}" type="number"
               min="0"
-              value!='\#{format SetReferencePrice coupon}'
+              value!='\#{format CouponSetReferencePrice coupon}'
             )
         .labeledRow
           label.labeledRow-header(for="setOtherConditions")
             | その他のクーポン適用条件
           .labeledRow-body
             textarea#setOtherConditions(
-              name="\#{toName SetOtherConditions}"
+              name="\#{toName CouponSetOtherConditions}"
             )
-              | %{forall condition <- format SetOtherConditions coupon}
+              | %{forall condition <- format CouponSetOtherConditions coupon}
               p \#{condition}
               | %{endforall}
 
@@ -160,17 +160,17 @@ form.couponEditor(enctype="multipart/form-data" method="POST" action="\#{action}
             | クーポン内容
           .labeledRow-body
             textarea#otherContent(
-              name="\#{toName OtherContent}"
+              name="\#{toName CouponOtherContent}"
             )
-              | \#{format OtherContent coupon}
+              | \#{format CouponOtherContent coupon}
         .labeledRow
           label.labeledRow-header(for="otherConditions")
             | クーポン適用条件
           .labeledRow-body
             textarea#otherConditions(
-              name="\#{toName OtherConditions}"
+              name="\#{toName CouponOtherConditions}"
             )
-              | %{forall condition <- format OtherConditions coupon}
+              | %{forall condition <- format CouponOtherConditions coupon}
               | \#{condition}
               | %{endforall}
       .couponSubmit

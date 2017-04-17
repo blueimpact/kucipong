@@ -29,7 +29,7 @@ import Kucipong.Handler.Store.TemplatePath
         templateCouponId, templateCouponIdEdit)
 import Kucipong.Handler.Store.Types
        (StoreError(..), CouponView(..), CouponViewImageUrl(..),
-        CouponViewKey(..), CouponViewTypes(..), CouponViewConditions(..),
+        CouponViewKey(..), CouponViewText(..), CouponViewTexts(..),
         CouponViewCouponType(..), StoreViewText(..))
 import Kucipong.Handler.Store.Util
        (awsUrlFromMaybeImageKey, guardMaybeImageKeyOwnedByStore)
