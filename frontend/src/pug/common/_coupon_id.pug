@@ -18,8 +18,10 @@
       )
       span.annotatedImageGroup-annotation 画像は一例です
       | %{ of _ }
-      div
-        | 画像が設定されていません
+      img.annotatedImageGroup-image(
+        src=require("../../img/noimage.svg")
+        alt="\#{format StoreName store}"
+      )
       | %{ endcase }
     .card_body
       .card_body_title
