@@ -1,0 +1,15 @@
+.alert#alert(
+  role="alertdialog"
+  aria-describedby="alert-message"
+)
+  .alert_body
+    a.alert_body_close(href="#")
+      | ×
+    .alert_body_message#alert-message
+      | #{ alertMessage || "Are you sure?"}
+    .alert_body_footer
+      .alert_body_footer-negative
+        | #{ alertNegative || "OK" }
+      .alert_body_footer-positive
+        | #{ alertPositive || "Cancel" }
+
