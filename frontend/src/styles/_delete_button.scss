@@ -1,0 +1,25 @@
+@mixin delete_button($color: #fff, $background-color: #ff5858, $line-length: 0.8em, $line-width: 0.1em) {
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  background-color: $background-color;
+  cursor: pointer;
+  position: relative;
+
+  &::before, &::after{
+    display: block;
+    content: '';
+    transform: rotate(-45deg);
+    background-color: $color;
+    position: absolute;
+    width: #{$line-width};
+    height: #{$line-length};
+    border-radius: calc(#{$line-width} / 2);
+    left: calc(0.5em - #{$line-width} / 2);
+    top: calc(0.5em - #{$line-length} / 2);
+  }
+
+  &::after {
+    transform: rotate(45deg);
+  }
+}
