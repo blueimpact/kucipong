@@ -44,6 +44,8 @@ instance I18n AdminError where
 instance I18n AdminMsg where
   label EnUS AdminMsgSentVerificationEmail =
     "We have sent you an email with verification URL."
+  label EnUS AdminMsgCreateStoreSuccess =
+    "Successfully created store."
 
 instance I18n ConsumerError where
   label EnUS ConsumerErrorCouldNotFindCoupon =

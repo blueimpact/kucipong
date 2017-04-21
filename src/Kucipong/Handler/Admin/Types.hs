@@ -19,5 +19,6 @@ data AdminError
 
 data AdminMsg
   = AdminMsgSentVerificationEmail
+  | AdminMsgCreateStoreSuccess
   deriving (Show, Eq, Ord, Read, Enum, Bounded)
 
