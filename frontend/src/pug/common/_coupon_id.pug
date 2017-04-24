@@ -8,7 +8,7 @@
         .icon.icon-fav.checkableIcon
           input#js-fav.checkableIcon-check.js-fav(type="checkbox" data-coupon-id="\#{key coupon}")
           label.checkableIcon-icon(for="js-fav")
-      .card_delete
+        .card_delete.js-deleteCoupon(data-coupon-id="\#{key coupon}")
 
     .annotatedImageGroup
       | %{ case format ImageUrl imageUrl }
