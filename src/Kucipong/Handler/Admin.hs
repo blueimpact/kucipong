@@ -162,7 +162,8 @@ storeCreatePost = do
     sendStoreLoginEmail
       storeEmail
       (storeLoginTokenLoginToken storeLoginToken)
-  redirect $ renderRoute adminStoreCreateR
+  let messages = [label def AdminMsgCreateStoreSuccess]
+  $(renderTemplateFromEnv templateStoreCreate)
   where
     handleErr :: Text -> ActionCtxT (HVect xs) m a
     handleErr errMsg = do
