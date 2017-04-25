@@ -18,6 +18,7 @@ body {
   @include ms-respond(font-size, 1);
 
   font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', Meiryo, メイリオ, Osaka, 'MS PGothic', arial, helvetica, sans-serif;
+  position: relative;
 }
 
 a {

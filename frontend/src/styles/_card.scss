@@ -1,9 +1,12 @@
 /* Helper module for card component */
 
+@import "_delete_button";
+
 @mixin card($header-color, $font-color, $shadow-color) {
   box-shadow: 2px 2px 10px -2px $shadow-color;
 
   .card_header {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -16,6 +19,13 @@
       justify-content: center;
       color: $font-color;
       font-size: 1em;
+    }
+
+    .card_delete {
+      font-size: 2em;
+      margin: 0.2em;
+
+      @include delete_button;
     }
 
     .card_header_icon {

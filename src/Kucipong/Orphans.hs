@@ -19,6 +19,8 @@ import Control.Monad.Random (MonadRandom(..))
 import Control.Monad.Trans.Resource (ResourceT)
 import Data.Data (Data)
 import Data.Default (Default(..))
+import Database.Persist (Key(..), ToBackendKey)
+import Database.Persist.Sql (SqlBackend, fromSqlKey)
 import Numeric.Natural (Natural)
 import Language.Haskell.TH (Q, runIO)
 import Text.Blaze (Markup, ToMarkup(..), string)
@@ -48,6 +50,10 @@ instance MonadIO Q where
 instance ToMarkup Natural where
   toMarkup :: Natural -> Markup
   toMarkup = string . show
+
+instance (ToBackendKey SqlBackend a) => ToMarkup (Key a) where
+  toMarkup :: Key a -> Markup
+  toMarkup = toMarkup . fromSqlKey
 
 deriving instance Data UploadedFile
 instance (FromHttpApiData a) => FromHttpApiData [a] where

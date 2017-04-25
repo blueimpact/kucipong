@@ -151,6 +151,7 @@ couponListGet = do
   couponEntitiesAndImages <- dbFindImagesForCoupons couponEntities
   let awsImageUrlFunc =
         fmap $ awsUrlFromImageAndBucket bucketName . imageS3Name . entityVal
+      couponAndImages = fmap (fmap awsImageUrlFunc) couponEntitiesAndImages
   $(renderTemplateFromEnv templateCoupon)
 
 

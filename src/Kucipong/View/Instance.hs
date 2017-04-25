@@ -6,8 +6,8 @@ module Kucipong.View.Instance where
 import Kucipong.Prelude
 
 import Data.Default (Default, def)
-import Database.Persist (Entity(..), ToBackendKey)
-import Database.Persist.Sql (SqlBackend, fromSqlKey)
+import Database.Persist (Entity(..), Key(..), ToBackendKey)
+import Database.Persist.Sql (SqlBackend)
 import Web.HttpApiData (FromHttpApiData, parseQueryParamMaybe)
 
 import Kucipong.Db
@@ -22,7 +22,6 @@ import Kucipong.Handler.Store.Types
 import Kucipong.View.Class
        (ToKey(..), ToKeyO, ToName(..), View(..), ViewO)
 
-data VKey = VKey
 data ImageUrl = ImageUrl
 
 -- --------
@@ -73,13 +72,13 @@ instance ToName CouponViewCouponType where
 --  ToKey
 -- -------
 
-type instance ToKeyO (Entity v) = Int64
+type instance ToKeyO (Entity v) = Key v
 type instance ToKeyO BusinessCategory = Text
 type instance ToKeyO BusinessCategoryDetail = Text
 type instance ToKeyO CouponType = Text
 
 instance (ToBackendKey SqlBackend v) => ToKey (Entity v) where
-  key = fromSqlKey . entityKey
+  key = entityKey
 
 instance ToKey BusinessCategory
 instance ToKey BusinessCategoryDetail
@@ -89,7 +88,6 @@ instance ToKey CouponType
 --  View
 -- ------
 
-type instance ViewO VKey = Int64
 type instance ViewO ImageUrl = Maybe Text
 type instance ViewO CouponViewTexts = [Text]
 type instance ViewO CouponViewCouponType = CouponType
@@ -102,10 +100,6 @@ type instance ViewO StoreViewTexts = [Text]
 instance (View v a) => View (Entity v) a where
   format :: a -> Entity v -> ViewO a
   format a (Entity _ v) = format a v
-
-instance (ToBackendKey SqlBackend v) => View (Entity v) VKey where
-  format :: VKey -> Entity v -> ViewO VKey
-  format VKey = fromSqlKey . entityKey
 
 instance View (Maybe Text) ImageUrl where
   format :: ImageUrl -> Maybe Text -> ViewO ImageUrl
